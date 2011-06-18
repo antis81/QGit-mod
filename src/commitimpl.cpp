@@ -278,7 +278,6 @@ void CommitImpl::pushButtonSettings_clicked() {
 }
 
 void CommitImpl::pushButtonCancel_clicked() {
-
 	close();
 }
 

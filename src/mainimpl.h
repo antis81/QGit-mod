@@ -53,6 +53,8 @@ public:
 
 	QComboBox* cmbSearch;
 
+        void changeBranch(QString branchName);
+
 signals:
 	void highlightPatch(const QString&, bool);
 	void updateRevDesc();
@@ -167,7 +169,7 @@ private:
 	RevsView* rv;
 	QProgressBar* pbFileNamesLoading;
 
-	// curDir is the repository working dir, could be different from qgit running
+        // curDir is the repository working dir, could be different from qgit running
 	// directory QDir::current(). Note that qgit could be run from subdirectory
 	// so only after git->isArchive() that updates curDir to point to working dir
 	// we are sure is correct.

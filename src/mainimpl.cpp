@@ -72,7 +72,7 @@ MainImpl::MainImpl(SCRef cd, QWidget* p) : QMainWindow(p) {
 	qApp->installEventFilter(this);
 
 	// init native types
-	setRepositoryBusy = false;
+        setRepositoryBusy = false;
 
 	// init filter match highlighters
 	shortLogRE.setMinimal(true);
@@ -101,7 +101,7 @@ MainImpl::MainImpl(SCRef cd, QWidget* p) : QMainWindow(p) {
 	// set-up tab view
 	delete tabWdg->currentWidget(); // cannot be done in Qt Designer
 	rv = new RevsView(this, git, true); // set has main domain
-	tabWdg->addTab(rv->tabPage(), "&Rev list");
+        tabWdg->addTab(rv->tabPage(), "&Rev list");
 
 	// set-up tab corner widget ('close tab' button)
 	QToolButton* ct = new QToolButton(tabWdg);
@@ -121,7 +121,6 @@ MainImpl::MainImpl(SCRef cd, QWidget* p) : QMainWindow(p) {
 
 	QVector<QSplitter*> v(1, treeSplitter);
 	QGit::restoreGeometrySetting(QGit::MAIN_GEOM_KEY, this, &v);
-	treeView->hide();
 
 	// set-up menu for recent visited repositories
 	connect(File, SIGNAL(triggered(QAction*)), this, SLOT(openRecent_triggered(QAction*)));
@@ -138,6 +137,7 @@ MainImpl::MainImpl(SCRef cd, QWidget* p) : QMainWindow(p) {
 
 	// disable all actions
 	updateGlobalActions(false);
+        ActShowTree->setChecked(leftWidget->isVisible());
 
 	connect(git, SIGNAL(fileNamesLoad(int, int)), this, SLOT(fileNamesLoad(int, int)));
 
@@ -155,7 +155,7 @@ MainImpl::MainImpl(SCRef cd, QWidget* p) : QMainWindow(p) {
 	connect(rv->tab()->fileList, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
 	        this, SLOT(fileList_itemDoubleClicked(QListWidgetItem*)));
 
-	connect(treeView, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),
+        connect(treeView, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),
 	        this, SLOT(treeView_doubleClicked(QTreeWidgetItem*, int)));
 
 	// use most recent repo as startup dir if it exists and user opted to do so
@@ -370,7 +370,7 @@ void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
 		// tree name should be set before init because in case of
 		// StGIT archives the first revs are sent before init returns
 		QString n(curDir);
-		treeView->setTreeName(n.prepend('/').section('/', -1, -1));
+                treeView->setTreeName(n.prepend('/').section('/', -1, -1));
 
 		bool quit;
 		bool ok = git->init(curDir, !refresh, passedArgs, overwriteArgs, &quit); // blocking call
@@ -384,6 +384,10 @@ void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
 			updateGlobalActions(true);
 			if (archiveChanged)
 				updateRecentRepoMenu(curDir);
+                        Domain* d;
+                        currentTabType(&d);
+                        branchesList->setup(d, git);
+                        branchesList->update();
 		} else
 			statusBar()->showMessage("Not a git archive");
 
@@ -403,7 +407,7 @@ exit:
 		}
 		const QString info("Exception \'" + EM_DESC(i) + "\' not "
 		                   "handled in setRepository...re-throw");
-		dbs(info);
+                dbs(info);
 		throw;
 	}
 }
@@ -415,7 +419,7 @@ void MainImpl::updateGlobalActions(bool b) {
 	ActViewRev->setEnabled(b);
 	ActViewDiff->setEnabled(b);
 	ActViewDiffNewTab->setEnabled(b && firstTab<PatchView>());
-	ActShowTree->setEnabled(b);
+        ActShowTree->setEnabled(b);
 	ActMailApplyPatch->setEnabled(b);
 	ActMailFormatPatch->setEnabled(b);
 
@@ -486,7 +490,7 @@ void MainImpl::treeView_doubleClicked(QTreeWidgetItem* item, int) {
 
 void MainImpl::pushButtonCloseTab_clicked() {
 
-	Domain* t;
+        Domain* t;
 	switch (currentTabType(&t)) {
 	case TAB_REV:
 		break;
@@ -520,7 +524,7 @@ void MainImpl::ActViewRev_activated() {
 	Domain* t;
 	if (currentTabType(&t) == TAB_FILE) {
 		rv->st = t->st;
-		UPDATE_DOMAIN(rv);
+                UPDATE_DOMAIN(rv);
 	}
 	tabWdg->setCurrentWidget(rv->tabPage());
 }
@@ -539,7 +543,7 @@ void MainImpl::openFileTab(FileView* fv) {
 
 	if (!fv) {
 		fv = new FileView(this, git);
-		tabWdg->addTab(fv->tabPage(), "File");
+                tabWdg->addTab(fv->tabPage(), "File");
 
 		connect(fv->tab()->histListView, SIGNAL(doubleClicked(const QModelIndex&)),
 		        this, SLOT(histListView_doubleClicked(const QModelIndex&)));
@@ -1062,7 +1066,7 @@ void MainImpl::fileNamesLoad(int status, int value) {
 
 	switch (status) {
 	case 1: // stop
-		pbFileNamesLoading->hide();
+                pbFileNamesLoading->hide();
 		break;
 	case 2: // update
 		pbFileNamesLoading->setValue(value);
@@ -1336,11 +1340,11 @@ void MainImpl::ActShowDescHeader_activated() {
 void MainImpl::ActShowTree_toggled(bool b) {
 
 	if (b) {
-		treeView->show();
+                leftWidget->show();
 		UPDATE_DOMAIN(rv);
 	} else {
 		saveCurrentGeometry();
-		treeView->hide();
+                leftWidget->hide();
 	}
 }
 
@@ -1739,7 +1743,7 @@ void MainImpl::ActFilterTree_toggled(bool b) {
 	}
 	if (b) {
 		QStringList selectedItems;
-		if (!treeView->isVisible())
+                if (!leftWidget->isVisible())
 			treeView->updateTree(); // force tree updating
 
 		treeView->getTreeSelectedItems(selectedItems);
@@ -1875,4 +1879,9 @@ void MainImpl::ActClose_activated() {
 void MainImpl::ActExit_activated() {
 
 	qApp->closeAllWindows();
+}
+
+void MainImpl::changeBranch(QString branchName) {
+    const QStringList l((branchName+"").split(" "));
+    setRepository(curDir, true, true, &l, true);
 }
