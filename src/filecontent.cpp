@@ -144,7 +144,7 @@ void FileContent::clearText(bool emitSignal) {
 	git->cancelProcess(proc);
 	proc = NULL;
 	fileRowData.clear();
-	QTextEdit::clear(); // explicit call because our clear() is only declared
+        QTextEdit::clear(); // explicit call because our clear() is only declared
 	listWidgetAnn->clear();
 	isFileAvail = isAnnotationAppended = false;
 

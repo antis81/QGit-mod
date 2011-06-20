@@ -11,25 +11,31 @@
 #include "git.h"
 #include "myprocess.h"
 #include "patchcontent.h"
+#include "stdio.h"
+#include <QPainter>
 
 void DiffHighlighter::highlightBlock(const QString& text) {
-
 	// state is used to count paragraphs, starting from 0
 	setCurrentBlockState(previousBlockState() + 1);
+
 	if (text.isEmpty())
 		return;
 
 	QTextCharFormat myFormat;
 	const char firstChar = text.at(0).toLatin1();
+        QColor lr(255, 220, 220);
+        QColor lg(220, 255, 220);
 	switch (firstChar) {
 	case '@':
 		myFormat.setForeground(Qt::darkMagenta);
 		break;
 	case '+':
 		myFormat.setForeground(Qt::darkGreen);
+                myFormat.setBackground(QBrush(lg));
 		break;
 	case '-':
-		myFormat.setForeground(Qt::red);
+		myFormat.setForeground(Qt::red);                
+                myFormat.setBackground(QBrush(lr));
 		break;
 	case 'c':
 	case 'd':
@@ -63,28 +69,29 @@ void DiffHighlighter::highlightBlock(const QString& text) {
 		}
 		break;
 	}
-	if (myFormat.isValid())
-		setFormat(0, text.length(), myFormat);
+        if (myFormat.isValid()) {
+           setFormat(0, text.length(), myFormat);
+        }
 
-	PatchContent* pc = static_cast<PatchContent*>(parent());
-	if (pc->matches.count() > 0) {
-		int indexFrom, indexTo;
-		if (pc->getMatch(currentBlockState(), &indexFrom, &indexTo)) {
+        PatchContent* pc = static_cast<PatchContent*>(parent());
+        if (pc->matches.count() > 0) {
+                int indexFrom, indexTo;
+                if (pc->getMatch(currentBlockState(), &indexFrom, &indexTo)) {
 
-			QTextEdit* te = dynamic_cast<QTextEdit*>(parent());
-			QTextCharFormat fmt;
-			fmt.setFont(te->currentFont());
-			fmt.setFontWeight(QFont::Bold);
-			fmt.setForeground(Qt::blue);
-			if (indexTo == 0)
-				indexTo = text.length();
+                        QTextEdit* te = dynamic_cast<QTextEdit*>(parent());
+                        QTextCharFormat fmt;
+                        fmt.setFont(te->currentFont());
+                        fmt.setFontWeight(QFont::Bold);
+                        fmt.setForeground(Qt::blue);
+                        if (indexTo == 0)
+                                indexTo = text.length();
 
-			setFormat(indexFrom, indexTo - indexFrom, fmt);
-		}
-	}
+                        setFormat(indexFrom, indexTo - indexFrom, fmt);
+                }
+        }
 }
 
-PatchContent::PatchContent(QWidget* parent) : QTextEdit(parent) {
+PatchContent::PatchContent(QWidget* parent) : QPlainTextEdit(parent) {
 
 	diffLoaded = seekTarget = false;
 	curFilter = prevFilter = VIEW_ALL;
@@ -93,7 +100,16 @@ PatchContent::PatchContent(QWidget* parent) : QTextEdit(parent) {
 	pickAxeRE.setCaseSensitivity(Qt::CaseInsensitive);
 
 	setFont(QGit::TYPE_WRITER_FONT);
-	diffHighlighter = new DiffHighlighter(this);
+//        diffHighlighter = new DiffHighlighter(this);
+
+        lineNumberArea = new LineNumberArea(this);
+
+        connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
+        connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
+        connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
+
+        updateLineNumberAreaWidth(0);
+        highlightCurrentLine();
 }
 
 void PatchContent::setup(Domain*, Git* g) {
@@ -104,7 +120,7 @@ void PatchContent::setup(Domain*, Git* g) {
 void PatchContent::clear() {
 
 	git->cancelProcess(proc);
-	QTextEdit::clear();
+        QPlainTextEdit::clear();
 	patchRowData.clear();
 	halfLine = "";
 	matches.clear();
@@ -248,7 +264,7 @@ void PatchContent::processData(const QByteArray& fileChunk, int* prevLineNum) {
 
 		bool toRemove = (n && curFilter == VIEW_ADDED) || (p && curFilter == VIEW_REMOVED);
 		if (!toRemove)
-			filteredLines.append(*it).append('\n');
+                        filteredLines.append(*it).append('\n');
 
 		if (prevLineNum && *prevLineNum == notNegCnt && prevFilter == VIEW_ADDED)
 			*prevLineNum = -curLineNum; // set once
@@ -269,24 +285,31 @@ void PatchContent::processData(const QByteArray& fileChunk, int* prevLineNum) {
 		if (*prevLineNum < 0)
 			*prevLineNum = 0;
 	}
-	newLines = filteredLines;
+        newLines = filteredLines;
 
 	} // end of scoped code
 
 skip_filter:
-
-	setUpdatesEnabled(false);
-
+        setUpdatesEnabled(false);
 	if (prevLineNum || document()->isEmpty()) { // use the faster setPlainText()
 
 		setPlainText(newLines);
 		moveCursor(QTextCursor::Start);
 	} else {
 		int topLine = cursorForPosition(QPoint(1, 1)).blockNumber();
-		append(newLines);
+                appendPlainText(newLines);
 		if (topLine > 0)
 			scrollLineToTop(topLine);
 	}
+        QTextCursor tc(textCursor());
+        tc.movePosition(QTextCursor::Start, QTextCursor::MoveAnchor);
+        do {
+            formatRow(tc);
+            for(QTextBlock::iterator it = tc.block().begin(); (!it.atEnd()); ++it) {
+
+            }
+
+        } while(tc.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor));
 	QScrollBar* vsb = verticalScrollBar();
 	vsb->setValue(vsb->value() + cursorRect().top());
 	setUpdatesEnabled(true);
@@ -300,11 +323,11 @@ void PatchContent::procFinished() {
 	refresh(); // show patchRowData content
 
 	if (seekTarget)
-		seekTarget = !centerTarget(target);
+                seekTarget = !centerTarget(target);
 
 	diffLoaded = true;
 	if (computeMatches()) {
-		diffHighlighter->rehighlight(); // slow on big data
+//                diffHighlighter->rehighlight(); // slow on big data
 		centerMatch();
 	}
 }
@@ -341,7 +364,7 @@ bool PatchContent::computeMatches() {
 		pos--;
 
 		s.paraTo = s.paraFrom + txt.mid(lastPos, pos - lastPos).count('\n');
-		s.indexTo = pos - txt.lastIndexOf('\n', pos) - 1;
+                s.indexTo = pos - txt.lastIndexOf('\n', pos) - 1;
 		s.indexTo++; // in QTextEdit::setSelection() indexTo is not included
 
 		lastPos = pos;
@@ -364,7 +387,7 @@ bool PatchContent::getMatch(int para, int* indexFrom, int* indexTo) {
 
 void PatchContent::on_highlightPatch(const QString& exp, bool re) {
 
-	pickAxeRE.setPattern(exp);
+        pickAxeRE.setPattern(exp);
 	isRegExp = re;
 	if (diffLoaded)
 		procFinished();
@@ -373,13 +396,176 @@ void PatchContent::on_highlightPatch(const QString& exp, bool re) {
 void PatchContent::update(StateInfo& st) {
 
 	bool combined = (st.isMerge() && !st.allMergeFiles());
-	if (combined) {
-		const Rev* r = git->revLookup(st.sha());
-		if (r)
-			diffHighlighter->setCombinedLength(r->parentsCount());
-	} else
-		diffHighlighter->setCombinedLength(0);
+//        if (combined) {
+//                const Rev* r = git->revLookup(st.sha());
+//                if (r)
+//                        diffHighlighter->setCombinedLength(r->parentsCount());
+//        } else
+//                diffHighlighter->setCombinedLength(0);
 
 	clear();
 	proc = git->getDiff(st.sha(), this, st.diffToSha(), combined); // non blocking
+}
+
+void PatchContent::formatRow(QTextCursor tc) {
+    //tc.select(QTextCursor::BlockUnderCursor);
+    const QString& text = tc.block().text();
+    if (text.isEmpty())
+            return;
+
+    QTextCharFormat charFormat;
+    QTextBlockFormat blockFormat;
+
+    const char firstChar = text.at(0).toLatin1();
+    QColor lr(255, 220, 220);
+    QColor lg(220, 255, 220);
+    switch (firstChar) {
+    case '@':
+            charFormat.setForeground(Qt::white);
+            blockFormat.setBackground(QGit::LIGHT_BLUE);
+            break;
+    case '+':
+            charFormat.setForeground(Qt::darkGreen);
+            blockFormat.setBackground(lg);
+            break;
+    case '-':
+            charFormat.setForeground(Qt::red);
+            blockFormat.setBackground(lr);
+            break;
+    case 'c':
+    case 'd':
+    case 'i':
+    case 'n':
+    case 'o':
+    case 'r':
+    case 's':
+            if (text.startsWith("diff --git a/")) {
+                    charFormat.setForeground(Qt::white);
+                    blockFormat.setBackground(QGit::DARK_ORANGE);
+            } else if (text.startsWith("copy ")
+                    || text.startsWith("index ")
+                    || text.startsWith("new ")
+                    || text.startsWith("old ")
+                    || text.startsWith("rename ")
+                    || text.startsWith("similarity ")) {
+                    charFormat.setForeground(Qt::white);
+                    blockFormat.setBackground(QGit::DARK_ORANGE);
+
+            } else if (text.startsWith("diff --combined")) {
+                    charFormat.setForeground(Qt::darkBlue);
+                    blockFormat.setBackground(QGit::PURPLE);
+            }
+            break;
+    case ' ':
+            charFormat.setForeground(Qt::blue);
+//            if (text.left(cl).contains('+'))
+//                    charFormat.setForeground(Qt::darkGreen);
+//            else if (text.left(cl).contains('-'))
+//                    charFormat.setForeground(Qt::red);
+            break;
+
+    }
+    if (blockFormat.isValid()) {
+        tc.mergeBlockFormat(blockFormat);
+    }
+    if (charFormat.isValid()) {
+        tc.select(QTextCursor::BlockUnderCursor);
+        tc.setCharFormat(charFormat);
+    }
+
+}
+
+
+int PatchContent::lineNumberAreaWidth()
+{
+
+    int digits = 1;
+    int max = qMax(1, document()->blockCount());
+    while (max >= 10) {
+        max /= 10;
+        ++digits;
+    }
+
+    int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits + 3;
+
+    return space;
+}
+
+
+
+void PatchContent::updateLineNumberAreaWidth(int /* newBlockCount */)
+{
+    setViewportMargins(lineNumberAreaWidth(), 0, 0, 0);
+}
+
+
+
+void PatchContent::updateLineNumberArea(const QRect &rect, int dy)
+{
+    if (dy)
+        lineNumberArea->scroll(0, dy);
+    else
+        lineNumberArea->update(0, rect.y(), lineNumberArea->width(), rect.height());
+
+    if (rect.contains(viewport()->rect()))
+        updateLineNumberAreaWidth(0);
+}
+
+
+
+void PatchContent::resizeEvent(QResizeEvent *e)
+{
+    QPlainTextEdit::resizeEvent(e);
+
+    QRect cr = contentsRect();
+    lineNumberArea->setGeometry(QRect(cr.left(), cr.top(), lineNumberAreaWidth(), cr.height()));
+}
+
+
+
+void PatchContent::highlightCurrentLine()
+{
+    QList<QTextEdit::ExtraSelection> extraSelections;
+
+    if (!isReadOnly()) {
+        QTextEdit::ExtraSelection selection;
+
+        QColor lineColor = QColor(Qt::yellow).lighter(160);
+
+        selection.format.setBackground(lineColor);
+        selection.format.setProperty(QTextFormat::FullWidthSelection, true);
+        selection.cursor = textCursor();
+        selection.cursor.clearSelection();
+        extraSelections.append(selection);
+    }
+
+    setExtraSelections(extraSelections);
+}
+
+
+
+void PatchContent::lineNumberAreaPaintEvent(QPaintEvent *event)
+{
+    QPainter painter(lineNumberArea);
+    painter.fillRect(event->rect(), Qt::lightGray);
+
+
+    QTextBlock block = firstVisibleBlock();
+    int blockNumber = block.blockNumber();
+    int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
+    int bottom = top + (int) blockBoundingRect(block).height();
+
+    while (block.isValid() && top <= event->rect().bottom()) {
+        if (block.isVisible() && bottom >= event->rect().top()) {
+            QString number = QString::number(blockNumber + 1);
+            painter.setPen(Qt::black);
+            painter.drawText(0, top, lineNumberArea->width() - 3, fontMetrics().height(),
+                             Qt::AlignRight, number);
+        }
+
+        block = block.next();
+        top = bottom;
+        bottom = top + (int) blockBoundingRect(block).height();
+        ++blockNumber;
+    }
 }

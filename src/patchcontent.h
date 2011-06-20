@@ -8,7 +8,7 @@
 #define PATCHCONTENT_H
 
 #include <QPointer>
-#include <QTextEdit>
+#include <QPlainTextEdit>
 #include <QSyntaxHighlighter>
 #include "common.h"
 
@@ -26,7 +26,7 @@ private:
 	uint cl;
 };
 
-class PatchContent: public QTextEdit {
+class PatchContent: public QPlainTextEdit {
 Q_OBJECT
 public:
 	PatchContent(QWidget* parent);
@@ -36,6 +36,9 @@ public:
 	void refresh();
 	void update(StateInfo& st);
 
+        void lineNumberAreaPaintEvent(QPaintEvent *event);
+        int lineNumberAreaWidth();
+
 	enum PatchFilter {
 		VIEW_ALL,
 		VIEW_ADDED,
@@ -43,11 +46,19 @@ public:
 	};
 	PatchFilter curFilter, prevFilter;
 
+protected:
+        void resizeEvent(QResizeEvent *event);
+
 public slots:
 	void on_highlightPatch(const QString&, bool);
 	void typeWriterFontChanged();
 	void procReadyRead(const QByteArray& data);
 	void procFinished();
+
+        // line numbers
+        void updateLineNumberAreaWidth(int newBlockCount);
+        void highlightCurrentLine();
+        void updateLineNumberArea(const QRect &, int);
 
 private:
 	friend class DiffHighlighter;
@@ -63,7 +74,7 @@ private:
 	void centerMatch(int id = 0);
 	bool centerTarget(SCRef target);
 	void processData(const QByteArray& data, int* prevLineNum = NULL);
-
+        void formatRow(QTextCursor tc);
 	Git* git;
 	DiffHighlighter* diffHighlighter;
 	QPointer<MyProcess> proc;
@@ -74,6 +85,7 @@ private:
 	QRegExp pickAxeRE;
 	QString target;
 	bool seekTarget;
+        QWidget *lineNumberArea;
 
 	struct MatchSelection {
 		int paraFrom;
@@ -85,4 +97,23 @@ private:
 	Matches matches;
 };
 
+class LineNumberArea : public QWidget
+{
+public:
+    LineNumberArea(PatchContent *editor) : QWidget(editor) {
+        codeEditor = editor;
+    }
+
+    QSize sizeHint() const {
+        return QSize(codeEditor->lineNumberAreaWidth(), 0);
+    }
+
+protected:
+    void paintEvent(QPaintEvent *event) {
+        codeEditor->lineNumberAreaPaintEvent(event);
+    }
+
+private:
+    PatchContent *codeEditor;
+};
 #endif

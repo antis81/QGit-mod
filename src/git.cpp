@@ -869,8 +869,9 @@ MyProcess* Git::getDiff(SCRef sha, QObject* receiver, SCRef diffToSha, bool comb
 		runCmd = "git diff-tree --no-color -r --patch-with-stat ";
 		runCmd.append(combined ? "-c " : "-C -m "); // TODO rename for combined
 		runCmd.append(diffToSha + " " + sha); // diffToSha could be empty
-	} else
+        } else {
 		runCmd = "git diff-index --no-color -r -m --patch-with-stat HEAD";
+        }
 
 	return runAsync(runCmd, receiver);
 }

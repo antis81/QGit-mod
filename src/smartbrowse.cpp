@@ -75,7 +75,7 @@ SmartBrowse::SmartBrowse(RevsView* par) : QObject(par) {
 	QString linkDiff(link.arg(QString::number(GO_DIFF), "Diff"));
 
 	QTextEdit* log = static_cast<QTextEdit*>(rv->tab()->textBrowserDesc);
-	QTextEdit* diff = static_cast<QTextEdit*>(rv->tab()->textEditDiff);
+        QPlainTextEdit* diff = static_cast<QPlainTextEdit*>(rv->tab()->textEditDiff);
 
 	logTopLbl = new SmartLabel(txt.arg("1uparrow.png", linkUp, ""), log);
 	logBottomLbl = new SmartLabel(txt.arg("1downarrow.png", linkDiff, linkDown), log);
@@ -129,16 +129,16 @@ void SmartBrowse::setVisible(bool b) {
 
 QTextEdit* SmartBrowse::curTextEdit(bool* isDiff) {
 
-	QTextEdit* log = static_cast<QTextEdit*>(rv->tab()->textBrowserDesc);
-	QTextEdit* diff = static_cast<QTextEdit*>(rv->tab()->textEditDiff);
+//	QTextEdit* log = static_cast<QTextEdit*>(rv->tab()->textBrowserDesc);
+//        QPlainTextEdit* diff = static_cast<QPlainTextEdit*>(rv->tab()->textEditDiff);
 
-	if (isDiff)
-		*isDiff = diff->isVisible();
+//	if (isDiff)
+//		*isDiff = diff->isVisible();
 
-	if (!diff->isVisible() && !log->isVisible())
-		return NULL;
+//	if (!diff->isVisible() && !log->isVisible())
+//		return NULL;
 
-	return (diff->isVisible() ? diff : log);
+//	return (diff->isVisible() ? diff : log);
 }
 
 int SmartBrowse::visibilityFlags(bool* isDiff) {

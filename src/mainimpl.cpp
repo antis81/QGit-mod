@@ -1015,23 +1015,23 @@ void MainImpl::goMatch(int delta) {
 
 QTextEdit* MainImpl::getCurrentTextEdit() {
 
-	QTextEdit* te = NULL;
-	Domain* t;
-	switch (currentTabType(&t)) {
-	case TAB_REV:
-		te = static_cast<RevsView*>(t)->tab()->textBrowserDesc;
-		if (!te->isVisible())
-			te = static_cast<RevsView*>(t)->tab()->textEditDiff;
-		break;
-	case TAB_PATCH:
-		te = static_cast<PatchView*>(t)->tab()->textEditDiff;
-		break;
-	case TAB_FILE:
-		te = static_cast<FileView*>(t)->tab()->textEditFile;
-		break;
-	default:
-		break;
-	}
+        QTextEdit* te = NULL;
+//	Domain* t;
+//	switch (currentTabType(&t)) {
+//	case TAB_REV:
+//		te = static_cast<RevsView*>(t)->tab()->textBrowserDesc;
+//		if (!te->isVisible())
+//			te = static_cast<RevsView*>(t)->tab()->textEditDiff;
+//		break;
+//	case TAB_PATCH:
+//		te = static_cast<PatchView*>(t)->tab()->textEditDiff;
+//		break;
+//	case TAB_FILE:
+//		te = static_cast<FileView*>(t)->tab()->textEditFile;
+//		break;
+//	default:
+//		break;
+//	}
 	return te;
 }
 
