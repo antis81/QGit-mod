@@ -11,14 +11,16 @@ class BranchesList : public QListWidget
 public:
     explicit BranchesList(QWidget *parent = 0);
 
-    void setup(Domain* d, Git* git);
+    void setup(Domain* domain, Git* git);
     void update();
 
 private:
-    Git* git;
-    Domain* d;
+    // я тут поменял, хотя в коде возможно есть конфликт имён (ибо не знаю с какого перепуга
+    // гражданин Скальм использовал переменные g и git наравне. Она что (g),
+    // глобальная чтоль какая? Однако работает, но это стоит учесть
+    Git *g;
+    Domain *d;
     void addList(QString header, Git::RefType type);
-signals:
 
 public slots:
     void itemDoubleClicked(QListWidgetItem *item);

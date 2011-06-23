@@ -38,7 +38,7 @@
         <enum>QTabWidget::West</enum>
        </property>
        <property name="currentIndex">
-        <number>1</number>
+        <number>2</number>
        </property>
        <property name="elideMode">
         <enum>Qt::ElideNone</enum>
@@ -103,7 +103,7 @@
        </widget>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
-         <string>Branches</string>
+         <string>Branches Tree</string>
         </attribute>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <property name="spacing">
@@ -112,6 +112,28 @@
          <property name="margin">
           <number>0</number>
          </property>
+         <item>
+          <widget class="BranchesTree" name="branchesTree">
+           <column>
+            <property name="text">
+             <string notr="true">1</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+       <widget class="QWidget" name="tab_3">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <attribute name="title">
+         <string>Branches List</string>
+        </attribute>
+        <layout class="QHBoxLayout" name="horizontalLayout_6">
          <item>
           <widget class="BranchesList" name="branchesList"/>
          </item>
@@ -859,6 +881,11 @@
    <extends>QListWidget</extends>
    <header>brancheslist.h</header>
   </customwidget>
+  <customwidget>
+   <class>BranchesTree</class>
+   <extends>QTreeWidget</extends>
+   <header>branchestree.h</header>
+  </customwidget>
  </customwidgets>
  <resources>
   <include location="icons.qrc"/>
@@ -1383,8 +1410,8 @@
    <slot>tabWdg_currentChanged(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>476</x>
-     <y>85</y>
+     <x>904</x>
+     <y>141</y>
     </hint>
     <hint type="destinationlabel">
      <x>20</x>

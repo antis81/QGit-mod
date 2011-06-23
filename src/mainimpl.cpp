@@ -388,8 +388,10 @@ void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
                         currentTabType(&d);
                         branchesList->setup(d, git);
                         branchesList->update();
-		} else
-			statusBar()->showMessage("Not a git archive");
+                        branchesTree->setup(d, git);
+                        branchesTree->update();
+        } else
+            statusBar()->showMessage("Not a git archive");
 
 exit:
 		setRepositoryBusy = false;

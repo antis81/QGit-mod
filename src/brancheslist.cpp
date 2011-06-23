@@ -6,9 +6,10 @@ BranchesList::BranchesList(QWidget *parent) :
     QObject::connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(itemDoubleClicked(QListWidgetItem*)));
 }
 
-void BranchesList::setup(Domain* d, Git* git) {
-    this->git = git;
-    this->d = d;
+void BranchesList::setup(Domain *domain, Git *git)
+{
+    g = git;
+    d = domain;
 }
 
 void BranchesList::update() {
@@ -19,8 +20,9 @@ void BranchesList::update() {
     addList("Tags", Git::TAG);
 }
 
-void BranchesList::addList(QString header, Git::RefType type) {
-    QStringList list = git->getAllRefNames(type, !Git::optOnlyLoaded);
+void BranchesList::addList(QString header, Git::RefType type)
+{
+    QStringList list = g->getAllRefNames(type, !Git::optOnlyLoaded);
     QListWidgetItem* li;
     if (list.isEmpty()) {
         return;
@@ -39,10 +41,10 @@ void BranchesList::addList(QString header, Git::RefType type) {
 
     QColor white(255, 255, 255);
     QColor black(128, 128, 128);
-    QLinearGradient g(0, 0, 0, 20);
-    g.setColorAt(0, white);
-    g.setColorAt(1, black);
-    li->setBackground(g);
+    QLinearGradient localGradient(0, 0, 0, 20);
+    localGradient.setColorAt(0, white);
+    localGradient.setColorAt(1, black);
+    li->setBackground(localGradient);
     this->addItem(li);
 
     list.sort();
