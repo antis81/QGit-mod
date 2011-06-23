@@ -17,30 +17,6 @@ class Git;
 class MyProcess;
 class StateInfo;
 
-class DiffHighlighter : public QSyntaxHighlighter
-{
-public:
-    DiffHighlighter(QTextEdit* p) : QSyntaxHighlighter(p), cl(0) {}
-    void setCombinedLength(uint c) { cl = c; }
-    virtual void highlightBlock(const QString& text);
-private:
-    uint cl;
-};
-
-class BlockData {
-public:
-    enum RowType {
-        ROW_FILE_HEADER,
-        ROW_PART_HEADER,
-        ROW_ADDED,
-        ROW_REMOVED,
-        ROW_CONTEXT,
-        ROW_OTHER
-    };
-
-    RowType type;
-};
-
 class PatchContent: public QPlainTextEdit
 {
     Q_OBJECT
@@ -53,17 +29,34 @@ public:
     void refresh();
     void update(StateInfo& st);
 
-        void lineNumberAreaPaintEvent(QPaintEvent *event);
-        int lineNumberAreaWidth();
+    void lineNumberAreaPaintEvent(QPaintEvent *event);
+    int lineNumberAreaWidth();
 
     enum PatchFilter {
         VIEW_ALL,
         VIEW_ADDED,
         VIEW_REMOVED
     };
-    PatchFilter curFilter, prevFilter;
+
+    PatchFilter filter() { return curFilter; };
+    void setFilter(PatchFilter filter);
+
+
+    enum RowType {
+        ROW_FILE_HEADER,
+        ROW_PART_HEADER,
+        ROW_FILE_OLD,
+        ROW_FILE_NEW,
+        ROW_ADDED,
+        ROW_REMOVED,
+        ROW_CONTEXT,
+        ROW_OTHER
+    };
+
 protected:
-        void resizeEvent(QResizeEvent *event);
+    PatchFilter curFilter, prevFilter;
+
+    void resizeEvent(QResizeEvent *event);
 
 public slots:
     void on_highlightPatch(const QString&, bool);
@@ -90,9 +83,11 @@ private:
     void centerMatch(int id = 0);
     bool centerTarget(SCRef target);
     void processData(const QByteArray& data, int* prevLineNum = NULL);
-        void formatRow(QTextCursor tc);
+    void formatRow(QTextCursor tc);
+    void formatBlock(QTextCursor& cursor, QTextBlock& block, RowType rowType);
+    void formatBlock(QTextCursor& cursor, QTextBlock& block);
+    RowType getRowType(QString row);
     Git* git;
-    DiffHighlighter* diffHighlighter;
     QPointer<MyProcess> proc;
     bool diffLoaded;
     QByteArray patchRowData;
@@ -132,4 +127,22 @@ protected:
 private:
     PatchContent *codeEditor;
 };
+
+class PatchTextBlockUserData : public QTextBlockUserData
+{
+public:
+    PatchContent::RowType rowType;
+
+    long* rowNumbers;
+    int partCount;
+
+    PatchTextBlockUserData() : rowNumbers(NULL), partCount(0), rowType(PatchContent::ROW_OTHER) {}
+    ~PatchTextBlockUserData() {
+        if (rowNumbers) {
+            delete[] rowNumbers;
+            rowNumbers = NULL;
+        }
+    }
+};
+
 #endif
