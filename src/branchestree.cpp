@@ -5,9 +5,29 @@
 BranchesTree::BranchesTree(QWidget *parent) : QTreeWidget(parent)
 {
     setColumnCount(1);
-    setHeaderLabel("Branches Tree");
+    setContextMenuPolicy(Qt::CustomContextMenu);
+
     QObject::connect(this, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
                      this, SLOT(changeBranch(QTreeWidgetItem*, int)));
+
+    QObject::connect(this, SIGNAL(customContextMenuRequested(QPoint)),
+                     this, SLOT(contextMenu(QPoint)));
+
+    collapseHeaderAction = new QAction(tr("Collapse"), this);
+    QObject::connect(collapseHeaderAction, SIGNAL(triggered()),
+                     this, SLOT(collapseHeader()));
+
+    expandHeaderAction = new QAction(tr("Expand"), this);
+    QObject::connect(expandHeaderAction, SIGNAL(triggered()),
+                     this, SLOT(expandHeader()));
+
+    checkoutAction = new QAction(tr("Checkout"), this);
+    QObject::connect(checkoutAction, SIGNAL(triggered()),
+                     this, SLOT(checkout()));
+
+    removeTagAction = new QAction(tr("Remove"), this);
+    QObject::connect(removeTagAction, SIGNAL(triggered()),
+                     this, SLOT(removeTag()));
 }
 
 void BranchesTree::setup(Domain *domain, Git *git)
@@ -19,20 +39,31 @@ void BranchesTree::setup(Domain *domain, Git *git)
 void BranchesTree::update()
 {
     clear();
-    setColumnCount(1);
-    setHeaderLabel("Branches Tree");
-    addNode("Branches", Git::BRANCH);
-    addNode("Remotes", Git::RMT_BRANCH);
-    addNode("Tags", Git::TAG);
+    addNode(BranchesTree::HeaderBranch, Git::BRANCH);
+    addNode(BranchesTree::HeaderRemote, Git::RMT_BRANCH);
+    addNode(BranchesTree::HeaderTag, Git::TAG);
 }
 
-void BranchesTree::addNode(QString header, Git::RefType type)
+void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
 {
     // получаем нужную инфу по типу
     QStringList tempList = g->getAllRefNames(type, !Git::optOnlyLoaded);
 
     // делаем хедер и добавляем на верхний уровень
-    QTreeWidgetItem *node = new QTreeWidgetItem(this, QStringList(header), BranchTreeNode);
+    QTreeWidgetItem *node;
+    switch (headerType) {
+    case (BranchesTree::HeaderBranch):
+        node = new QTreeWidgetItem(this, QStringList("branches"), headerType);
+        break;
+    case (BranchesTree::HeaderRemote):
+        node = new QTreeWidgetItem(this, QStringList("remotes"), headerType);
+        break;
+    case (BranchesTree::HeaderTag):
+        node = new QTreeWidgetItem(this, QStringList("tags"), headerType);
+        break;
+    }
+
+    tempList.sort();
 
     QFont font = node->font(0);
     font.setBold(true);
@@ -45,13 +76,27 @@ void BranchesTree::addNode(QString header, Git::RefType type)
     localGradient.setColorAt(1, black);
     node->setBackground(0, localGradient);
 
-        addTopLevelItem(node);
+    addTopLevelItem(node);
 
     QTreeWidgetItem *tempItemList;
 
     // заполняем дерево потомками
     FOREACH_SL (it, tempList) {
-        tempItemList = new QTreeWidgetItem(node, QStringList(QString(*it)));
+        switch (headerType) {
+        case (BranchesTree::HeaderBranch):
+            // имеет значение, что node, а не this. это важно!
+            tempItemList = new QTreeWidgetItem(node, QStringList(QString(*it)),
+                                               BranchesTree::LeafBranch);
+            break;
+        case (BranchesTree::HeaderRemote):
+            tempItemList = new QTreeWidgetItem(node, QStringList(QString(*it)),
+                                               BranchesTree::LeafRemote);
+            break;
+        case (BranchesTree::HeaderTag):
+            tempItemList = new QTreeWidgetItem(node, QStringList(QString(*it)),
+                                               BranchesTree::LeafTag);
+            break;
+        }
         node->addChild(tempItemList);
     }
 }
@@ -63,7 +108,9 @@ void BranchesTree::changeBranch(QTreeWidgetItem *item, int column)
     // примечание: ->childCount() == 0) { - альтернативный вариант, забракованый Скальмом
     // потому что у верхнего уровня может и не быть детей.
     // Кстати, вместо числа надо запилить константу (объявляется в addNode)
-    if (item->type() != BranchTreeNode) {
+    if ((item->type() != BranchesTree::HeaderBranch)
+            && (item->type() != BranchesTree::HeaderRemote)
+            && (item->type() != BranchesTree::HeaderTag)) {
         // запоминаем состояние закрытости/открытости хедеров
         // и текст выделенного узла
         bool stateTree[topLevelItemCount()];
@@ -91,4 +138,56 @@ void BranchesTree::changeBranch(QTreeWidgetItem *item, int column)
         if (tempItem) // кажись прокатывает такой вариант
             tempItem->setSelected(true);
     }
+}
+
+void BranchesTree::contextMenu(const QPoint & pos)
+{
+    QMenu branchesTreeContextMenu(tr("Context menu"), this);
+    QTreeWidgetItem *item = selectedItems().first();
+
+    switch (item->type()) {
+    case BranchesTree::HeaderBranch:
+        ;
+    case BranchesTree::HeaderRemote:
+        ;
+    case BranchesTree::HeaderTag:
+        branchesTreeContextMenu.addAction(collapseHeaderAction);
+        branchesTreeContextMenu.addAction(expandHeaderAction);
+        branchesTreeContextMenu.exec(viewport()->mapToGlobal(pos));
+        break;
+    case BranchesTree::LeafBranch:
+        branchesTreeContextMenu.addAction(checkoutAction);
+        branchesTreeContextMenu.exec(viewport()->mapToGlobal(pos));
+        break;
+    case BranchesTree::LeafRemote:
+        break;
+    case BranchesTree::LeafTag:
+        branchesTreeContextMenu.addAction(checkoutAction);
+        branchesTreeContextMenu.addAction(removeTagAction);
+        branchesTreeContextMenu.exec(viewport()->mapToGlobal(pos));
+        break;
+    }
+}
+
+void BranchesTree::collapseHeader()
+{
+    QTreeWidgetItem *item = selectedItems().first();
+    item->setExpanded(false);
+    update();
+}
+
+void BranchesTree::expandHeader()
+{
+    QTreeWidgetItem *item = selectedItems().first();
+    item->setExpanded(true);
+}
+
+void BranchesTree::checkout()
+{
+    //
+}
+
+void BranchesTree::removeTag()
+{
+
 }

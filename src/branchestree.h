@@ -9,22 +9,36 @@ class BranchesTree : public QTreeWidget
 {
     Q_OBJECT
 public:
-    enum BranchTreeItemType
+    enum BranchTreeItemTypes
     {
-        BranchTreeLeaf = 257,
-        BranchTreeNode = 258
+        HeaderBranch = 257,
+        HeaderRemote = 258,
+        HeaderTag = 259,
+        LeafBranch = 260,
+        LeafRemote = 261,
+        LeafTag = 262
     };
     BranchesTree(QWidget *parent = 0);
     void setup(Domain *domain, Git *git);
     void update();
 
+public slots:
+    void changeBranch(QTreeWidgetItem *item, int column);
+    void contextMenu(const QPoint & pos);
+    void collapseHeader();
+    void expandHeader();
+    void checkout();
+    void removeTag();
+
 private:
     Git *g;
     Domain *d;
-    void addNode(QString header, Git::RefType type);
+    QAction *collapseHeaderAction;
+    QAction *expandHeaderAction;
+    QAction *checkoutAction;
+    QAction *removeTagAction;
+    void addNode(BranchTreeItemTypes headerType, Git::RefType type);
 
-public slots:
-    void changeBranch(QTreeWidgetItem *item, int column);
 };
 
 #endif // BRANCHESTREE_H
