@@ -473,7 +473,7 @@ void PatchContent::formatBlock(QTextCursor& cursor, QTextBlock& block, PatchCont
     QTextCharFormat charFormat;
     QTextBlockFormat blockFormat;
     charFormat.setForeground(Qt::black);
-    blockFormat.setBackground(Qt::white);
+    blockFormat.setBackground(QGit::PATCH_BACKGROUND);
     switch (rowType) {
     case ROW_PART_HEADER:
         charFormat.setForeground(Qt::white);
@@ -493,7 +493,7 @@ void PatchContent::formatBlock(QTextCursor& cursor, QTextBlock& block, PatchCont
         charFormat.setForeground(Qt::white);
         blockFormat.setBackground(QGit::DARK_ORANGE);
         break;
-    case ROW_OTHER:
+    case ROW_OTHER:        
         break;
     case ROW_CONTEXT:
         charFormat.setForeground(Qt::blue);
@@ -512,7 +512,7 @@ void PatchContent::formatBlock(QTextCursor& cursor, QTextBlock& block, PatchCont
 int PatchContent::lineNumberAreaWidth()
 {
 
-    int digits = 10;
+    int digits = 9;
     int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits + 3;
 
     return space;
@@ -570,16 +570,31 @@ void PatchContent::highlightCurrentLine()
 }
 
 
-
 void PatchContent::lineNumberAreaPaintEvent(QPaintEvent *event)
 {
     QPainter painter(lineNumberArea);
-    painter.fillRect(event->rect(), Qt::lightGray);
+
+    const int shadowStrength = 20;
+    QColor backColorLight(QGit::LINE_NUMBERS_BACKGROUND.red() + shadowStrength,
+                          QGit::LINE_NUMBERS_BACKGROUND.green() + shadowStrength,
+                          QGit::LINE_NUMBERS_BACKGROUND.blue() + shadowStrength);
+    QColor backColorDark(QGit::LINE_NUMBERS_BACKGROUND.red() - shadowStrength,
+                          QGit::LINE_NUMBERS_BACKGROUND.green() - shadowStrength,
+                          QGit::LINE_NUMBERS_BACKGROUND.blue() - shadowStrength);
+
+    painter.fillRect(event->rect(), QGit::LINE_NUMBERS_BACKGROUND);
 
     QTextBlock block = firstVisibleBlock();
     int blockNumber = block.blockNumber();
     int top = (int) blockBoundingGeometry(block).translated(contentOffset()).top();
     int bottom = top + (int) blockBoundingRect(block).height();
+    int width = lineNumberArea->width();
+
+    painter.setPen(backColorLight);
+    painter.drawLine(width/2, event->rect().top(), width/2, event->rect().bottom());
+    painter.setPen(backColorDark);
+    painter.drawLine(width/2+1, event->rect().top(), width/2+1, event->rect().bottom());
+
 
     while (block.isValid() && top <= event->rect().bottom()) {
         if (block.isVisible() && bottom >= event->rect().top()) {
@@ -590,14 +605,14 @@ void PatchContent::lineNumberAreaPaintEvent(QPaintEvent *event)
                 if (ud->rowNumbers[0] >= 0) {
                     number = QString::number(ud->rowNumbers[0]);
 
-                    painter.setPen(Qt::black);
+                    painter.setPen(QGit::LINE_NUMBERS_FOREGROUND);
                     painter.drawText(0, top, lineNumberArea->width()/2 - 3, fontMetrics().height(),
                                     Qt::AlignRight, number);
                 }
                 if (ud->rowNumbers[1] >= 0) {
                     number = QString::number(ud->rowNumbers[1]);
 
-                    painter.setPen(Qt::black);
+                    painter.setPen(QGit::LINE_NUMBERS_FOREGROUND);
                     painter.drawText(0, top, lineNumberArea->width() - 3, fontMetrics().height(),
                                      Qt::AlignRight, number);
                 }
