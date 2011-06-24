@@ -386,8 +386,6 @@ void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
 				updateRecentRepoMenu(curDir);
                         Domain* d;
                         currentTabType(&d);
-                        branchesList->setup(d, git);
-                        branchesList->update();
                         branchesTree->setup(d, git);
                         branchesTree->update();
         } else

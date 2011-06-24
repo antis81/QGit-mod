@@ -79,8 +79,6 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
            listview.h mainimpl.h myprocess.h patchcontent.h patchview.h \
            rangeselectimpl.h revdesc.h revsview.h settingsimpl.h \
            smartbrowse.h treeview.h \
-    brancheslist.h \
-    branchtreeitem.h \
     branchestree.h
 
 SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
@@ -89,8 +87,6 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
            lanes.cpp listview.cpp mainimpl.cpp myprocess.cpp namespace_def.cpp \
            patchcontent.cpp patchview.cpp rangeselectimpl.cpp \
            revdesc.cpp revsview.cpp settingsimpl.cpp smartbrowse.cpp treeview.cpp \
-    brancheslist.cpp \
-    branchtreeitem.cpp \
     branchestree.cpp \
     main.cpp
 
