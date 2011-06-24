@@ -52,6 +52,34 @@
        <property name="movable">
         <bool>true</bool>
        </property>
+       <widget class="QWidget" name="tab_2">
+        <attribute name="title">
+         <string>Branches Tree</string>
+        </attribute>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="margin">
+          <number>0</number>
+         </property>
+         <item>
+          <widget class="BranchesTree" name="branchesTree">
+           <property name="frameShadow">
+            <enum>QFrame::Sunken</enum>
+           </property>
+           <attribute name="headerVisible">
+            <bool>false</bool>
+           </attribute>
+           <column>
+            <property name="text">
+             <string notr="true">1</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+        </layout>
+       </widget>
        <widget class="QWidget" name="tab">
         <property name="autoFillBackground">
          <bool>false</bool>
@@ -98,34 +126,6 @@
            <column>
             <property name="text">
              <string>Git tree</string>
-            </property>
-           </column>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-       <widget class="QWidget" name="tab_2">
-        <attribute name="title">
-         <string>Branches Tree</string>
-        </attribute>
-        <layout class="QHBoxLayout" name="horizontalLayout_3">
-         <property name="spacing">
-          <number>0</number>
-         </property>
-         <property name="margin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="BranchesTree" name="branchesTree">
-           <property name="frameShadow">
-            <enum>QFrame::Sunken</enum>
-           </property>
-           <attribute name="headerVisible">
-            <bool>false</bool>
-           </attribute>
-           <column>
-            <property name="text">
-             <string notr="true">1</string>
             </property>
            </column>
           </widget>

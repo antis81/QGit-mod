@@ -4,7 +4,6 @@
 
 BranchesTree::BranchesTree(QWidget *parent) : QTreeWidget(parent)
 {
-    setColumnCount(1);
     setContextMenuPolicy(Qt::CustomContextMenu);
 
     QObject::connect(this, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
@@ -42,6 +41,7 @@ void BranchesTree::update()
     addNode(BranchesTree::HeaderBranch, Git::BRANCH);
     addNode(BranchesTree::HeaderRemote, Git::RMT_BRANCH);
     addNode(BranchesTree::HeaderTag, Git::TAG);
+    expandAll();
 }
 
 void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
