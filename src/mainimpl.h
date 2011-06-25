@@ -53,7 +53,8 @@ public:
 
 	QComboBox* cmbSearch;
 
-        void changeBranch(QString branchName);
+    void changeBranch(QString branchName);
+    void checkout(const QString& branchName);
 
 signals:
 	void highlightPatch(const QString&, bool);

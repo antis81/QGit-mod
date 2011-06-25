@@ -1818,18 +1818,21 @@ bool Git::deleteTag(SCRef sha) {
 	return false;
 }
 
-bool Git::stgPush(SCRef sha) {
-
-	const QStringList patch(getRefName(sha, UN_APPLIED));
-	if (patch.count() != 1) {
-		dbp("ASSERT in Git::stgPush, found %1 patches instead of 1", patch.count());
-		return false;
-	}
-	return run("stg push " + quote(patch.first()));
+bool Git::checkout(SCRef sha)
+{
+    return run("git checkout " + sha);
 }
 
+bool Git::stgPush(SCRef sha)
+{
+    const QStringList patch(getRefName(sha, UN_APPLIED));
+    if (patch.count() != 1) {
+        dbp("ASSERT in Git::stgPush, found %1 patches instead of 1", patch.count());
+        return false;
+    }
+    return run("stg push " + quote(patch.first()));
+}
 bool Git::stgPop(SCRef sha) {
-
 	const QStringList patch(getRefName(sha, APPLIED));
 	if (patch.count() != 1) {
 		dbp("ASSERT in Git::stgPop, found %1 patches instead of 1", patch.count());

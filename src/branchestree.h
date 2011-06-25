@@ -28,6 +28,8 @@ public slots:
     void checkout();
     void removeTag();
 
+public:
+    void selectBranch(const QString& branch);
 private:
     Git *g;
     Domain *d;
@@ -37,6 +39,25 @@ private:
     QAction *removeTagAction;
     void addNode(BranchTreeItemTypes headerType, Git::RefType type);
 
+    QTreeWidgetItem* recursiveFindBranch(const QString& branch);
+    QTreeWidgetItem* recursiveFindBranch(QTreeWidgetItem* parent, const QString& branch);
+
+};
+
+class BranchesTreeItem : public QTreeWidgetItem
+{
+private:
+    QString m_branch;
+
+public:
+    BranchesTreeItem(QTreeWidgetItem *parent, const QStringList &strings, int type = Type)
+        : QTreeWidgetItem(parent, strings, type) {};
+
+    QString branch() { return m_branch; };
+
+    void setBranch(QString branch) {
+        m_branch = branch;
+    }
 };
 
 #endif // BRANCHESTREE_H

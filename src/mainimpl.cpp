@@ -1885,3 +1885,7 @@ void MainImpl::changeBranch(QString branchName) {
     const QStringList l((branchName+"").split(" "));
     setRepository(curDir, true, true, &l, true);
 }
+
+void MainImpl::checkout(const QString& branchName) {
+    git->checkout(branchName);
+}
