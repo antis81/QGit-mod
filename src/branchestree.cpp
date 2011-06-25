@@ -12,13 +12,13 @@ BranchesTree::BranchesTree(QWidget *parent) : QTreeWidget(parent)
     QObject::connect(this, SIGNAL(customContextMenuRequested(QPoint)),
                      this, SLOT(contextMenu(QPoint)));
 
-    collapseHeaderAction = new QAction(tr("Collapse"), this);
-    QObject::connect(collapseHeaderAction, SIGNAL(triggered()),
-                     this, SLOT(collapseHeader()));
+    collapseAllAction = new QAction(tr("Collapse all"), this);
+    QObject::connect(collapseAllAction, SIGNAL(triggered()),
+                     this, SLOT(collapseAll()));
 
-    expandHeaderAction = new QAction(tr("Expand"), this);
-    QObject::connect(expandHeaderAction, SIGNAL(triggered()),
-                     this, SLOT(expandHeader()));
+    expandAllAction = new QAction(tr("Expand all"), this);
+    QObject::connect(expandAllAction, SIGNAL(triggered()),
+                     this, SLOT(expandAll()));
 
     checkoutAction = new QAction(tr("Checkout"), this);
     QObject::connect(checkoutAction, SIGNAL(triggered()),
@@ -53,14 +53,14 @@ void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
     QTreeWidgetItem *node;
     switch (headerType) {
     case (BranchesTree::HeaderBranch):
-        node = new QTreeWidgetItem(this, QStringList("branches"), headerType);
+        node = new QTreeWidgetItem(this, QStringList("Branches"), headerType);
         break;
     case (BranchesTree::HeaderRemote):
-        node = new QTreeWidgetItem(this, QStringList("remotes"), headerType);
+        node = new QTreeWidgetItem(this, QStringList("Remotes"), headerType);
         node->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/branch_master.png")));
         break;
     case (BranchesTree::HeaderTag):
-        node = new QTreeWidgetItem(this, QStringList("tags"), headerType);
+        node = new QTreeWidgetItem(this, QStringList("Tags"), headerType);
         node->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/tag.png")));
         break;
     }
@@ -106,11 +106,6 @@ void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
 
 void BranchesTree::changeBranch(QTreeWidgetItem *item, int column)
 {
-    // !!!  Осторожно! КОСТЫЛЬ!  !!!
-    // проверяем не заголовок ли дерева. если нет, то переходим.
-    // примечание: ->childCount() == 0) { - альтернативный вариант, забракованый Скальмом
-    // потому что у верхнего уровня может и не быть детей.
-    // Кстати, вместо числа надо запилить константу (объявляется в addNode)
     if ((item->type() != BranchesTree::HeaderBranch)
             && (item->type() != BranchesTree::HeaderRemote)
             && (item->type() != BranchesTree::HeaderTag)) {
@@ -145,6 +140,9 @@ void BranchesTree::changeBranch(QTreeWidgetItem *item, int column)
 
 void BranchesTree::contextMenu(const QPoint & pos)
 {
+    QPoint globalPos = viewport()->mapToGlobal(pos);
+    globalPos += QPoint(10, 10);
+
     QMenu branchesTreeContextMenu(tr("Context menu"), this);
     QTreeWidgetItem *item = selectedItems().first();
 
@@ -154,35 +152,22 @@ void BranchesTree::contextMenu(const QPoint & pos)
     case BranchesTree::HeaderRemote:
         ;
     case BranchesTree::HeaderTag:
-        branchesTreeContextMenu.addAction(collapseHeaderAction);
-        branchesTreeContextMenu.addAction(expandHeaderAction);
-        branchesTreeContextMenu.exec(viewport()->mapToGlobal(pos));
+        branchesTreeContextMenu.addAction(collapseAllAction);
+        branchesTreeContextMenu.addAction(expandAllAction);
         break;
     case BranchesTree::LeafBranch:
         branchesTreeContextMenu.addAction(checkoutAction);
-        branchesTreeContextMenu.exec(viewport()->mapToGlobal(pos));
         break;
     case BranchesTree::LeafRemote:
         break;
     case BranchesTree::LeafTag:
         branchesTreeContextMenu.addAction(checkoutAction);
         branchesTreeContextMenu.addAction(removeTagAction);
-        branchesTreeContextMenu.exec(viewport()->mapToGlobal(pos));
         break;
     }
-}
-
-void BranchesTree::collapseHeader()
-{
-    QTreeWidgetItem *item = selectedItems().first();
-    item->setExpanded(false);
-    update();
-}
-
-void BranchesTree::expandHeader()
-{
-    QTreeWidgetItem *item = selectedItems().first();
-    item->setExpanded(true);
+    if (!branchesTreeContextMenu.isEmpty()) {
+        branchesTreeContextMenu.exec(globalPos);
+    }
 }
 
 void BranchesTree::checkout()

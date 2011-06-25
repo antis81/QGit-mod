@@ -25,16 +25,14 @@ public:
 public slots:
     void changeBranch(QTreeWidgetItem *item, int column);
     void contextMenu(const QPoint & pos);
-    void collapseHeader();
-    void expandHeader();
     void checkout();
     void removeTag();
 
 private:
     Git *g;
     Domain *d;
-    QAction *collapseHeaderAction;
-    QAction *expandHeaderAction;
+    QAction *collapseAllAction;
+    QAction *expandAllAction;
     QAction *checkoutAction;
     QAction *removeTagAction;
     void addNode(BranchTreeItemTypes headerType, Git::RefType type);
