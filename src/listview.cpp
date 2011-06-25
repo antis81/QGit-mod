@@ -749,12 +749,11 @@ QPixmap* ListViewDelegate::getTagMarks(SCRef sha, const QStyleOptionViewItem& op
 
 void ListViewDelegate::addRefPixmap(QPixmap** pp, SCRef sha, int type, QStyleOptionViewItem opt) const {
 
-	QString curBranch;
-	SCList refs = git->getRefName(sha, (Git::RefType)type, &curBranch);
-	FOREACH_SL (it, refs) {
+    SCList refs = git->getRefName(sha, (Git::RefType)type);
+    FOREACH_SL (it, refs) {
 
-		bool isCur = (curBranch == *it);
-		opt.font.setBold(isCur);
+        bool isCur = git->currentBranch().compare(*it) == 0;
+        opt.font.setBold(isCur);
 
 		QColor clr;
 		if (type == Git::BRANCH)

@@ -84,11 +84,15 @@ void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
 
     // заполняем дерево потомками
     FOREACH_SL (it, tempList) {
+        bool isCurrent = (g->currentBranch().compare(*it) == 0);
         switch (headerType) {
         case (HeaderBranch):
             // имеет значение, что node, а не this. это важно!
             tempItemList = new BranchesTreeItem(node, QStringList(QString(*it)),
                                                LeafBranch);
+            if (isCurrent) {
+                tempItemList->setText(0, tempItemList->text(0) + " *");
+            }
             tempItemList->setBranch(QString(*it));
             break;
         case (HeaderRemote):
@@ -99,6 +103,9 @@ void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
         case (HeaderTag):
             tempItemList = new BranchesTreeItem(node, QStringList(QString(*it)),
                                                LeafTag);
+            if (isCurrent) {
+                tempItemList->setText(0, tempItemList->text(0) + " *");
+            }
             tempItemList->setBranch(QString(*it));
             break;
         }
@@ -203,6 +210,7 @@ void BranchesTree::checkout()
 {
     QString branch = (checkoutAction->data()).toString();
     d->m()->checkout(branch);
+    update();
 }
 
 void BranchesTree::removeTag()

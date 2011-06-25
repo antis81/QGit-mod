@@ -470,18 +470,15 @@ uint Git::checkRef(SCRef sha, uint mask) const {
 	return (it != refsShaMap.constEnd() ? (*it).type & mask : 0);
 }
 
-const QStringList Git::getRefName(SCRef sha, RefType type, QString* curBranch) const {
+const QStringList Git::getRefName(SCRef sha, RefType type) const
+{
+    if (!checkRef(sha, type))
+        return QStringList();
 
-	if (!checkRef(sha, type))
-		return QStringList();
+    const Reference& rf = refsShaMap[toTempSha(sha)];
 
-	const Reference& rf = refsShaMap[toTempSha(sha)];
-
-	if (curBranch)
-		*curBranch = rf.currentBranch;
-
-	if (type == TAG)
-		return rf.tags;
+    if (type == TAG)
+        return rf.tags;
 
 	else if (type == BRANCH)
 		return rf.branches;
@@ -1820,7 +1817,9 @@ bool Git::deleteTag(SCRef sha) {
 
 bool Git::checkout(SCRef sha)
 {
-    return run("git checkout " + sha);
+    bool b = run("git checkout " + sha);
+    updateCurrentBranch();
+    return b;
 }
 
 bool Git::stgPush(SCRef sha)
@@ -1839,4 +1838,19 @@ bool Git::stgPop(SCRef sha) {
 		return false;
 	}
 	return run("stg pop " + quote(patch));
+}
+
+bool Git::updateCurrentBranch() {
+    QString curBranchName;
+    if (!run("git branch", &curBranchName))
+        return false;
+
+    curBranchName = curBranchName.prepend('\n').section("\n*", 1);
+    curBranchName = curBranchName.section('\n', 0, 0).trimmed();
+    m_currentBranch = curBranchName;
+    return true;
+}
+
+QString& Git::currentBranch() {
+    return m_currentBranch;
 }

@@ -107,108 +107,104 @@ Reference* Git::lookupReference(const ShaString& sha, bool create) {
 
 bool Git::getRefs() {
 
-	// check for a StGIT stack
-	QDir d(gitDir);
-	QString stgCurBranch;
-	if (d.exists("patches")) { // early skip
-		errorReportingEnabled = false;
-		isStGIT = run("stg branch", &stgCurBranch); // slow command
-		errorReportingEnabled = true;
-		stgCurBranch = stgCurBranch.trimmed();
-	} else
-		isStGIT = false;
+    // check for a StGIT stack
+    QDir d(gitDir);
+    QString stgCurBranch;
+    if (d.exists("patches")) { // early skip
+        errorReportingEnabled = false;
+        isStGIT = run("stg branch", &stgCurBranch); // slow command
+        errorReportingEnabled = true;
+        stgCurBranch = stgCurBranch.trimmed();
+    } else
+        isStGIT = false;
 
-	// check for a merge and read current branch sha
-	isMergeHead = d.exists("MERGE_HEAD");
-	QString curBranchSHA, curBranchName;
-	if (!run("git rev-parse --revs-only HEAD", &curBranchSHA))
-		return false;
+    // check for a merge and read current branch sha
+    isMergeHead = d.exists("MERGE_HEAD");
+    QString curBranchSHA;
+    if (!run("git rev-parse --revs-only HEAD", &curBranchSHA))
+        return false;
 
-	if (!run("git branch", &curBranchName))
-		return false;
+    if (!updateCurrentBranch())
+        return false;
 
-	curBranchSHA = curBranchSHA.trimmed();
-	curBranchName = curBranchName.prepend('\n').section("\n*", 1);
-	curBranchName = curBranchName.section('\n', 0, 0).trimmed();
+    curBranchSHA = curBranchSHA.trimmed();
 
-	// read refs, normally unsorted
-	QString runOutput;
-	if (!run("git show-ref -d", &runOutput))
-		return false;
+    // read refs, normally unsorted
+    QString runOutput;
+    if (!run("git show-ref -d", &runOutput))
+        return false;
 
-	refsShaMap.clear();
-	shaBackupBuf.clear(); // revs are already empty now
+    refsShaMap.clear();
+    shaBackupBuf.clear(); // revs are already empty now
 
-	QString prevRefSha;
-	QStringList patchNames, patchShas;
-	const QStringList rLst(runOutput.split('\n', QString::SkipEmptyParts));
-	FOREACH_SL (it, rLst) {
+    QString prevRefSha;
+    QStringList patchNames, patchShas;
+    const QStringList rLst(runOutput.split('\n', QString::SkipEmptyParts));
+    FOREACH_SL (it, rLst) {
 
-		SCRef revSha = (*it).left(40);
-		SCRef refName = (*it).mid(41);
+        SCRef revSha = (*it).left(40);
+        SCRef refName = (*it).mid(41);
 
-		if (refName.startsWith("refs/patches/")) {
+        if (refName.startsWith("refs/patches/")) {
 
-			// save StGIT patch sha, to be used later
-			SCRef patchesDir("refs/patches/" + stgCurBranch + "/");
-			if (refName.startsWith(patchesDir)) {
-				patchNames.append(refName.mid(patchesDir.length()));
-				patchShas.append(revSha);
-			}
-			// StGIT patches should not be added to refs,
-			// but an applied StGIT patch could be also an head or
-			// a tag in this case will be added in another loop cycle
-			continue;
-		}
-		// one rev could have many tags
-		Reference* cur = lookupReference(toPersistentSha(revSha, shaBackupBuf), optCreate);
+            // save StGIT patch sha, to be used later
+            SCRef patchesDir("refs/patches/" + stgCurBranch + "/");
+            if (refName.startsWith(patchesDir)) {
+                patchNames.append(refName.mid(patchesDir.length()));
+                patchShas.append(revSha);
+            }
+            // StGIT patches should not be added to refs,
+            // but an applied StGIT patch could be also an head or
+            // a tag in this case will be added in another loop cycle
+            continue;
+        }
+        // one rev could have many tags
+        Reference* cur = lookupReference(toPersistentSha(revSha, shaBackupBuf), optCreate);
 
-		if (refName.startsWith("refs/tags/")) {
+        if (refName.startsWith("refs/tags/")) {
 
-			if (refName.endsWith("^{}")) { // tag dereference
+            if (refName.endsWith("^{}")) { // tag dereference
 
-				// we assume that a tag dereference follows strictly
-				// the corresponding tag object in rLst. So the
-				// last added tag is a tag object, not a commit object
-				cur->tags.append(refName.mid(10, refName.length() - 13));
+                // we assume that a tag dereference follows strictly
+                // the corresponding tag object in rLst. So the
+                // last added tag is a tag object, not a commit object
+                cur->tags.append(refName.mid(10, refName.length() - 13));
 
-				// store tag object. Will be used to fetching
-				// tag message (if any) when necessary.
-				cur->tagObj = prevRefSha;
+                // store tag object. Will be used to fetching
+                // tag message (if any) when necessary.
+                cur->tagObj = prevRefSha;
 
-				// tagObj must be removed from ref map
-				if (!prevRefSha.isEmpty())
-					refsShaMap.remove(toTempSha(prevRefSha));
+                // tagObj must be removed from ref map
+                if (!prevRefSha.isEmpty())
+                    refsShaMap.remove(toTempSha(prevRefSha));
 
-			} else
-				cur->tags.append(refName.mid(10));
+            } else
+                cur->tags.append(refName.mid(10));
 
-			cur->type |= TAG;
+            cur->type |= TAG;
 
-		} else if (refName.startsWith("refs/heads/")) {
+        } else if (refName.startsWith("refs/heads/")) {
 
-			cur->branches.append(refName.mid(11));
-			cur->type |= BRANCH;
-			if (curBranchSHA == revSha) {
-				cur->type |= CUR_BRANCH;
-				cur->currentBranch = curBranchName;
-			}
-		} else if (refName.startsWith("refs/remotes/") && !refName.endsWith("HEAD")) {
+            cur->branches.append(refName.mid(11));
+            cur->type |= BRANCH;
+            if (curBranchSHA == revSha) {
+                cur->type |= CUR_BRANCH;
+            }
+        } else if (refName.startsWith("refs/remotes/") && !refName.endsWith("HEAD")) {
+            cur->remoteBranches.append(refName.mid(13));
+            cur->type |= RMT_BRANCH;
 
-			cur->remoteBranches.append(refName.mid(13));
-			cur->type |= RMT_BRANCH;
+        } else if (!refName.startsWith("refs/bases/") && !refName.endsWith("HEAD")) {
 
-		} else if (!refName.startsWith("refs/bases/") && !refName.endsWith("HEAD")) {
+            cur->refs.append(refName);
+            cur->type |= REF;
+        }
+        prevRefSha = revSha;
+    }
+    if (isStGIT && !patchNames.isEmpty())
+        parseStGitPatches(patchNames, patchShas);
 
-			cur->refs.append(refName);
-			cur->type |= REF;
-		}
-		prevRefSha = revSha;
-	}
-	if (isStGIT && !patchNames.isEmpty())
-		parseStGitPatches(patchNames, patchShas);
-
-	return !refsShaMap.empty();
+    return !refsShaMap.empty();
 }
 
 void Git::parseStGitPatches(SCList patchNames, SCList patchShas) {
