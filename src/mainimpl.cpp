@@ -137,7 +137,7 @@ MainImpl::MainImpl(SCRef cd, QWidget* p) : QMainWindow(p) {
 
 	// disable all actions
 	updateGlobalActions(false);
-        ActShowTree->setChecked(leftWidget->isVisible());
+        ActShowTree->toggle();
 
 	connect(git, SIGNAL(fileNamesLoad(int, int)), this, SLOT(fileNamesLoad(int, int)));
 
