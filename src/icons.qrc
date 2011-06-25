@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/icons" >
+    <qresource prefix="/icons">
         <file>resources/1downarrow.png</file>
         <file>resources/1uparrow.png</file>
         <file>resources/bookmark.png</file>
@@ -46,5 +46,8 @@
         <file>resources/view_top_bottom.png</file>
         <file>resources/view_tree.png</file>
         <file>resources/wizard.png</file>
+        <file>resources/branch.png</file>
+        <file>resources/tag.png</file>
+        <file>resources/branch_master.png</file>
     </qresource>
 </RCC>

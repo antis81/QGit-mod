@@ -57,9 +57,11 @@ void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
         break;
     case (BranchesTree::HeaderRemote):
         node = new QTreeWidgetItem(this, QStringList("remotes"), headerType);
+        node->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/branch_master.png")));
         break;
     case (BranchesTree::HeaderTag):
         node = new QTreeWidgetItem(this, QStringList("tags"), headerType);
+        node->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/tag.png")));
         break;
     }
 
@@ -69,12 +71,12 @@ void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
     font.setBold(true);
     node->setFont(0, font);
 
-    QColor white(255, 255, 255);
-    QColor black(128, 128, 128);
-    QLinearGradient localGradient(0, 0, 0, 20);
-    localGradient.setColorAt(0, white);
-    localGradient.setColorAt(1, black);
-    node->setBackground(0, localGradient);
+//    QColor white(255, 255, 255);
+//    QColor black(128, 128, 128);
+//    QLinearGradient localGradient(0, 0, 0, 20);
+//    localGradient.setColorAt(0, white);
+//    localGradient.setColorAt(1, black);
+//    node->setBackground(0, localGradient);
 
     addTopLevelItem(node);
 
@@ -97,6 +99,7 @@ void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
                                                BranchesTree::LeafTag);
             break;
         }
+        tempItemList->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/branch.png")));
         node->addChild(tempItemList);
     }
 }
