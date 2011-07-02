@@ -446,6 +446,14 @@ QTextCodec* Git::getTextCodec(bool* isGitArchive) {
 	return QTextCodec::codecForName(runOutput.trimmed().toLatin1());
 }
 
+const QString Git::escape(QString s) {
+    return s.replace(QRegExp("([\\\\\\ \\\"\\\'])"), "\\\\1");
+}
+
+const QString Git::unescape(QString s) {
+    return s.replace(QRegExp("(\\\\([\\ \\\\\\\'\\\"]))"), "\\2");
+}
+
 const QString Git::quote(SCRef nm) {
 
 	return (QUOTE_CHAR + nm + QUOTE_CHAR);

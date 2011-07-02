@@ -214,6 +214,8 @@ public:
     Domain* curContext() const { return curDomain; }
     bool updateCurrentBranch();
     QString& currentBranch();
+    static const QString escape(QString s);
+    static const QString unescape(QString s);
 signals:
     void newRevsAdded(const FileHistory*, const QVector<ShaString>&);
     void loadCompleted(const FileHistory*, const QString&);
@@ -318,7 +320,6 @@ private:
     void setExtStatus(RevFile& rf, SCRef rowSt, int parNum, FileNamesLoader& fl);
     void appendNamesWithId(QStringList& names, SCRef sha, SCList data, bool onlyLoaded);
     Reference* lookupReference(const ShaString& sha, bool create = false);
-
     EM_DECLARE(exGitStopped);
 
     Domain* curDomain;
