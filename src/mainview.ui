@@ -54,7 +54,7 @@
        </property>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
-         <string>Branches Tree</string>
+         <string>Branches</string>
         </attribute>
         <layout class="QHBoxLayout" name="horizontalLayout_3">
          <property name="spacing">
@@ -85,7 +85,7 @@
          <bool>false</bool>
         </property>
         <attribute name="title">
-         <string>Files Tree</string>
+         <string>Files</string>
         </attribute>
         <layout class="QHBoxLayout" name="horizontalLayout">
          <property name="spacing">
