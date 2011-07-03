@@ -15,7 +15,7 @@
 #include <QPainter>
 
 PatchContent::PatchContent(QWidget* parent) : QPlainTextEdit(parent) {
-
+    fitted_height = 0;
     diffLoaded = seekTarget = false;
     curFilter = prevFilter = VIEW_ALL;
 
@@ -23,12 +23,13 @@ PatchContent::PatchContent(QWidget* parent) : QPlainTextEdit(parent) {
     pickAxeRE.setCaseSensitivity(Qt::CaseInsensitive);
 
     setFont(QGit::TYPE_WRITER_FONT);
-
+    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
     lineNumberArea = new LineNumberArea(this);
 
     connect(this, SIGNAL(blockCountChanged(int)), this, SLOT(updateLineNumberAreaWidth(int)));
     connect(this, SIGNAL(updateRequest(QRect,int)), this, SLOT(updateLineNumberArea(QRect,int)));
     connect(this, SIGNAL(cursorPositionChanged()), this, SLOT(highlightCurrentLine()));
+    connect(this, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
 
     updateLineNumberAreaWidth(0);
     highlightCurrentLine();
@@ -59,6 +60,7 @@ void PatchContent::refresh() {
     patchRowData = tmp;
     processData(patchRowData, &topPara);
     scrollLineToTop(topPara);
+    fitHeightToDocument();
     setUpdatesEnabled(true);
 }
 
@@ -632,4 +634,23 @@ void PatchContent::setFilter(PatchFilter filter)
     prevFilter = curFilter;
     curFilter = filter;
     refresh();
+}
+
+QSize PatchContent::sizeHint() const {
+  QSize sizehint = QPlainTextEdit::sizeHint();
+  sizehint.setHeight(this->fitted_height);
+  return sizehint;
+}
+
+void PatchContent::fitHeightToDocument() {
+      this->document()->setTextWidth(this->viewport()->width());
+      QSize document_size(this->document()->size().toSize());
+
+      this->fitted_height = (document_size.height() + 2) * fontMetrics().lineSpacing() + document()->documentMargin() * 2;
+      this->updateGeometry();
+}
+
+void PatchContent::onTextChanged()
+{
+    //fitHeightToDocument();
 }

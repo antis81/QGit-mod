@@ -41,6 +41,7 @@ public:
     PatchFilter filter() { return curFilter; };
     void setFilter(PatchFilter filter);
 
+    QSize sizeHint() const;
 
     enum RowType {
         ROW_FILE_HEADER,
@@ -96,7 +97,11 @@ private:
     QRegExp pickAxeRE;
     QString target;
     bool seekTarget;
-        QWidget *lineNumberArea;
+    QWidget *lineNumberArea;
+
+private:
+    int fitted_height;
+    void fitHeightToDocument();
 
     struct MatchSelection {
         int paraFrom;
@@ -106,6 +111,9 @@ private:
     };
     typedef QVector<MatchSelection> Matches;
     Matches matches;
+
+private slots:
+    void onTextChanged();
 };
 
 class LineNumberArea : public QWidget

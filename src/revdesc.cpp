@@ -12,12 +12,16 @@
 #include "revdesc.h"
 
 RevDesc::RevDesc(QWidget* p) : QTextBrowser(p), d(NULL) {
+    fitted_height = 0;
+    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
 
-	connect(this, SIGNAL(anchorClicked(const QUrl&)),
-	        this, SLOT(on_anchorClicked(const QUrl&)));
+    connect(this, SIGNAL(anchorClicked(const QUrl&)),
+            this, SLOT(on_anchorClicked(const QUrl&)));
 
-	connect(this, SIGNAL(highlighted(const QUrl&)),
-	        this, SLOT(on_highlighted(const QUrl&)));
+    connect(this, SIGNAL(highlighted(const QUrl&)),
+            this, SLOT(on_highlighted(const QUrl&)));
+
+    connect(this, SIGNAL(textChanged()), this, SLOT(onTextChanged()));
 }
 
 void RevDesc::on_anchorClicked(const QUrl& link) {
@@ -51,4 +55,24 @@ void RevDesc::contextMenuEvent(QContextMenuEvent* e) {
 	}
 	menu->exec(e->globalPos());
 	delete menu;
+}
+
+
+QSize RevDesc::sizeHint() const {
+  QSize sizehint = QTextBrowser::sizeHint();
+  sizehint.setHeight(this->fitted_height);
+  return sizehint;
+}
+
+void RevDesc::fitHeightToDocument() {
+      this->document()->setTextWidth(this->viewport()->width());
+      QSize document_size(this->document()->size().toSize());
+
+      this->fitted_height = document_size.height() + document()->documentMargin();
+      this->updateGeometry();
+}
+
+void RevDesc::onTextChanged()
+{
+    fitHeightToDocument();
 }

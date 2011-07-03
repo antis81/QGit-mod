@@ -252,7 +252,6 @@
     <addaction name="ActExternalDiff"/>
     <addaction name="ActShowTree"/>
     <addaction name="ActSplitView"/>
-    <addaction name="ActToggleLogsDiff"/>
     <addaction name="ActShowDescHeader"/>
     <addaction name="ActFilterTree"/>
    </widget>
@@ -814,20 +813,6 @@
    </property>
    <property name="shortcut">
     <string>H</string>
-   </property>
-  </action>
-  <action name="ActToggleLogsDiff">
-   <property name="text">
-    <string>Toggle message/diff</string>
-   </property>
-   <property name="iconText">
-    <string>Toggle message/diff</string>
-   </property>
-   <property name="toolTip">
-    <string>Toggle between messages and patch content\n in revision description pane</string>
-   </property>
-   <property name="shortcut">
-    <string>M</string>
    </property>
   </action>
   <action name="ActRangeDlg">
@@ -1451,22 +1436,6 @@
     </hint>
     <hint type="destinationlabel">
      <x>487</x>
-     <y>238</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ActToggleLogsDiff</sender>
-   <signal>triggered()</signal>
-   <receiver>MainBase</receiver>
-   <slot>ActToggleLogsDiff_activated()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>-1</x>
-     <y>-1</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>452</x>
      <y>238</y>
     </hint>
    </hints>
