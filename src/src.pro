@@ -78,17 +78,19 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
            filecontent.h filelist.h fileview.h git.h help.h lanes.h \
            listview.h mainimpl.h myprocess.h patchcontent.h patchview.h \
            rangeselectimpl.h revdesc.h revsview.h settingsimpl.h \
-           smartbrowse.h treeview.h \
-    branchestree.h
+           treeview.h \
+    branchestree.h \
+    findsupport.h
 
 SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
            customactionimpl.cpp dataloader.cpp domain.cpp exceptionmanager.cpp \
            filecontent.cpp filelist.cpp fileview.cpp git.cpp git_startup.cpp \
            lanes.cpp listview.cpp mainimpl.cpp myprocess.cpp namespace_def.cpp \
            patchcontent.cpp patchview.cpp rangeselectimpl.cpp \
-           revdesc.cpp revsview.cpp settingsimpl.cpp smartbrowse.cpp treeview.cpp \
+           revdesc.cpp revsview.cpp settingsimpl.cpp treeview.cpp \
     branchestree.cpp \
-    main.cpp
+    main.cpp \
+    findsupport.cpp
 
 DISTFILES += app_icon.rc helpgen.sh resources/* Src.vcproj todo.txt
 DISTFILES += ../COPYING ../exception_manager.txt ../README ../README_WIN.txt

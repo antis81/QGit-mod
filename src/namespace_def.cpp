@@ -134,6 +134,11 @@ const QColor QGit::LIGHT_BLUE   = QColor(85, 85, 255);
 const QColor QGit::PURPLE       = QColor(221, 221, 255);
 const QColor QGit::DARK_GREEN   = QColor(0, 205, 0);
 
+const QColor QGit::LINE_NUMBERS_BACKGROUND = QColor(225, 225, 225);
+const QColor QGit::LINE_NUMBERS_FOREGROUND = QColor(100, 100, 100);
+
+const QColor QGit::PATCH_BACKGROUND = QColor(240, 240, 240);
+
 // initialized at startup according to system wide settings
 QColor QGit::ODD_LINE_COL;
 QColor QGit::EVEN_LINE_COL;

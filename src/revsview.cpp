@@ -16,7 +16,6 @@
 #include "filelist.h"
 #include "revdesc.h"
 #include "patchview.h"
-#include "smartbrowse.h"
 #include "mainimpl.h"
 #include "revsview.h"
 
@@ -31,9 +30,7 @@ RevsView::RevsView(MainImpl* mi, Git* g, bool isMain) : Domain(mi, g, isMain) {
 	tab()->fileList->setup(this, git);
 	m()->treeView->setup(this, git);
 
-	setTabLogDiffVisible(QGit::testFlag(QGit::LOG_DIFF_TAB_F));
-
-	SmartBrowse* sb = new SmartBrowse(this);
+//	setTabLogDiffVisible(QGit::testFlag(QGit::LOG_DIFF_TAB_F));
 
 	// restore geometry
 	QVector<QSplitter*> v;
@@ -42,9 +39,6 @@ RevsView::RevsView(MainImpl* mi, Git* g, bool isMain) : Domain(mi, g, isMain) {
 
 	connect(m(), SIGNAL(typeWriterFontChanged()),
 	        tab()->textEditDiff, SLOT(typeWriterFontChanged()));
-
-	connect(m(), SIGNAL(flagChanged(uint)),
-	        sb, SLOT(flagChanged(uint)));
 
 	connect(git, SIGNAL(newRevsAdded(const FileHistory*, const QVector<ShaString>&)),
 	        this, SLOT(on_newRevsAdded(const FileHistory*, const QVector<ShaString>&)));
@@ -122,55 +116,6 @@ void RevsView::setEnabled(bool b) {
 		linkedPatchView->tabPage()->setEnabled(b);
 }
 
-void RevsView::toggleDiffView() {
-
-	QStackedWidget* s = tab()->stackedPanes;
-	QTabWidget* t = tab()->tabLogDiff;
-
-	bool isTabPage = (s->currentIndex() == 0);
-	int idx = (isTabPage ? t->currentIndex() : s->currentIndex());
-
-	bool old = container->updatesEnabled();
-	container->setUpdatesEnabled(false);
-
-	if (isTabPage)
-		t->setCurrentIndex(1 - idx);
-	else
-		s->setCurrentIndex(3 - idx);
-
-	container->setUpdatesEnabled(old);
-}
-
-void RevsView::setTabLogDiffVisible(bool b) {
-
-	QStackedWidget* s = tab()->stackedPanes;
-	QTabWidget* t = tab()->tabLogDiff;
-
-	bool isTabPage = (s->currentIndex() == 0);
-	int idx = (isTabPage ? t->currentIndex() : s->currentIndex());
-
-	container->setUpdatesEnabled(false);
-
-	if (b && !isTabPage) {
-
-		t->addTab(tab()->textBrowserDesc, "Log");
-		t->addTab(tab()->textEditDiff, "Diff");
-
-		t->setCurrentIndex(idx - 1);
-		s->setCurrentIndex(0);
-	}
-	if (!b && isTabPage) {
-
-		s->addWidget(tab()->textBrowserDesc);
-		s->addWidget(tab()->textEditDiff);
-
-		// manually remove the two remaining empty pages
-		t->removeTab(0); t->removeTab(0);
-
-		s->setCurrentIndex(idx + 1);
-	}
-	container->setUpdatesEnabled(true);
-}
 
 void RevsView::viewPatch(bool newTab) {
 
@@ -246,10 +191,6 @@ bool RevsView::doUpdate(bool force) {
 			updateLineEditSHA();
 			on_updateRevDesc();
 			showStatusBarMessage(git->getRevInfo(st.sha()));
-
-			if (   testFlag(QGit::MSG_ON_NEW_F)
-			    && tab()->textEditDiff->isVisible())
-				toggleDiffView();
 		}
 		const RevFile* files = NULL;
 		bool newFiles = false;
