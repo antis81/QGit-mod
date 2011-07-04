@@ -11,11 +11,13 @@
 #include <QPlainTextEdit>
 #include <QSyntaxHighlighter>
 #include "common.h"
+#include "findsupport.h"
 
 class Domain;
 class Git;
 class MyProcess;
 class StateInfo;
+class PatchContentFindSupport;
 
 class PatchContent: public QPlainTextEdit
 {
@@ -29,17 +31,7 @@ public:
     void refresh();
     void update(StateInfo& st);
 
-    void lineNumberAreaPaintEvent(QPaintEvent *event);
-    int lineNumberAreaWidth();
 
-    enum PatchFilter {
-        VIEW_ALL,
-        VIEW_ADDED,
-        VIEW_REMOVED
-    };
-
-    PatchFilter filter() { return curFilter; };
-    void setFilter(PatchFilter filter);
 
     QSize sizeHint() const;
 
@@ -54,8 +46,11 @@ public:
         ROW_OTHER
     };
 
+    PatchContentFindSupport* m_findSupport;
+
+    ~PatchContent();
+
 protected:
-    PatchFilter curFilter, prevFilter;
 
     void resizeEvent(QResizeEvent *event);
 
@@ -65,10 +60,6 @@ public slots:
     void procReadyRead(const QByteArray& data);
     void procFinished();
 
-        // line numbers
-        void updateLineNumberAreaWidth(int newBlockCount);
-        void highlightCurrentLine();
-        void updateLineNumberArea(const QRect &, int);
 
 private:
     friend class DiffHighlighter;
@@ -78,42 +69,68 @@ private:
     int positionToLineNum(int pos);
     int topToLineNum();
     void saveRestoreSizes(bool startup = false);
-    int doSearch(const QString& txt, int pos);
-    bool computeMatches();
-    bool getMatch(int para, int* indexFrom, int* indexTo);
     void centerMatch(int id = 0);
     bool centerTarget(SCRef target);
     void processData(const QByteArray& data, int* prevLineNum = NULL);
     void formatRow(QTextCursor tc);
     void formatBlock(QTextCursor& cursor, QTextBlock& block, RowType rowType);
     void formatBlock(QTextCursor& cursor, QTextBlock& block);
-    RowType getRowType(QString row);
+    RowType getRowType(const QString& row);
     Git* git;
     QPointer<MyProcess> proc;
     bool diffLoaded;
     QByteArray patchRowData;
     QString halfLine;
-    bool isRegExp;
-    QRegExp pickAxeRE;
     QString target;
     bool seekTarget;
+
+
+private slots:
+    void onTextChanged();
+
+// Filter
+public:
+    enum PatchFilter {
+        VIEW_ALL,
+        VIEW_ADDED,
+        VIEW_REMOVED
+    };
+
+    PatchFilter filter() { return curFilter; };
+    void setFilter(PatchFilter filter);
+
+protected:
+    PatchFilter curFilter;
+    PatchFilter prevFilter;
+
+
+// Line numbers
+public:
+    void lineNumberAreaPaintEvent(QPaintEvent *event);
+    int lineNumberAreaWidth();
+
+private:
     QWidget *lineNumberArea;
 
+private slots:
+    void updateLineNumberAreaWidth(int newBlockCount);
+    void highlightCurrentLine();
+    void updateLineNumberArea(const QRect &, int);
+
+
+// Auto size
 private:
     int fitted_height;
     void fitHeightToDocument();
 
-    struct MatchSelection {
-        int paraFrom;
-        int indexFrom;
-        int paraTo;
-        int indexTo;
-    };
-    typedef QVector<MatchSelection> Matches;
-    Matches matches;
 
-private slots:
-    void onTextChanged();
+// Search
+public:
+    FindSupport* findSupport();
+
+private:
+    friend class PatchContentFindSupport;
+    void updateMatchesHighlight();
 };
 
 class LineNumberArea : public QWidget
@@ -151,6 +168,35 @@ public:
             rowNumbers = NULL;
         }
     }
+};
+
+class PatchContentFindSupport : public FindSupport
+{
+public:
+    PatchContentFindSupport(PatchContent* patchContent);
+
+    bool find();
+    bool findNext();
+
+    void setText(QString text, bool re);
+    void setText(QString text);
+private:
+    friend class PatchContent;
+
+    PatchContent* m_patchContent;
+    bool isRegExp;
+    QRegExp pickAxeRE;
+
+    struct MatchSelection {
+        int from;
+        int to;
+    };
+    typedef QVector<MatchSelection> Matches;
+
+    Matches matches;
+
+    QTextCursor findNextMatch(const QTextDocument* document, QTextCursor& cursor);
+    bool computeMatches();
 };
 
 #endif

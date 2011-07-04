@@ -79,7 +79,8 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
            listview.h mainimpl.h myprocess.h patchcontent.h patchview.h \
            rangeselectimpl.h revdesc.h revsview.h settingsimpl.h \
            treeview.h \
-    branchestree.h
+    branchestree.h \
+    findsupport.h
 
 SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
            customactionimpl.cpp dataloader.cpp domain.cpp exceptionmanager.cpp \
@@ -88,7 +89,8 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
            patchcontent.cpp patchview.cpp rangeselectimpl.cpp \
            revdesc.cpp revsview.cpp settingsimpl.cpp treeview.cpp \
     branchestree.cpp \
-    main.cpp
+    main.cpp \
+    findsupport.cpp
 
 DISTFILES += app_icon.rc helpgen.sh resources/* Src.vcproj todo.txt
 DISTFILES += ../COPYING ../exception_manager.txt ../README ../README_WIN.txt
