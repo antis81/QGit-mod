@@ -40,13 +40,13 @@ void BranchesTree::setup(Domain *domain, Git *git)
 void BranchesTree::update()
 {
     clear();
-    addNode(BranchesTree::HeaderBranch, Git::BRANCH);
-    addNode(BranchesTree::HeaderRemote, Git::RMT_BRANCH);
-    addNode(BranchesTree::HeaderTag, Git::TAG);
+    addNode(BranchesTree::HeaderBranches, Git::BRANCH);
+    addRemotesNodes();
+    addNode(BranchesTree::HeaderTags, Git::TAG);
     expandAll();
 }
 
-void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
+void BranchesTree::addNode(ItemType headerType, Git::RefType type)
 {
     // получаем нужную инфу по типу
     QStringList tempList = g->getAllRefNames(type, !Git::optOnlyLoaded);
@@ -54,13 +54,13 @@ void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
     // делаем хедер и добавляем на верхний уровень
     QTreeWidgetItem *node;
     switch (headerType) {
-    case (BranchesTree::HeaderBranch):
+    case (BranchesTree::HeaderBranches):
         node = new QTreeWidgetItem(this, QStringList("Branches"), headerType);
         break;
-    case (BranchesTree::HeaderRemote):
+    case (BranchesTree::HeaderRemotes):
         node = new QTreeWidgetItem(this, QStringList("Remotes"), headerType);        
         break;
-    case (BranchesTree::HeaderTag):
+    case (BranchesTree::HeaderTags):
         node = new QTreeWidgetItem(this, QStringList("Tags"), headerType);
         break;
     }
@@ -71,12 +71,6 @@ void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
     font.setBold(true);
     node->setFont(0, font);
 
-//    QColor white(255, 255, 255);
-//    QColor black(128, 128, 128);
-//    QLinearGradient localGradient(0, 0, 0, 20);
-//    localGradient.setColorAt(0, white);
-//    localGradient.setColorAt(1, black);
-//    node->setBackground(0, localGradient);
 
     addTopLevelItem(node);
 
@@ -86,7 +80,7 @@ void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
     FOREACH_SL (it, tempList) {
         bool isCurrent = (g->currentBranch().compare(*it) == 0);
         switch (headerType) {
-        case (HeaderBranch):
+        case (HeaderBranches):
 
             tempItemList = new BranchesTreeItem(node, QStringList(QString(*it)), LeafBranch);
             if (isCurrent) {
@@ -100,11 +94,11 @@ void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
                 tempItemList->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/branch_master.png")));
             }
             break;
-        case (HeaderRemote):
+        case (HeaderRemotes):
             tempItemList = new BranchesTreeItem(node, QStringList(QString(*it)), LeafRemote);
             tempItemList->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/branch.png")));
             break;
-        case (HeaderTag):
+        case (HeaderTags):
             tempItemList = new BranchesTreeItem(node, QStringList(QString(*it)), LeafTag);
             tempItemList->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/tag.png")));
             break;
@@ -114,32 +108,79 @@ void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
     }
 }
 
+void BranchesTree::addRemotesNodes()
+{
+    // делаем хедер и добавляем на верхний уровень
+    QTreeWidgetItem *headerNode;
+    headerNode = new QTreeWidgetItem(this, QStringList("Remotes"), HeaderRemotes);
+    QFont font = headerNode->font(0);
+    font.setBold(true);
+    headerNode->setFont(0, font);
+    addTopLevelItem(headerNode);
+
+    // получаем нужную инфу по типу
+    QStringList tempList = g->getAllRefNames(Git::RMT_BRANCH, !Git::optOnlyLoaded);
+    tempList.sort();
+
+
+    BranchesTreeItem *tempItemList;
+
+    QString lastRemoteName;
+    QString remoteName;
+    QTreeWidgetItem* parentNode = headerNode;
+    QString text;
+
+    // заполняем дерево потомками
+    FOREACH_SL (it, tempList) {
+        const QString& branchName = *it;
+        int i = branchName.indexOf("/");
+        if (i > 0) {
+            remoteName = branchName.left(i);
+            text = branchName.mid(i + 1);
+            if (remoteName.compare(lastRemoteName) != 0) {
+                parentNode = new BranchesTreeItem(headerNode, QStringList(remoteName), HeaderRemote);
+                lastRemoteName = remoteName;
+            }
+        } else {
+            parentNode = headerNode;
+            text = branchName;
+            lastRemoteName = "";
+        }
+        tempItemList = new BranchesTreeItem(parentNode, QStringList(text), LeafRemote);
+        tempItemList->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/branch.png")));
+        tempItemList->setBranch(QString(*it));
+        //headerNode->addChild(tempItemList);
+    }
+}
+
 void BranchesTree::changeBranch(QTreeWidgetItem *item, int column)
 {
-    if ((item->type() != BranchesTree::HeaderBranch)
-            && (item->type() != BranchesTree::HeaderRemote)
-            && (item->type() != BranchesTree::HeaderTag)) {
-        // запоминаем состояние закрытости/открытости хедеров
-        // и текст выделенного узла
-        bool stateTree[topLevelItemCount()];
-        BranchesTreeItem* branchItem = static_cast<BranchesTreeItem*>(item);
-        const QString& branch = branchItem->branch();
-
-        for (int i = 0; i < topLevelItemCount(); i++) {
-            stateTree[i] = this->topLevelItem(i)->isExpanded();
-        }
-
-        // перестраиваем дерево
-        d->m()->changeBranch(branch);
-
-        // возвращаем назад состояние
-        for (int i = 0; i < topLevelItemCount(); i++) {
-            this->topLevelItem(i)->setExpanded(stateTree[i]);
-        }
-
-        clearSelection();
-        selectBranch(branch);
+    if ((item->type() != LeafBranch)
+            && (item->type() != LeafRemote)
+            && (item->type() != LeafTag)) {
+        return;
     }
+
+    // запоминаем состояние закрытости/открытости хедеров
+    // и текст выделенного узла
+    bool stateTree[topLevelItemCount()];
+    BranchesTreeItem* branchItem = static_cast<BranchesTreeItem*>(item);
+    const QString& branch = branchItem->branch();
+
+    for (int i = 0; i < topLevelItemCount(); i++) {
+        stateTree[i] = this->topLevelItem(i)->isExpanded();
+    }
+
+    // перестраиваем дерево
+    d->m()->changeBranch(branch);
+
+    // возвращаем назад состояние
+    for (int i = 0; i < topLevelItemCount(); i++) {
+        this->topLevelItem(i)->setExpanded(stateTree[i]);
+    }
+
+    clearSelection();
+    selectBranch(branch);
 }
 
 void BranchesTree::selectBranch(const QString& branch) {
@@ -179,11 +220,11 @@ void BranchesTree::contextMenu(const QPoint & pos)
     QTreeWidgetItem *item = selectedItems().first();    
     BranchesTreeItem* branchItem;
     switch (item->type()) {
-    case HeaderBranch:
+    case HeaderBranches:
         ;
-    case HeaderRemote:
+    case HeaderRemotes:
         ;
-    case HeaderTag:
+    case HeaderTags:
         branchesTreeContextMenu.addAction(collapseAllAction);
         branchesTreeContextMenu.addAction(expandAllAction);
         break;
