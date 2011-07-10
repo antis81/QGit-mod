@@ -1142,9 +1142,6 @@ static int cntMenuEntries(const QMenu& menu) {
 void MainImpl::doContexPopup(SCRef sha) {
 
 	QMenu contextMenu(this);
-//	QMenu contextBrnMenu("More branches...", this);
-//	QMenu contextTagMenu("More tags...", this);
-//	QMenu contextRmtMenu("Remote branches", this);
 
 	connect(&contextMenu, SIGNAL(triggered(QAction*)), this, SLOT(goRef_triggered(QAction*)));
 
