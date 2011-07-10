@@ -27,6 +27,8 @@ BranchesTree::BranchesTree(QWidget *parent) : QTreeWidget(parent)
     removeTagAction = new QAction(tr("Remove"), this);
     QObject::connect(removeTagAction, SIGNAL(triggered()),
                      this, SLOT(removeTag()));
+    this->setRootIsDecorated(false);
+    this->setIndentation(10);
 }
 
 void BranchesTree::setup(Domain *domain, Git *git)
@@ -56,12 +58,10 @@ void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
         node = new QTreeWidgetItem(this, QStringList("Branches"), headerType);
         break;
     case (BranchesTree::HeaderRemote):
-        node = new QTreeWidgetItem(this, QStringList("Remotes"), headerType);
-        node->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/branch_master.png")));
+        node = new QTreeWidgetItem(this, QStringList("Remotes"), headerType);        
         break;
     case (BranchesTree::HeaderTag):
         node = new QTreeWidgetItem(this, QStringList("Tags"), headerType);
-        node->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/tag.png")));
         break;
     }
 
@@ -87,32 +87,29 @@ void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
         bool isCurrent = (g->currentBranch().compare(*it) == 0);
         switch (headerType) {
         case (HeaderBranch):
-            // имеет значение, что node, а не this. это важно!
-            tempItemList = new BranchesTreeItem(node, QStringList(QString(*it)),
-                                               LeafBranch);
+
+            tempItemList = new BranchesTreeItem(node, QStringList(QString(*it)), LeafBranch);
             if (isCurrent) {
                 QFont font = tempItemList->font(0);
                 font.setBold(true);
                 tempItemList->setFont(0, font);
                 tempItemList->setForeground(0, Qt::red);
             }
-            tempItemList->setBranch(QString(*it));
+            tempItemList->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/branch.png")));
+            if (*it == "master") {
+                tempItemList->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/branch_master.png")));
+            }
             break;
         case (HeaderRemote):
-            tempItemList = new BranchesTreeItem(node, QStringList(QString(*it)),
-                                               LeafRemote);
-            tempItemList->setBranch(QString(*it));
+            tempItemList = new BranchesTreeItem(node, QStringList(QString(*it)), LeafRemote);
+            tempItemList->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/branch.png")));
             break;
         case (HeaderTag):
-            tempItemList = new BranchesTreeItem(node, QStringList(QString(*it)),
-                                               LeafTag);
-            if (isCurrent) {
-                tempItemList->setText(0, tempItemList->text(0) + " *");
-            }
-            tempItemList->setBranch(QString(*it));
+            tempItemList = new BranchesTreeItem(node, QStringList(QString(*it)), LeafTag);
+            tempItemList->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/tag.png")));
             break;
         }
-        tempItemList->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/branch.png")));
+        tempItemList->setBranch(QString(*it));
         node->addChild(tempItemList);
     }
 }
