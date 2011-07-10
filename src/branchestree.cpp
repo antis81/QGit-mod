@@ -9,7 +9,7 @@ BranchesTree::BranchesTree(QWidget *parent) : QTreeWidget(parent),
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
 
-    QObject::connect(this, SIGNAL(itemClicked(QTreeWidgetItem*, int)),
+    QObject::connect(this, SIGNAL(itemDoubleClicked(QTreeWidgetItem*,int)),
                      this, SLOT(changeBranch(QTreeWidgetItem*, int)));
 
     QObject::connect(this, SIGNAL(customContextMenuRequested(QPoint)),
