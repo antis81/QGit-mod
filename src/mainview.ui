@@ -34,6 +34,12 @@
        <enum>Qt::Horizontal</enum>
       </property>
       <widget class="QTabWidget" name="leftWidget">
+       <property name="styleSheet">
+        <string notr="true">QTabWidget::pane
+{
+	border-width: 0px
+}</string>
+       </property>
        <property name="tabPosition">
         <enum>QTabWidget::West</enum>
        </property>
@@ -65,8 +71,14 @@
          </property>
          <item>
           <widget class="BranchesTree" name="branchesTree">
-           <property name="frameShadow">
-            <enum>QFrame::Sunken</enum>
+           <property name="autoFillBackground">
+            <bool>false</bool>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::NoFrame</enum>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectItems</enum>
            </property>
            <attribute name="headerVisible">
             <bool>false</bool>
@@ -134,6 +146,14 @@
        </widget>
       </widget>
       <widget class="QTabWidget" name="tabWdg">
+       <property name="styleSheet">
+        <string notr="true">QTabWidget::pane {
+	border-width: 0px;
+}</string>
+       </property>
+       <property name="tabsClosable">
+        <bool>false</bool>
+       </property>
        <widget class="QWidget" name="TabWdg">
         <attribute name="title">
          <string>Tab&amp;Wdg</string>

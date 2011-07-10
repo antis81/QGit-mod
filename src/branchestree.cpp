@@ -2,7 +2,10 @@
 #include "mainimpl.h"
 #include <QDebug>
 
-BranchesTree::BranchesTree(QWidget *parent) : QTreeWidget(parent)
+BranchesTree::BranchesTree(QWidget *parent) : QTreeWidget(parent),
+    branchIcon(QString::fromUtf8(":/icons/resources/branch.png")),
+    masterBranchIcon(QString::fromUtf8(":/icons/resources/branch_master.png")),
+    tagIcon(QString::fromUtf8(":/icons/resources/tag.png"))
 {
     setContextMenuPolicy(Qt::CustomContextMenu);
 
@@ -29,6 +32,10 @@ BranchesTree::BranchesTree(QWidget *parent) : QTreeWidget(parent)
                      this, SLOT(removeTag()));
     this->setRootIsDecorated(false);
     this->setIndentation(10);
+
+    QPalette p = this->palette();
+    p.setColor(QPalette::Base, p.color(QPalette::Window));
+    this->setPalette(p);
 }
 
 void BranchesTree::setup(Domain *domain, Git *git)
@@ -52,16 +59,16 @@ void BranchesTree::addNode(ItemType headerType, Git::RefType type)
     QStringList tempList = g->getAllRefNames(type, !Git::optOnlyLoaded);
 
     // делаем хедер и добавляем на верхний уровень
-    QTreeWidgetItem *node;
+    BranchesTreeItem *node;
     switch (headerType) {
     case (BranchesTree::HeaderBranches):
-        node = new QTreeWidgetItem(this, QStringList("Branches"), headerType);
+        node = new BranchesTreeItem(this, QStringList("Branches"), headerType);
         break;
     case (BranchesTree::HeaderRemotes):
-        node = new QTreeWidgetItem(this, QStringList("Remotes"), headerType);        
+        node = new BranchesTreeItem(this, QStringList("Remotes"), headerType);
         break;
     case (BranchesTree::HeaderTags):
-        node = new QTreeWidgetItem(this, QStringList("Tags"), headerType);
+        node = new BranchesTreeItem(this, QStringList("Tags"), headerType);
         break;
     }
 
@@ -89,22 +96,21 @@ void BranchesTree::addNode(ItemType headerType, Git::RefType type)
                 tempItemList->setFont(0, font);
                 tempItemList->setForeground(0, Qt::red);
             }
-            tempItemList->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/branch.png")));
+            tempItemList->setIcon(0, branchIcon);
             if (*it == "master") {
-                tempItemList->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/branch_master.png")));
+                tempItemList->setIcon(0, masterBranchIcon);
             }
             break;
         case (HeaderRemotes):
             tempItemList = new BranchesTreeItem(node, QStringList(QString(*it)), LeafRemote);
-            tempItemList->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/branch.png")));
+            tempItemList->setIcon(0, branchIcon);
             break;
         case (HeaderTags):
             tempItemList = new BranchesTreeItem(node, QStringList(QString(*it)), LeafTag);
-            tempItemList->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/tag.png")));
+            tempItemList->setIcon(0, tagIcon);
             break;
         }
         tempItemList->setBranch(QString(*it));
-        node->addChild(tempItemList);
     }
 }
 
@@ -116,7 +122,6 @@ void BranchesTree::addRemotesNodes()
     QFont font = headerNode->font(0);
     font.setBold(true);
     headerNode->setFont(0, font);
-    addTopLevelItem(headerNode);
 
     // получаем нужную инфу по типу
     QStringList tempList = g->getAllRefNames(Git::RMT_BRANCH, !Git::optOnlyLoaded);
@@ -149,7 +154,6 @@ void BranchesTree::addRemotesNodes()
         tempItemList = new BranchesTreeItem(parentNode, QStringList(text), LeafRemote);
         tempItemList->setIcon(0, QIcon(QString::fromUtf8(":/icons/resources/branch.png")));
         tempItemList->setBranch(QString(*it));
-        //headerNode->addChild(tempItemList);
     }
 }
 
@@ -259,3 +263,24 @@ void BranchesTree::removeTag()
 
 }
 
+
+BranchesTreeItem::BranchesTreeItem(QTreeWidgetItem *parent, const QStringList &strings, int type)
+    : QTreeWidgetItem(parent, strings, type)
+{
+    setupStyle();
+}
+
+BranchesTreeItem::BranchesTreeItem(QTreeWidget *view, const QStringList &strings, int type)
+    : QTreeWidgetItem(view, strings, type)
+{
+    setupStyle();
+}
+
+void BranchesTreeItem::setupStyle()
+{
+    if (treeWidget()) {
+        QSize size = sizeHint(0);
+        size.setHeight(treeWidget()->fontMetrics().lineSpacing() + 7);
+        setSizeHint(0, size);
+    }
+}

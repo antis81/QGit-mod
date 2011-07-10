@@ -44,6 +44,9 @@ private:
     QTreeWidgetItem* recursiveFindBranch(const QString& branch);
     QTreeWidgetItem* recursiveFindBranch(QTreeWidgetItem* parent, const QString& branch);
 
+    QIcon branchIcon;
+    QIcon masterBranchIcon;
+    QIcon tagIcon;
 };
 
 class BranchesTreeItem : public QTreeWidgetItem
@@ -52,14 +55,15 @@ private:
     QString m_branch;
 
 public:
-    BranchesTreeItem(QTreeWidgetItem *parent, const QStringList &strings, int type = Type)
-        : QTreeWidgetItem(parent, strings, type) {};
-
+    BranchesTreeItem(QTreeWidgetItem *parent, const QStringList &strings, int type = Type);
+    BranchesTreeItem(QTreeWidget *view, const QStringList &strings, int type = Type);
+    void setupStyle();
     QString branch() { return m_branch; };
 
     void setBranch(QString branch) {
         m_branch = branch;
     }
+
 };
 
 #endif // BRANCHESTREE_H
