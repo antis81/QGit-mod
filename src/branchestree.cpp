@@ -91,7 +91,10 @@ void BranchesTree::addNode(BranchTreeItemTypes headerType, Git::RefType type)
             tempItemList = new BranchesTreeItem(node, QStringList(QString(*it)),
                                                LeafBranch);
             if (isCurrent) {
-                tempItemList->setText(0, tempItemList->text(0) + " *");
+                QFont font = tempItemList->font(0);
+                font.setBold(true);
+                tempItemList->setFont(0, font);
+                tempItemList->setForeground(0, Qt::red);
             }
             tempItemList->setBranch(QString(*it));
             break;
