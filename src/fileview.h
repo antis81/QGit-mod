@@ -10,12 +10,13 @@
 #include "ui_fileview.h" // needed by moc_* file to understand tab() function
 #include "common.h"
 #include "domain.h"
+#include "customtabwidget.h"
 
 class MainImpl;
 class Git;
 class FileHistory;
 
-class FileView: public Domain {
+class FileView: public Domain, public CustomTab {
 Q_OBJECT
 public:
 	FileView() {}
@@ -59,6 +60,12 @@ private:
 	void updateEnabledButtons();
 
 	Ui_TabFile* fileTab;
+
+public:
+    bool canCloseTab() { return true; };
+    bool closeTab() { deleteWhenDone(); return true;};
+    QString tabLabel() { return "File"; };
+    QWidget* tabWidget() { return tabPage(); };
 };
 
 #endif

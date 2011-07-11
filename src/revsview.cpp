@@ -124,7 +124,7 @@ void RevsView::viewPatch(bool newTab) {
 		return;
 	}
 	PatchView* pv = new PatchView(m(), git);
-	m()->tabWdg->addTab(pv->tabPage(), "&Patch");
+	m()->tabWdg->addTab(pv);
 	m()->tabWdg->setCurrentWidget(pv->tabPage());
 
 	if (!newTab) { // linkedPatchView == NULL

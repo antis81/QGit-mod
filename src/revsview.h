@@ -11,13 +11,13 @@
 #include "ui_revsview.h" // needed by moc_* file to understand tab() function
 #include "common.h"
 #include "domain.h"
-
+#include "customtabwidget.h"
 class MainImpl;
 class Git;
 class FileHistory;
 class PatchView;
 
-class RevsView : public Domain {
+class RevsView : public Domain, CustomTab {
 Q_OBJECT
 public:
 	RevsView(MainImpl* parent, Git* git, bool isMain = false);
@@ -43,6 +43,13 @@ private:
 
 	Ui_TabRev* revTab;
 	QPointer<PatchView> linkedPatchView;
+
+public:
+    bool canCloseTab() { return false; };
+    bool closeTab() {};
+    QString tabLabel() { return "&Rev list"; };
+    QWidget* tabWidget() { return tabPage(); };
+
 };
 
 #endif

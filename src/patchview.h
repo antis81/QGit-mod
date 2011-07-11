@@ -9,10 +9,10 @@
 
 #include "ui_patchview.h"
 #include "domain.h"
-
+#include "customtabwidget.h"
 class Git;
 
-class PatchView :public Domain {
+class PatchView :public Domain, public CustomTab {
 Q_OBJECT
 public:
 	PatchView() {}
@@ -49,6 +49,12 @@ private:
 		DIFF_TO_HEAD   = 1,
 		DIFF_TO_SHA    = 2
 	};
+
+public:
+    bool canCloseTab() { return true; };
+    bool closeTab() { deleteWhenDone(); return true;};
+    QString tabLabel() { return "&Patch"; };
+    QWidget* tabWidget() { return tabPage(); };
 };
 
 #endif

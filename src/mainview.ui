@@ -145,14 +145,11 @@
         </layout>
        </widget>
       </widget>
-      <widget class="QTabWidget" name="tabWdg">
+      <widget class="CustomTabWidget" name="tabWdg">
        <property name="styleSheet">
         <string notr="true">QTabWidget::pane {
 	border-width: 0px;
 }</string>
-       </property>
-       <property name="tabsClosable">
-        <bool>false</bool>
        </property>
        <widget class="QWidget" name="TabWdg">
         <attribute name="title">
@@ -878,6 +875,12 @@
    <class>BranchesTree</class>
    <extends>QTreeWidget</extends>
    <header>branchestree.h</header>
+  </customwidget>
+  <customwidget>
+   <class>CustomTabWidget</class>
+   <extends>QTabWidget</extends>
+   <header>customtabwidget.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

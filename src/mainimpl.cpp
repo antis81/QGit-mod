@@ -101,16 +101,7 @@ MainImpl::MainImpl(SCRef cd, QWidget* p) : QMainWindow(p) {
 	// set-up tab view
 	delete tabWdg->currentWidget(); // cannot be done in Qt Designer
 	rv = new RevsView(this, git, true); // set has main domain
-        tabWdg->addTab(rv->tabPage(), "&Rev list");
-
-	// set-up tab corner widget ('close tab' button)
-	QToolButton* ct = new QToolButton(tabWdg);
-	ct->setIcon(QIcon(QString::fromUtf8(":/icons/resources/tab_remove.png")));
-	ct->setToolTip("Close tab");
-	ct->setEnabled(false);
-	tabWdg->setCornerWidget(ct);
-	connect(ct, SIGNAL(clicked()), this, SLOT(pushButtonCloseTab_clicked()));
-	connect(this, SIGNAL(closeTabButtonEnabled(bool)), ct, SLOT(setEnabled(bool)));
+		tabWdg->addTab(rv);
 
 	// set-up file names loading progress bar
 	pbFileNamesLoading = new QProgressBar(statusBar());
@@ -488,26 +479,6 @@ void MainImpl::treeView_doubleClicked(QTreeWidgetItem* item, int) {
 		ActViewFile->activate(QAction::Trigger);
 }
 
-void MainImpl::pushButtonCloseTab_clicked() {
-
-        Domain* t;
-	switch (currentTabType(&t)) {
-	case TAB_REV:
-		break;
-	case TAB_PATCH:
-		t->deleteWhenDone();
-		ActViewDiffNewTab->setEnabled(ActViewDiff->isEnabled() && firstTab<PatchView>());
-		break;
-	case TAB_FILE:
-		t->deleteWhenDone();
-		ActViewFileNewTab->setEnabled(ActViewFile->isEnabled() && firstTab<FileView>());
-		break;
-	default:
-		dbs("ASSERT in pushButtonCloseTab_clicked: unknown current page");
-		break;
-	}
-}
-
 void MainImpl::ActRangeDlg_activated() {
 
 	QString args;
@@ -543,7 +514,7 @@ void MainImpl::openFileTab(FileView* fv) {
 
 	if (!fv) {
 		fv = new FileView(this, git);
-                tabWdg->addTab(fv->tabPage(), "File");
+				tabWdg->addTab(fv);
 
 		connect(fv->tab()->histListView, SIGNAL(doubleClicked(const QModelIndex&)),
 		        this, SLOT(histListView_doubleClicked(const QModelIndex&)));
@@ -902,15 +873,12 @@ void MainImpl::tabWdg_currentChanged(int w) {
 	switch (currentTabType(&t)) {
 	case TAB_REV:
 		static_cast<RevsView*>(t)->tab()->listViewLog->setFocus();
-		emit closeTabButtonEnabled(false);
 		break;
 	case TAB_PATCH:
 		static_cast<PatchView*>(t)->tab()->textEditDiff->setFocus();
-		emit closeTabButtonEnabled(true);
 		break;
 	case TAB_FILE:
 		static_cast<FileView*>(t)->tab()->histListView->setFocus();
-		emit closeTabButtonEnabled(true);
 		break;
 	default:
 		dbs("ASSERT in tabWdg_currentChanged: unknown current page");

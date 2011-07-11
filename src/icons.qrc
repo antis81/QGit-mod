@@ -49,5 +49,6 @@
         <file>resources/branch.png</file>
         <file>resources/branch_master.png</file>
         <file>resources/tag.png</file>
+        <file>resources/close.png</file>
     </qresource>
 </RCC>
