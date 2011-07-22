@@ -17,7 +17,7 @@ class Git;
 class FileHistory;
 class PatchView;
 
-class RevsView : public Domain
+class RevsView : public Domain, public CustomTab
 {
     Q_OBJECT
 public:
