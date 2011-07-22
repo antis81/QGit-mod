@@ -480,7 +480,7 @@ uint Git::checkRef(SCRef sha, uint mask) const
     return (it != refsShaMap.constEnd() ? (*it).type & mask : 0);
 }
 
-const QStringList Git::getRefName(SCRef sha, RefType type, QString* curBranch) const
+const QStringList Git::getRefName(SCRef sha, RefType type) const
 {
     if (!checkRef(sha, type))
         return QStringList();
