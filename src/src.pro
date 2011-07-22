@@ -10,15 +10,15 @@ CUR_QT = $$[QT_VERSION]
 
 # WARNING greaterThan is an undocumented function
 !greaterThan(CUR_QT, 4.3) {
-	error("Sorry I need Qt 4.3.0 or later, you seem to have Qt $$CUR_QT instead")
+    error("Sorry I need Qt 4.3.0 or later, you seem to have Qt $$CUR_QT instead")
 }
 
 # check for g++ compiler
 contains(QMAKE_CC,.*g\+\+.*) {
-	CONFIG += HAVE_GCC
+    CONFIG += HAVE_GCC
 }
 contains(QMAKE_CC,.*gcc.*) {
-	CONFIG += HAVE_GCC
+    CONFIG += HAVE_GCC
 }
 
 # General stuff
@@ -50,13 +50,13 @@ macx {
 }
 
 HAVE_GCC {
-	QMAKE_CXXFLAGS_RELEASE += -s -O2 -Wno-non-virtual-dtor -Wno-long-long -pedantic -Wconversion
-	QMAKE_CXXFLAGS_DEBUG += -g3 -ggdb -O0 -Wno-non-virtual-dtor -Wno-long-long -pedantic -Wconversion
+    QMAKE_CXXFLAGS_RELEASE += -s -O2 -Wno-non-virtual-dtor -Wno-long-long -pedantic -Wconversion
+    QMAKE_CXXFLAGS_DEBUG += -g3 -ggdb -O0 -Wno-non-virtual-dtor -Wno-long-long -pedantic -Wconversion
 }
 
 ENABLE_CONSOLE_MSG {
-	CONFIG -= windows
-	CONFIG += console
+    CONFIG -= windows
+    CONFIG += console
 }
 
 INSTALLS += target
