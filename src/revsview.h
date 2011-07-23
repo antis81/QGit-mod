@@ -47,7 +47,7 @@ private:
 
 public:
     bool canCloseTab() { return false; };
-    bool closeTab() {};
+    bool closeTab() { return false; };
     QString tabLabel() { return "&Rev list"; };
     QWidget* tabWidget() { return tabPage(); };
 
