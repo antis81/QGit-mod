@@ -62,13 +62,14 @@ typedef QSet<QString>               ShaSet;
 
 uint qHash(const ShaString&); // optimized custom hash for sha strings
 
-namespace QGit {
-
+namespace QGit
+{
     // minimum git version required
     extern const QString GIT_VERSION;
 
     // tab pages
-    enum TabType {
+    enum TabType
+    {
         TAB_REV,
         TAB_PATCH,
         TAB_FILE
@@ -104,6 +105,7 @@ namespace QGit {
 
         LANE_TYPES_NUM
     };
+
     const int COLORS_NUM = 8;
 
     // graph helpers
@@ -119,7 +121,8 @@ namespace QGit {
                                           isMerge(x)); }
 
     // custom events
-    enum EventType {
+    enum EventType
+    {
         ERROR_EV      = 65432,
         POPUP_LIST_EV = 65433,
         POPUP_FILE_EV = 65434,
@@ -131,7 +134,8 @@ namespace QGit {
     };
 
     // list views columns
-    enum ColumnType {
+    enum ColumnType
+    {
         GRAPH_COL   = 0,
         ANN_ID_COL  = 1,
         LOG_COL     = 2,
@@ -218,7 +222,8 @@ namespace QGit {
     extern const QString EXT_DIFF_DEF;
 
     // settings booleans
-    enum FlagType {
+    enum FlagType
+    {
         MSG_ON_NEW_F    = 1 << 0,
         ACT_REFRESH_F   = 1 << 1,
         NUMBERS_F       = 1 << 2,
@@ -236,6 +241,7 @@ namespace QGit {
         REOPEN_REPO_F   = 1 << 14,
         USE_CMT_MSG_F   = 1 << 15
     };
+
     const int FLAGS_DEF = USE_CMT_MSG_F | RANGE_SELECT_F | SMART_LBL_F | VERIFY_CMT_F | SIGN_PATCH_F | LOG_DIFF_TAB_F | MSG_ON_NEW_F;
 
     // ShaString helpers
@@ -368,7 +374,8 @@ class RevFile
     RevFile& operator=(const RevFile&);
 public:
 
-    enum StatusFlag {
+    enum StatusFlag
+    {
         MODIFIED = 1,
         DELETED  = 2,
         NEW      = 4,
@@ -396,15 +403,18 @@ public:
     QVector<int> mergeParent;
 
     // helper functions
-    int count() const {
-
+    int count() const
+    {
         return pathsIdx.size() / ((int)sizeof(int) * 2);
     }
-    bool statusCmp(int idx, StatusFlag sf) const {
 
+    bool statusCmp(int idx, StatusFlag sf) const
+    {
         return ((onlyModified ? MODIFIED : status.at(idx)) & sf);
     }
-    const QString extendedStatus(int idx) const {
+
+    const QString extendedStatus(int idx) const
+    {
     /*
        rf.extStatus has size equal to position of latest copied/renamed file,
        that could be lower then count(), so we have to explicitly check for
@@ -412,13 +422,15 @@ public:
     */
         return (!extStatus.isEmpty() && idx < extStatus.count() ? extStatus.at(idx) : "");
     }
+
     const RevFile& operator>>(QDataStream&) const;
     RevFile& operator<<(QDataStream&);
 };
 typedef QHash<ShaString, const RevFile*> RevFileMap;
 
 
-class FileAnnotation {
+class FileAnnotation
+{
 public:
     explicit FileAnnotation(int id) : isValid(false), annId(id) {}
     FileAnnotation() : isValid(false) {}
@@ -427,10 +439,12 @@ public:
     int annId;
     QString fileSha;
 };
+
 typedef QHash<ShaString, FileAnnotation> AnnotateHistory;
 
 
-class BaseEvent: public QEvent {
+class BaseEvent: public QEvent
+{
 public:
     BaseEvent(SCRef d, int id) : QEvent((QEvent::Type)id), payLoad(d) {}
     const QString myData() const { return payLoad; }
@@ -444,7 +458,8 @@ private:
 DEF_EVENT(MessageEvent, QGit::MSG_EV);
 DEF_EVENT(AnnotateProgressEvent, QGit::ANN_PRG_EV);
 
-class DeferredPopupEvent : public BaseEvent {
+class DeferredPopupEvent : public BaseEvent
+{
 public:
     DeferredPopupEvent(SCRef msg, int type) : BaseEvent(msg, type) {}
 };

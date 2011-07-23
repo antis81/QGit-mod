@@ -14,21 +14,22 @@
 
 using namespace QGit;
 
-void Lanes::init(const QString& expectedSha) {
-
+void Lanes::init(const QString& expectedSha)
+{
     clear();
     activeLane = 0;
     setBoundary(false);
     add(BRANCH, expectedSha, activeLane);
 }
 
-void Lanes::clear() {
-
+void Lanes::clear()
+{
     typeVec.clear();
     nextShaVec.clear();
 }
 
-void Lanes::setBoundary(bool b) {
+void Lanes::setBoundary(bool b)
+{
 // changes the state so must be called as first one
 
     NODE   = b ? BOUNDARY_C : MERGE_FORK;
@@ -40,8 +41,8 @@ void Lanes::setBoundary(bool b) {
         typeVec[activeLane] = BOUNDARY;
 }
 
-bool Lanes::isFork(const QString& sha, bool& isDiscontinuity) {
-
+bool Lanes::isFork(const QString& sha, bool& isDiscontinuity)
+{
     int pos = findNextSha(sha, 0);
     isDiscontinuity = (activeLane != pos);
     if (pos == -1) // new branch case
@@ -60,8 +61,8 @@ bool Lanes::isFork(const QString& sha, bool& isDiscontinuity) {
 */
 }
 
-void Lanes::setFork(const QString& sha) {
-
+void Lanes::setFork(const QString& sha)
+{
     int rangeStart, rangeEnd, idx;
     rangeStart = rangeEnd = idx = findNextSha(sha, 0);
 
@@ -99,7 +100,8 @@ void Lanes::setFork(const QString& sha) {
     }
 }
 
-void Lanes::setMerge(const QStringList& parents) {
+void Lanes::setMerge(const QStringList& parents)
+{
 // setFork() must be called before setMerge()
 
     if (boundary)
@@ -172,21 +174,21 @@ void Lanes::setMerge(const QStringList& parents) {
     }
 }
 
-void Lanes::setInitial() {
-
+void Lanes::setInitial()
+{
     int& t = typeVec[activeLane];
     if (!IS_NODE(t) && t != APPLIED)
         t = (boundary ? BOUNDARY : INITIAL);
 }
 
-void Lanes::setApplied() {
-
+void Lanes::setApplied()
+{
     // applied patches are not merges, nor forks
     typeVec[activeLane] = APPLIED; // TODO test with boundaries
 }
 
-void Lanes::changeActiveLane(const QString& sha) {
-
+void Lanes::changeActiveLane(const QString& sha)
+{
     int& t = typeVec[activeLane];
     if (t == INITIAL || isBoundary(t))
         t = EMPTY;
@@ -202,8 +204,8 @@ void Lanes::changeActiveLane(const QString& sha) {
     activeLane = idx;
 }
 
-void Lanes::afterMerge() {
-
+void Lanes::afterMerge()
+{
     if (boundary)
         return; // will be reset by changeActiveLane()
 
@@ -222,8 +224,8 @@ void Lanes::afterMerge() {
     }
 }
 
-void Lanes::afterFork() {
-
+void Lanes::afterFork()
+{
     for (int i = 0; i < typeVec.count(); i++) {
 
         int& t = typeVec[i];
@@ -243,44 +245,44 @@ void Lanes::afterFork() {
     }
 }
 
-bool Lanes::isBranch() {
-
+bool Lanes::isBranch()
+{
     return (typeVec[activeLane] == BRANCH);
 }
 
-void Lanes::afterBranch() {
-
+void Lanes::afterBranch()
+{
     typeVec[activeLane] = ACTIVE; // TODO test with boundaries
 }
 
-void Lanes::afterApplied() {
-
+void Lanes::afterApplied()
+{
     typeVec[activeLane] = ACTIVE; // TODO test with boundaries
 }
 
-void Lanes::nextParent(const QString& sha) {
-
+void Lanes::nextParent(const QString& sha)
+{
     nextShaVec[activeLane] = (boundary ? "" : sha);
 }
 
-int Lanes::findNextSha(const QString& next, int pos) {
-
+int Lanes::findNextSha(const QString& next, int pos)
+{
     for (int i = pos; i < nextShaVec.count(); i++)
         if (nextShaVec[i] == next)
             return i;
     return -1;
 }
 
-int Lanes::findType(int type, int pos) {
-
+int Lanes::findType(int type, int pos)
+{
     for (int i = pos; i < typeVec.count(); i++)
         if (typeVec[i] == type)
             return i;
     return -1;
 }
 
-int Lanes::add(int type, const QString& next, int pos) {
-
+int Lanes::add(int type, const QString& next, int pos)
+{
     // first check empty lanes starting from pos
     if (pos < (int)typeVec.count()) {
         pos = findType(EMPTY, pos);

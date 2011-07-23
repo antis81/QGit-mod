@@ -16,7 +16,6 @@
 #include "filehistory.h"
 
 class Git;
-//class FileHistory;
 class MyProcess;
 
 class Annotate : public QObject
@@ -44,7 +43,7 @@ private slots:
 private:
     void annotateFileHistory();
     void doAnnotate(const ShaString &sha);
-    FileAnnotation* getFileAnnotation(SCRef sha);
+    FileAnnotation *getFileAnnotation(SCRef sha);
     void setInitialAnnotation(SCRef fileSha, FileAnnotation *fa);
     const QString setupAuthor(SCRef origAuthor, int annId);
     bool setAnnotation(SCRef diff, SCRef aut, SCList pAnn, SList nAnn, int ofs = 0);

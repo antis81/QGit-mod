@@ -17,7 +17,6 @@ public:
 
 private:
     int findTabByCloseButton(QToolButton *closeButton);
-signals:
 
 private slots:
     void onCloseTabButtonClicked();

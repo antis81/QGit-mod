@@ -36,9 +36,9 @@ protected slots:
 private:
     const QStringList actions();
     void updateActions();
-    bool getNewName(QString& name, const QString& caption);
-    void loadAction(const QString& name);
-    void removeAction(const QString& name);
+    bool getNewName(QString &name, const QString &caption);
+    void loadAction(const QString &name);
+    void removeAction(const QString &name);
 };
 
 #endif

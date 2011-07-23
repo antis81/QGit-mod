@@ -24,6 +24,8 @@ class Lanes;
 class MyProcess;
 class FileHistory;
 
+// Need to add in class (conflict in git_startup.cpp)
+
 struct Reference  // stores tag information associated to a revision
 {
     Reference() : type(0) {}
@@ -38,6 +40,8 @@ struct Reference  // stores tag information associated to a revision
 };
 
 typedef QHash<ShaString, Reference> RefMap;
+
+
 
 class Git : public QObject
 {

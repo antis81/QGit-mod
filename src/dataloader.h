@@ -13,7 +13,6 @@
 #include "filehistory.h"
 
 class Git;
-//class FileHistory;
 class QString;
 class UnbufferedTemporaryFile;
 

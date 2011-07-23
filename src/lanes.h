@@ -23,7 +23,6 @@ class QStringList;
 //  The ListView class is responsible for rendering the glyphs.
 //
 
-
 class Lanes
 {
 public:
@@ -43,13 +42,13 @@ public:
     bool isBranch();
     void afterBranch();
     void afterApplied();
-    void nextParent(const QString& sha);
+    void nextParent(const QString &sha);
     void getLanes(QVector<int> &ln) { ln = typeVec; } // O(1) vector is implicitly shared
 
 private:
-    int findNextSha(const QString& next, int pos);
+    int findNextSha(const QString &next, int pos);
     int findType(int type, int pos);
-    int add(int type, const QString& next, int pos);
+    int add(int type, const QString &next, int pos);
 
     int activeLane;
     QVector<int> typeVec;  // Describes which glyphs should be drawn.

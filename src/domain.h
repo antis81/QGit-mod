@@ -34,7 +34,7 @@ public:
     void showStatusBarMessage(const QString& msg, int timeout = 0);
     void setThrowOnDelete(bool b);
     bool isThrowOnDeleteRaised(int excpId, SCRef curContext);
-    MainImpl* m() const;
+    MainImpl* m() const ;
     FileHistory* model() const { return fileHistory; }
     bool isReadyToDrag() const { return readyToDrag; }
     bool setReadyToDrag(bool b);

@@ -166,6 +166,7 @@ MainImpl* Domain::m() const
     return static_cast<MainImpl*>(parent());
 }
 
+
 void Domain::showStatusBarMessage(const QString& msg, int timeout)
 {
     m()->statusBar()->showMessage(msg, timeout);

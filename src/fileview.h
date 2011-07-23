@@ -17,8 +17,9 @@ class MainImpl;
 class Git;
 class FileHistory;
 
-class FileView: public Domain, public CustomTab {
-Q_OBJECT
+class FileView: public Domain, public CustomTab
+{
+    Q_OBJECT
 public:
     FileView() {}
     FileView(MainImpl* m, Git* git);
