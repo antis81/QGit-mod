@@ -15,7 +15,7 @@
 #include <QVariant>
 #include <QVector>
 #include "model/shastring.h"
-
+#include "lanes.h"
 /*
    QVariant does not support size_t type used in Qt containers, this is
    a problem on 64bit systems where size_t != uint and when using debug
@@ -75,50 +75,9 @@ namespace QGit
         TAB_FILE
     };
 
-    // graph elements
-    enum LaneType {
-        EMPTY,
-        ACTIVE,
-        NOT_ACTIVE,
-        MERGE_FORK,
-        MERGE_FORK_R,
-        MERGE_FORK_L,
-        JOIN,
-        JOIN_R,
-        JOIN_L,
-        HEAD,
-        HEAD_R,
-        HEAD_L,
-        TAIL,
-        TAIL_R,
-        TAIL_L,
-        CROSS,
-        CROSS_EMPTY,
-        INITIAL,
-        BRANCH,
-        UNAPPLIED,
-        APPLIED,
-        BOUNDARY,
-        BOUNDARY_C, // corresponds to MERGE_FORK
-        BOUNDARY_R, // corresponds to MERGE_FORK_R
-        BOUNDARY_L, // corresponds to MERGE_FORK_L
 
-        LANE_TYPES_NUM
-    };
 
     const int COLORS_NUM = 8;
-
-    // graph helpers
-    inline bool isHead(int x) { return (x == HEAD || x == HEAD_R || x == HEAD_L); }
-    inline bool isTail(int x) { return (x == TAIL || x == TAIL_R || x == TAIL_L); }
-    inline bool isJoin(int x) { return (x == JOIN || x == JOIN_R || x == JOIN_L); }
-    inline bool isFreeLane(int x) { return (x == NOT_ACTIVE || x == CROSS || isJoin(x)); }
-    inline bool isBoundary(int x) { return (x == BOUNDARY || x == BOUNDARY_C ||
-                                            x == BOUNDARY_R || x == BOUNDARY_L); }
-    inline bool isMerge(int x) { return (x == MERGE_FORK || x == MERGE_FORK_R ||
-                                         x == MERGE_FORK_L || isBoundary(x)); }
-    inline bool isActive(int x) { return (x == ACTIVE || x == INITIAL || x == BRANCH ||
-                                          isMerge(x)); }
 
     // custom events
     enum EventType
@@ -311,7 +270,8 @@ public:
     const QString longLog() const { setup(); return mid(lLogStart, lLogLen); }
     const QString diff() const { setup(); return mid(diffStart, diffLen); }
 
-    QVector<int> lanes, childs;
+    QVector<LaneType> lanes;
+    QVector<int> childs;
     QVector<int> descRefs;     // list of descendant refs index, normally tags
     QVector<int> ancRefs;      // list of ancestor refs index, normally tags
     QVector<int> descBranches; // list of descendant branches index

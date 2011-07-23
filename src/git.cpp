@@ -597,8 +597,9 @@ const QString Git::getLaneParent(SCRef fromSHA, int laneNum)
 
         if (!isFreeLane(r->lanes[laneNum])) {
 
-            int type = r->lanes[laneNum], parNum = 0;
-            while (!isMerge(type) && type != ACTIVE) {
+            LaneType type = r->lanes[laneNum];
+            int parNum = 0;
+            while (!isMerge(type) && type != LANE_ACTIVE) {
 
                 if (isHead(type))
                     parNum++;
@@ -1915,7 +1916,7 @@ const Rev* Git::fakeWorkDirRev(SCRef parent, SCRef log, SCRef longLog, int idx, 
     QStringList parents(parent);
     Rev* c = fakeRevData(ZERO_SHA, parents, author, date, log, longLog, patch, idx, fh);
     c->isDiffCache = true;
-    c->lanes.append(EMPTY);
+    c->lanes.append(LANE_EMPTY);
     return c;
 }
 
@@ -2651,7 +2652,7 @@ int Git::addChunk(FileHistory* fh, const QByteArray& ba, int start) {
 
             Rev* c = const_cast<Rev*>(revLookup(sha, fh));
             c->isUnApplied = true;
-            c->lanes.append(UNAPPLIED);
+            c->lanes.append(LANE_UNAPPLIED);
 
         } else if (patchesStillToFind > 0 || !isMainHistory(fh)) { // try to avoid costly lookup
 

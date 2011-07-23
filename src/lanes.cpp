@@ -19,7 +19,7 @@ void Lanes::init(const QString& expectedSha)
     clear();
     activeLane = 0;
     setBoundary(false);
-    add(BRANCH, expectedSha, activeLane);
+    add(LANE_BRANCH, expectedSha, activeLane);
 }
 
 void Lanes::clear()
@@ -32,13 +32,13 @@ void Lanes::setBoundary(bool b)
 {
 // changes the state so must be called as first one
 
-    NODE   = b ? BOUNDARY_C : MERGE_FORK;
-    NODE_R = b ? BOUNDARY_R : MERGE_FORK_R;
-    NODE_L = b ? BOUNDARY_L : MERGE_FORK_L;
+    NODE   = b ? LANE_BOUNDARY_C : LANE_MERGE_FORK;
+    NODE_R = b ? LANE_BOUNDARY_R : LANE_MERGE_FORK_R;
+    NODE_L = b ? LANE_BOUNDARY_L : LANE_MERGE_FORK_L;
     boundary = b;
 
     if (boundary)
-        typeVec[activeLane] = BOUNDARY;
+        typeVec[activeLane] = LANE_BOUNDARY;
 }
 
 bool Lanes::isFork(const QString& sha, bool& isDiscontinuity)
@@ -68,13 +68,13 @@ void Lanes::setFork(const QString& sha)
 
     while (idx != -1) {
         rangeEnd = idx;
-        typeVec[idx] = TAIL;
+        typeVec[idx] = LANE_TAIL;
         idx = findNextSha(sha, idx + 1);
     }
     typeVec[activeLane] = NODE;
 
-    int& startT = typeVec[rangeStart];
-    int& endT = typeVec[rangeEnd];
+    LaneType& startT = typeVec[rangeStart];
+    LaneType& endT = typeVec[rangeEnd];
 
     if (startT == NODE)
         startT = NODE_L;
@@ -82,21 +82,21 @@ void Lanes::setFork(const QString& sha)
     if (endT == NODE)
         endT = NODE_R;
 
-    if (startT == TAIL)
-        startT = TAIL_L;
+    if (startT == LANE_TAIL)
+        startT = LANE_TAIL_L;
 
-    if (endT == TAIL)
-        endT = TAIL_R;
+    if (endT == LANE_TAIL)
+        endT = LANE_TAIL_R;
 
     for (int i = rangeStart + 1; i < rangeEnd; i++) {
 
-        int& t = typeVec[i];
+        LaneType& t = typeVec[i];
 
-        if (t == NOT_ACTIVE)
-            t = CROSS;
+        if (t == LANE_NOT_ACTIVE)
+            t = LANE_CROSS;
 
-        else if (t == EMPTY)
-            t = CROSS_EMPTY;
+        else if (t == LANE_EMPTY)
+            t = LANE_CROSS_EMPTY;
     }
 }
 
@@ -107,7 +107,7 @@ void Lanes::setMerge(const QStringList& parents)
     if (boundary)
         return; // handle as a simple active line
 
-    int& t = typeVec[activeLane];
+    LaneType& t = typeVec[activeLane];
     bool wasFork   = (t == NODE);
     bool wasFork_L = (t == NODE_L);
     bool wasFork_R = (t == NODE_R);
@@ -125,21 +125,21 @@ void Lanes::setMerge(const QStringList& parents)
             if (idx > rangeEnd) {
 
                 rangeEnd = idx;
-                endJoinWasACross = typeVec[idx] == CROSS;
+                endJoinWasACross = typeVec[idx] == LANE_CROSS;
             }
 
             if (idx < rangeStart) {
 
                 rangeStart = idx;
-                startJoinWasACross = typeVec[idx] == CROSS;
+                startJoinWasACross = typeVec[idx] == LANE_CROSS;
             }
 
-            typeVec[idx] = JOIN;
+            typeVec[idx] = LANE_JOIN;
         } else
-            rangeEnd = add(HEAD, *it, rangeEnd + 1);
+            rangeEnd = add(LANE_HEAD, *it, rangeEnd + 1);
     }
-    int& startT = typeVec[rangeStart];
-    int& endT = typeVec[rangeEnd];
+    LaneType& startT = typeVec[rangeStart];
+    LaneType& endT = typeVec[rangeEnd];
 
     if (startT == NODE && !wasFork && !wasFork_R)
         startT = NODE_L;
@@ -147,59 +147,59 @@ void Lanes::setMerge(const QStringList& parents)
     if (endT == NODE && !wasFork && !wasFork_L)
         endT = NODE_R;
 
-    if (startT == JOIN && !startJoinWasACross)
-        startT = JOIN_L;
+    if (startT == LANE_JOIN && !startJoinWasACross)
+        startT = LANE_JOIN_L;
 
-    if (endT == JOIN && !endJoinWasACross)
-        endT = JOIN_R;
+    if (endT == LANE_JOIN && !endJoinWasACross)
+        endT = LANE_JOIN_R;
 
-    if (startT == HEAD)
-        startT = HEAD_L;
+    if (startT == LANE_HEAD)
+        startT = LANE_HEAD_L;
 
-    if (endT == HEAD)
-        endT = HEAD_R;
+    if (endT == LANE_HEAD)
+        endT = LANE_HEAD_R;
 
     for (int i = rangeStart + 1; i < rangeEnd; i++) {
 
-        int& t = typeVec[i];
+        LaneType& t = typeVec[i];
 
-        if (t == NOT_ACTIVE)
-            t = CROSS;
+        if (t == LANE_NOT_ACTIVE)
+            t = LANE_CROSS;
 
-        else if (t == EMPTY)
-            t = CROSS_EMPTY;
+        else if (t == LANE_EMPTY)
+            t = LANE_CROSS_EMPTY;
 
-        else if (t == TAIL_R || t == TAIL_L)
-            t = TAIL;
+        else if (t == LANE_TAIL_R || t == LANE_TAIL_L)
+            t = LANE_TAIL;
     }
 }
 
 void Lanes::setInitial()
 {
-    int& t = typeVec[activeLane];
-    if (!IS_NODE(t) && t != APPLIED)
-        t = (boundary ? BOUNDARY : INITIAL);
+    LaneType& t = typeVec[activeLane];
+    if (!IS_NODE(t) && t != LANE_APPLIED)
+        t = (boundary ? LANE_BOUNDARY : LANE_INITIAL);
 }
 
 void Lanes::setApplied()
 {
     // applied patches are not merges, nor forks
-    typeVec[activeLane] = APPLIED; // TODO test with boundaries
+    typeVec[activeLane] = LANE_APPLIED; // TODO test with boundaries
 }
 
 void Lanes::changeActiveLane(const QString& sha)
 {
-    int& t = typeVec[activeLane];
-    if (t == INITIAL || isBoundary(t))
-        t = EMPTY;
+    LaneType& t = typeVec[activeLane];
+    if (t == LANE_INITIAL || isBoundary(t))
+        t = LANE_EMPTY;
     else
-        t = NOT_ACTIVE;
+        t = LANE_NOT_ACTIVE;
 
     int idx = findNextSha(sha, 0); // find first sha
     if (idx != -1)
-        typeVec[idx] = ACTIVE; // called before setBoundary()
+        typeVec[idx] = LANE_ACTIVE; // called before setBoundary()
     else
-        idx = add(BRANCH, sha, activeLane); // new branch
+        idx = add(LANE_BRANCH, sha, activeLane); // new branch
 
     activeLane = idx;
 }
@@ -211,16 +211,16 @@ void Lanes::afterMerge()
 
     for (int i = 0; i < typeVec.count(); i++) {
 
-        int& t = typeVec[i];
+        LaneType& t = typeVec[i];
 
-        if (isHead(t) || isJoin(t) || t == CROSS)
-            t = NOT_ACTIVE;
+        if (isHead(t) || isJoin(t) || t == LANE_CROSS)
+            t = LANE_NOT_ACTIVE;
 
-        else if (t == CROSS_EMPTY)
-            t = EMPTY;
+        else if (t == LANE_CROSS_EMPTY)
+            t = LANE_EMPTY;
 
         else if (IS_NODE(t))
-            t = ACTIVE;
+            t = LANE_ACTIVE;
     }
 }
 
@@ -228,18 +228,18 @@ void Lanes::afterFork()
 {
     for (int i = 0; i < typeVec.count(); i++) {
 
-        int& t = typeVec[i];
+        LaneType& t = typeVec[i];
 
-        if (t == CROSS)
-            t = NOT_ACTIVE;
+        if (t == LANE_CROSS)
+            t = LANE_NOT_ACTIVE;
 
-        else if (isTail(t) || t == CROSS_EMPTY)
-            t = EMPTY;
+        else if (isTail(t) || t == LANE_CROSS_EMPTY)
+            t = LANE_EMPTY;
 
         if (!boundary && IS_NODE(t))
-            t = ACTIVE; // boundary will be reset by changeActiveLane()
+            t = LANE_ACTIVE; // boundary will be reset by changeActiveLane()
     }
-    while (typeVec.last() == EMPTY) {
+    while (typeVec.last() == LANE_EMPTY) {
         typeVec.pop_back();
         nextShaVec.pop_back();
     }
@@ -247,17 +247,17 @@ void Lanes::afterFork()
 
 bool Lanes::isBranch()
 {
-    return (typeVec[activeLane] == BRANCH);
+    return (typeVec[activeLane] == LANE_BRANCH);
 }
 
 void Lanes::afterBranch()
 {
-    typeVec[activeLane] = ACTIVE; // TODO test with boundaries
+    typeVec[activeLane] = LANE_ACTIVE; // TODO test with boundaries
 }
 
 void Lanes::afterApplied()
 {
-    typeVec[activeLane] = ACTIVE; // TODO test with boundaries
+    typeVec[activeLane] = LANE_ACTIVE; // TODO test with boundaries
 }
 
 void Lanes::nextParent(const QString& sha)
@@ -273,7 +273,7 @@ int Lanes::findNextSha(const QString& next, int pos)
     return -1;
 }
 
-int Lanes::findType(int type, int pos)
+int Lanes::findType(LaneType type, int pos)
 {
     for (int i = pos; i < typeVec.count(); i++)
         if (typeVec[i] == type)
@@ -281,11 +281,11 @@ int Lanes::findType(int type, int pos)
     return -1;
 }
 
-int Lanes::add(int type, const QString& next, int pos)
+int Lanes::add(LaneType type, const QString& next, int pos)
 {
     // first check empty lanes starting from pos
     if (pos < (int)typeVec.count()) {
-        pos = findType(EMPTY, pos);
+        pos = findType(LANE_EMPTY, pos);
         if (pos != -1) {
             typeVec[pos] = type;
             nextShaVec[pos] = next;

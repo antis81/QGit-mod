@@ -70,10 +70,10 @@ void ListViewDelegate::paintGraphLane(QPainter* p, int type, int x1, int x2,
 
     // arc
     switch (type) {
-    case JOIN:
-    case JOIN_R:
-    case HEAD:
-    case HEAD_R: {
+    case LANE_JOIN:
+    case LANE_JOIN_R:
+    case LANE_HEAD:
+    case LANE_HEAD_R: {
         QConicalGradient gradient(CENTER_UR);
         gradient.setColorAt(0.375, col);
         gradient.setColorAt(0.625, activeCol);
@@ -82,7 +82,7 @@ void ListViewDelegate::paintGraphLane(QPainter* p, int type, int x1, int x2,
         p->drawArc(P_CENTER, DELTA_UR);
         break;
     }
-    case JOIN_L: {
+    case LANE_JOIN_L: {
         QConicalGradient gradient(CENTER_UL);
         gradient.setColorAt(0.375, activeCol);
         gradient.setColorAt(0.625, col);
@@ -91,8 +91,8 @@ void ListViewDelegate::paintGraphLane(QPainter* p, int type, int x1, int x2,
         p->drawArc(P_CENTER, DELTA_UL);
         break;
     }
-    case TAIL:
-    case TAIL_R: {
+    case LANE_TAIL:
+    case LANE_TAIL_R: {
         QConicalGradient gradient(CENTER_DR);
         gradient.setColorAt(0.375, activeCol);
         gradient.setColorAt(0.625, col);
@@ -110,27 +110,27 @@ void ListViewDelegate::paintGraphLane(QPainter* p, int type, int x1, int x2,
 
     // vertical line
     switch (type) {
-    case ACTIVE:
-    case NOT_ACTIVE:
-    case MERGE_FORK:
-    case MERGE_FORK_R:
-    case MERGE_FORK_L:
-    case JOIN:
-    case JOIN_R:
-    case JOIN_L:
-    case CROSS:
+    case LANE_ACTIVE:
+    case LANE_NOT_ACTIVE:
+    case LANE_MERGE_FORK:
+    case LANE_MERGE_FORK_R:
+    case LANE_MERGE_FORK_L:
+    case LANE_JOIN:
+    case LANE_JOIN_R:
+    case LANE_JOIN_L:
+    case LANE_CROSS:
         p->drawLine(P_90, P_270);
         break;
-    case HEAD_L:
-    case BRANCH:
+    case LANE_HEAD_L:
+    case LANE_BRANCH:
         p->drawLine(P_CENTER, P_270);
         break;
-    case TAIL_L:
-    case INITIAL:
-    case BOUNDARY:
-    case BOUNDARY_C:
-    case BOUNDARY_R:
-    case BOUNDARY_L:
+    case LANE_TAIL_L:
+    case LANE_INITIAL:
+    case LANE_BOUNDARY:
+    case LANE_BOUNDARY_C:
+    case LANE_BOUNDARY_R:
+    case LANE_BOUNDARY_L:
         p->drawLine(P_90, P_CENTER);
         break;
     default:
@@ -142,23 +142,23 @@ void ListViewDelegate::paintGraphLane(QPainter* p, int type, int x1, int x2,
 
     // horizontal line
     switch (type) {
-    case MERGE_FORK:
-    case JOIN:
-    case HEAD:
-    case TAIL:
-    case CROSS:
-    case CROSS_EMPTY:
-    case BOUNDARY_C:
+    case LANE_MERGE_FORK:
+    case LANE_JOIN:
+    case LANE_HEAD:
+    case LANE_TAIL:
+    case LANE_CROSS:
+    case LANE_CROSS_EMPTY:
+    case LANE_BOUNDARY_C:
         p->drawLine(P_180, P_0);
         break;
-    case MERGE_FORK_R:
-    case BOUNDARY_R:
+    case LANE_MERGE_FORK_R:
+    case LANE_BOUNDARY_R:
         p->drawLine(P_180, P_CENTER);
         break;
-    case MERGE_FORK_L:
-    case HEAD_L:
-    case TAIL_L:
-    case BOUNDARY_L:
+    case LANE_MERGE_FORK_L:
+    case LANE_HEAD_L:
+    case LANE_TAIL_L:
+    case LANE_BOUNDARY_L:
         p->drawLine(P_CENTER, P_0);
         break;
     default:
@@ -167,41 +167,41 @@ void ListViewDelegate::paintGraphLane(QPainter* p, int type, int x1, int x2,
 
     // center symbol, e.g. rect or ellipse
     switch (type) {
-    case ACTIVE:
-    case INITIAL:
-    case BRANCH:
+    case LANE_ACTIVE:
+    case LANE_INITIAL:
+    case LANE_BRANCH:
         p->setPen(Qt::black);
         p->setBrush(col);
         p->drawEllipse(R_CENTER);
         break;
-    case MERGE_FORK:
-    case MERGE_FORK_R:
-    case MERGE_FORK_L:
+    case LANE_MERGE_FORK:
+    case LANE_MERGE_FORK_R:
+    case LANE_MERGE_FORK_L:
         p->setPen(Qt::black);
         p->setBrush(col);
         p->drawRect(R_CENTER);
         break;
-    case UNAPPLIED:
+    case LANE_UNAPPLIED:
         // Red minus sign
         p->setPen(Qt::NoPen);
         p->setBrush(Qt::red);
         p->drawRect(m - r, h - 1, d, 2);
         break;
-    case APPLIED:
+    case LANE_APPLIED:
         // Green plus sign
         p->setPen(Qt::NoPen);
         p->setBrush(DARK_GREEN);
         p->drawRect(m - r, h - 1, d, 2);
         p->drawRect(m - 1, h - r, 2, d);
         break;
-    case BOUNDARY:
+    case LANE_BOUNDARY:
         p->setPen(Qt::black);
         p->setBrush(back);
         p->drawEllipse(R_CENTER);
         break;
-    case BOUNDARY_C:
-    case BOUNDARY_R:
-    case BOUNDARY_L:
+    case LANE_BOUNDARY_C:
+    case LANE_BOUNDARY_R:
+    case LANE_BOUNDARY_L:
         p->setPen(Qt::black);
         p->setBrush(back);
         p->drawRect(R_CENTER);
@@ -252,7 +252,7 @@ void ListViewDelegate::paintGraph(QPainter* p, const QStyleOptionViewItem& opt,
         git->setLane(r->sha(), fh);
 
     QBrush back = opt.palette.base();
-    const QVector<int>& lanes(r->lanes);
+    const QVector<LaneType>& lanes(r->lanes);
     uint laneNum = lanes.count();
     uint activeLane = 0;
     for (uint i = 0; i < laneNum; i++)
@@ -273,7 +273,7 @@ void ListViewDelegate::paintGraph(QPainter* p, const QStyleOptionViewItem& opt,
         x2 += lw;
 
         int ln = lanes[i];
-        if (ln == EMPTY)
+        if (ln == LANE_EMPTY)
             continue;
 
         QColor color = i == activeLane ? activeColor : colors[i % COLORS_NUM];

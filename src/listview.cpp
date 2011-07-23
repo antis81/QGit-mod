@@ -164,10 +164,10 @@ const QString ListView::currentText(int column)
     return (idx.isValid() ? idx.data().toString() : "");
 }
 
-int ListView::getLaneType(SCRef sha, int pos) const
+LaneType ListView::getLaneType(SCRef sha, int pos) const
 {
     const Rev* r = git->revLookup(sha, fh);
-    return (r && pos < r->lanes.count() && pos >= 0 ? r->lanes.at(pos) : -1);
+    return (r && pos < r->lanes.count() && pos >= 0 ? r->lanes.at(pos) : LANE_UNDEFINED);
 }
 
 void ListView::showIdValues()
@@ -366,8 +366,8 @@ bool ListView::getLaneParentsChilds(SCRef sha, int x, SList p, SList c)
 {
     ListViewDelegate* lvd = static_cast<ListViewDelegate*>(itemDelegate());
     uint lane = x / lvd->laneWidth();
-    int t = getLaneType(sha, lane);
-    if (t == EMPTY || t == -1)
+    LaneType t = getLaneType(sha, lane);
+    if (t == LANE_EMPTY || t == -1)
         return false;
 
     // first find the parents
