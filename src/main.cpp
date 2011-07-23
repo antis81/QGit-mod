@@ -17,7 +17,7 @@ using namespace QGit;
 
 int main(int argc, char* argv[])
 {
-    QApplication app(argc, argv);
+    QApplication application(argc, argv);
     QCoreApplication::setOrganizationName(ORG_KEY);
     QCoreApplication::setApplicationName(APP_KEY);
 
@@ -30,10 +30,13 @@ int main(int argc, char* argv[])
 
     initMimePix();
 
-    MainImpl* mainWin = new MainImpl;
-    mainWin->show();
-    QObject::connect(&app, SIGNAL(lastWindowClosed()), &app, SLOT(quit()));
-    bool ret = app.exec();
+    MainImpl *mainWindow = new MainImpl;
+    mainWindow->show();
+
+    QObject::connect(&application, SIGNAL(lastWindowClosed()),
+                     &application, SLOT(quit()));
+
+    bool ret = application.exec();
 
     freeMimePix();
     return ret;
