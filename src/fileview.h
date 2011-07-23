@@ -11,6 +11,7 @@
 #include "common.h"
 #include "domain.h"
 #include "customtabwidget.h"
+#include "customtab.h"
 
 class MainImpl;
 class Git;

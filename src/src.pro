@@ -81,7 +81,12 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
            treeview.h \
     branchestree.h \
     findsupport.h \
-    customtabwidget.h
+    customtabwidget.h \
+    branchestreeitem.h \
+    externaldiffproc.h \
+    customtab.h \
+    reachinfo.h \
+    rangeinfo.h
 
 SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
            customactionimpl.cpp dataloader.cpp domain.cpp exceptionmanager.cpp \
@@ -92,7 +97,12 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
     branchestree.cpp \
     main.cpp \
     findsupport.cpp \
-    customtabwidget.cpp
+    customtabwidget.cpp \
+    branchestreeitem.cpp \
+    externaldiffproc.cpp \
+    customtab.cpp \
+    reachinfo.cpp \
+    rangeinfo.cpp
 
 DISTFILES += app_icon.rc helpgen.sh resources/* Src.vcproj todo.txt
 DISTFILES += ../COPYING ../exception_manager.txt ../README ../README_WIN.txt

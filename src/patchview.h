@@ -10,6 +10,8 @@
 #include "ui_patchview.h"
 #include "domain.h"
 #include "customtabwidget.h"
+#include "customtab.h"
+
 class Git;
 
 class PatchView :public Domain, public CustomTab {

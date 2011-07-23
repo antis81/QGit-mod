@@ -12,32 +12,16 @@
 #include "exceptionmanager.h"
 #include "common.h"
 
+#include "reachinfo.h"
+#include "rangeinfo.h"
+
 class Git;
 class FileHistory;
 class MyProcess;
 
-class ReachInfo
-{
-public:
-    ReachInfo() {}
-    ReachInfo(SCRef s, int i, int t) : sha(s), id(i), type(t) {}
-    const QString sha;
-    int id, type;
-    QStringList roots;
-};
-
+// не используется на самом деле. FIXME :)
 typedef QVector<ReachInfo> ReachList;
-
-class RangeInfo
-{
-public:
-    RangeInfo() { clear(); }
-    RangeInfo(int s, int e, bool m) : start(s), end(e), modified(m) {}
-    void clear() { start = end = 0; modified = false; }
-    int start, end; // ranges count file lines from 1 like patches diffs
-    bool modified;
-};
-
+// и вообще это надо в класс внести ибо нефик
 typedef QHash<QString, RangeInfo> Ranges;
 
 class Annotate : public QObject

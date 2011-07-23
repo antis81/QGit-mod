@@ -46,6 +46,11 @@ void CustomTabWidget::onCloseTabButtonClicked()
 
 }
 
+int CustomTabWidget::addTab(QWidget *widget, const QString &label)
+{
+    return QTabWidget::addTab(widget, label);
+}
+
 int CustomTabWidget::findTabByCloseButton(QToolButton* closeButton)
 {
     int count = tabBar()->count();

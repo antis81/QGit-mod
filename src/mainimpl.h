@@ -14,6 +14,8 @@
 #include "common.h"
 #include "ui_mainview.h"
 
+#include "externaldiffproc.h"
+
 class QAction;
 class QCloseEvent;
 class QComboBox;
@@ -42,7 +44,8 @@ public:
     QLineEdit* lineEditSHA;
     QLineEdit* lineEditFilter;
 
-    enum ComboSearch {
+    enum ComboSearch
+    {
         CS_SHORT_LOG,
         CS_LOG_MSG,
         CS_AUTHOR,
@@ -168,7 +171,7 @@ private:
     RevsView* rv;
     QProgressBar* pbFileNamesLoading;
 
-        // curDir is the repository working dir, could be different from qgit running
+    // curDir is the repository working dir, could be different from qgit running
     // directory QDir::current(). Note that qgit could be run from subdirectory
     // so only after git->isArchive() that updates curDir to point to working dir
     // we are sure is correct.
@@ -178,37 +181,6 @@ private:
     QRegExp shortLogRE;
     QRegExp longLogRE;
     bool setRepositoryBusy;
-};
-
-class ExternalDiffProc : public QProcess
-{
-    Q_OBJECT
-public:
-    ExternalDiffProc(const QStringList& f, QObject* p)
-        : QProcess(p), filenames(f) {
-
-        connect(this, SIGNAL(finished(int, QProcess::ExitStatus)),
-                this, SLOT(on_finished(int, QProcess::ExitStatus)));
-    }
-    ~ExternalDiffProc() {
-
-        terminate();
-        removeFiles();
-    }
-    QStringList filenames;
-
-private slots:
-    void on_finished(int, QProcess::ExitStatus) { deleteLater(); }
-
-private:
-    void removeFiles() {
-
-        if (!filenames.empty()) {
-            QDir d; // remove temporary files to diff on
-            d.remove(filenames[0]);
-            d.remove(filenames[1]);
-        }
-    }
 };
 
 #endif

@@ -5,7 +5,9 @@
 #include <QVariant>
 #include <QToolButton>
 
-class CustomTab;
+#include "customtab.h"
+
+//class CustomTab;
 
 class CustomTabWidget : public QTabWidget
 {
@@ -13,7 +15,7 @@ class CustomTabWidget : public QTabWidget
 public:
     explicit CustomTabWidget(QWidget *parent = 0);
     void addTab(CustomTab* tab);
-    int addTab(QWidget *widget, const QString &label) { return QTabWidget::addTab(widget, label); };
+    int addTab(QWidget *widget, const QString &label);
 
 private:
     int findTabByCloseButton(QToolButton* closeButton);
@@ -22,15 +24,5 @@ signals:
 private slots:
     void onCloseTabButtonClicked();
 };
-
-class CustomTab {
-public:
-    virtual bool canCloseTab() = 0;
-    virtual bool closeTab() = 0;
-    virtual QString tabLabel() = 0;
-    virtual QWidget* tabWidget() = 0;
-
-};
-Q_DECLARE_METATYPE(CustomTab* );
 
 #endif // CUSTOMTABWIDGET_H
