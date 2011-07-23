@@ -94,11 +94,13 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
     linenumberarea.h \
     patchcontentfindsupport.h \
     patchtextblockuserdata.h \
-    filehistory.h
+    filehistory.h \
+    listviewproxy.h \
+    listviewdelegate.h
 
 SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
            customactionimpl.cpp dataloader.cpp domain.cpp exceptionmanager.cpp \
-           filecontent.cpp filelist.cpp fileview.cpp git.cpp git_startup.cpp \
+           filecontent.cpp filelist.cpp fileview.cpp git.cpp \
            lanes.cpp listview.cpp mainimpl.cpp myprocess.cpp namespace_def.cpp \
            patchcontent.cpp patchview.cpp rangeselectimpl.cpp \
            revdesc.cpp revsview.cpp settingsimpl.cpp treeview.cpp \
@@ -118,7 +120,9 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
     linenumberarea.cpp \
     patchcontentfindsupport.cpp \
     patchtextblockuserdata.cpp \
-    filehistory.cpp
+    filehistory.cpp \
+    listviewproxy.cpp \
+    listviewdelegate.cpp
 
 DISTFILES += app_icon.rc helpgen.sh resources/* Src.vcproj todo.txt
 DISTFILES += ../COPYING ../exception_manager.txt ../README ../README_WIN.txt

@@ -11,6 +11,7 @@
 #include <QSortFilterProxyModel>
 #include <QRegExp>
 #include "common.h"
+#include "listviewproxy.h"
 
 class Git;
 class StateInfo;
@@ -74,62 +75,6 @@ private:
     ListViewProxy* lp;
     unsigned long secs;
     bool filterNextContextMenuRequest;
-};
-
-class ListViewDelegate : public QItemDelegate
-{
-    Q_OBJECT
-public:
-    ListViewDelegate(Git* git, ListViewProxy* lp, QObject* parent);
-
-    virtual void paint(QPainter* p, const QStyleOptionViewItem& o, const QModelIndex &i) const;
-    virtual QSize sizeHint(const QStyleOptionViewItem& o, const QModelIndex &i) const;
-    int laneWidth() const { return 3 * laneHeight / 4; }
-    void setLaneHeight(int h) { laneHeight = h; }
-
-signals:
-    void updateView();
-
-public slots:
-    void diffTargetChanged(int);
-
-private:
-    const Rev* revLookup(int row, FileHistory** fhPtr = NULL) const;
-    void paintLog(QPainter* p, const QStyleOptionViewItem& o, const QModelIndex &i) const;
-    void paintGraph(QPainter* p, const QStyleOptionViewItem& o, const QModelIndex &i) const;
-    void paintGraphLane(QPainter* p, int type, int x1, int x2, const QColor& col, const QColor& activeCol, const QBrush& back) const;
-    QPixmap* getTagMarks(SCRef sha, const QStyleOptionViewItem& opt) const;
-    void addRefPixmap(QPixmap** pp, SCRef sha, int type, QStyleOptionViewItem opt) const;
-    void addTextPixmap(QPixmap** pp, SCRef txt, const QStyleOptionViewItem& opt) const;
-    bool changedFiles(SCRef sha) const;
-
-    Git* git;
-    ListViewProxy* lp;
-    int laneHeight;
-    int diffTargetRow;
-};
-
-class ListViewProxy : public QSortFilterProxyModel
-{
-    Q_OBJECT
-public:
-    ListViewProxy(QObject* parent, Domain* d, Git* g);
-    int setFilter(bool isOn, bool highlight, SCRef filter, int colNum, ShaSet* s);
-    bool isHighlighted(int row) const;
-
-protected:
-    virtual bool filterAcceptsRow(int sourceRow, const QModelIndex& sourceParent) const;
-
-private:
-    bool isMatch(int row) const;
-    bool isMatch(SCRef sha) const;
-
-    Domain* d;
-    Git* git;
-    bool isHighLight;
-    QRegExp filter;
-    int colNum;
-    ShaSet shaSet;
 };
 
 #endif

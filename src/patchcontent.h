@@ -24,7 +24,6 @@ class PatchContent: public QPlainTextEdit
 {
     Q_OBJECT
 public:
-
     PatchContent(QWidget* parent);
     void setup(Domain* parent, Git* git);
     void clear();
@@ -50,14 +49,35 @@ public:
 
     ~PatchContent();
 
-protected:
-    void resizeEvent(QResizeEvent *event);
+    // Search
+    FindSupport* findSupport();
+
+    // Line numbers
+    void lineNumberAreaPaintEvent(QPaintEvent *event);
+    int lineNumberAreaWidth();
+
+    // Filter
+    enum PatchFilter
+    {
+        VIEW_ALL,
+        VIEW_ADDED,
+        VIEW_REMOVED
+    };
+
+    PatchFilter filter() { return curFilter; };
+    void setFilter(PatchFilter filter);
 
 public slots:
     void on_highlightPatch(const QString&, bool);
     void typeWriterFontChanged();
     void procReadyRead(const QByteArray& data);
     void procFinished();
+
+protected:
+    void resizeEvent(QResizeEvent *event);
+
+    PatchFilter curFilter;
+    PatchFilter prevFilter;
 
 private:
     friend class DiffHighlighter;
@@ -82,51 +102,21 @@ private:
     QString target;
     bool seekTarget;
 
-private slots:
-    void onTextChanged();
-
-// Filter
-public:
-    enum PatchFilter
-    {
-        VIEW_ALL,
-        VIEW_ADDED,
-        VIEW_REMOVED
-    };
-
-    PatchFilter filter() { return curFilter; };
-    void setFilter(PatchFilter filter);
-
-protected:
-    PatchFilter curFilter;
-    PatchFilter prevFilter;
-
-// Line numbers
-public:
-    void lineNumberAreaPaintEvent(QPaintEvent *event);
-    int lineNumberAreaWidth();
-
-private:
-    QWidget *lineNumberArea;
-
-private slots:
-    void updateLineNumberAreaWidth(int newBlockCount);
-    void highlightCurrentLine();
-    void updateLineNumberArea(const QRect &, int);
-
-// Auto size
-private:
+    // Auto size
     int fitted_height;
     void fitHeightToDocument();
 
-
-// Search
-public:
-    FindSupport* findSupport();
-
-private:
     friend class PatchContentFindSupport;
     void updateMatchesHighlight();
+
+    QWidget *lineNumberArea;
+
+private slots:
+    void onTextChanged();
+
+    void updateLineNumberAreaWidth(int newBlockCount);
+    void highlightCurrentLine();
+    void updateLineNumberArea(const QRect &, int);
 };
 
 #endif

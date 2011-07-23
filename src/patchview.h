@@ -24,6 +24,11 @@ public:
     void clear(bool complete = true);
     Ui_TabPatch* tab() { return patchTab; }
 
+    bool canCloseTab() { return true; };
+    bool closeTab() { deleteWhenDone(); return true;};
+    QString tabLabel() { return "&Patch"; };
+    QWidget* tabWidget() { return tabPage(); };
+
 signals:
     void diffTo(const QString&);
     void diffViewerDocked();
@@ -53,12 +58,6 @@ private:
         DIFF_TO_HEAD   = 1,
         DIFF_TO_SHA    = 2
     };
-
-public:
-    bool canCloseTab() { return true; };
-    bool closeTab() { deleteWhenDone(); return true;};
-    QString tabLabel() { return "&Patch"; };
-    QWidget* tabWidget() { return tabPage(); };
 };
 
 #endif

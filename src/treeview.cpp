@@ -13,8 +13,8 @@
 #include "mainimpl.h"
 #include "treeview.h"
 
-void TreeView::setup(Domain* dm, Git* g) {
-
+void TreeView::setup(Domain* dm, Git* g)
+{
     d = dm;
     git = g;
     st = &(d->st);
@@ -39,8 +39,8 @@ void TreeView::setup(Domain* dm, Git* g) {
             this, SLOT(on_customContextMenuRequested(const QPoint&)));
 }
 
-void TreeView::on_currentItemChanged(QTreeWidgetItem* item, QTreeWidgetItem*) {
-
+void TreeView::on_currentItemChanged(QTreeWidgetItem* item, QTreeWidgetItem*)
+{
     if (item) {
         SCRef fn = ((FileItem*)item)->fullName();
         if (!ignoreCurrentChanged && fn != st->fileName()) {
@@ -51,29 +51,29 @@ void TreeView::on_currentItemChanged(QTreeWidgetItem* item, QTreeWidgetItem*) {
     }
 }
 
-void TreeView::on_customContextMenuRequested(const QPoint& pos) {
-
+void TreeView::on_customContextMenuRequested(const QPoint& pos)
+{
     QTreeWidgetItem* item = itemAt(pos);
     if (item)
         emit contextMenu(fullName(item), QGit::POPUP_TREE_EV);
 }
 
-void TreeView::clear() {
-
+void TreeView::clear()
+{
     rootName = "";
     QTreeWidget::clear();
 }
 
-bool TreeView::isModified(SCRef path, bool isDir) {
-
+bool TreeView::isModified(SCRef path, bool isDir)
+{
     if (isDir)
         return modifiedDirs.contains(path);
 
     return modifiedFiles.contains(path);
 }
 
-bool TreeView::isDir(SCRef fileName) {
-
+bool TreeView::isDir(SCRef fileName)
+{
     // if currentItem is NULL or is different from fileName
     // return false, because treeview is not updated while
     // not visible, so could be out of sync.
@@ -84,14 +84,14 @@ bool TreeView::isDir(SCRef fileName) {
     return dynamic_cast<DirItem*>(item);
 }
 
-const QString TreeView::fullName(QTreeWidgetItem* item) {
-
+const QString TreeView::fullName(QTreeWidgetItem* item)
+{
     FileItem* f = static_cast<FileItem*>(item);
     return (item ? f->fullName() : "");
 }
 
-void TreeView::getTreeSelectedItems(QStringList& selectedItems) {
-
+void TreeView::getTreeSelectedItems(QStringList& selectedItems)
+{
     selectedItems.clear();
     QList<QTreeWidgetItem*> ls = QTreeWidget::selectedItems();
     FOREACH (QList<QTreeWidgetItem*>, it, ls) {
@@ -100,8 +100,8 @@ void TreeView::getTreeSelectedItems(QStringList& selectedItems) {
     }
 }
 
-void TreeView::setTree(SCRef treeSha) {
-
+void TreeView::setTree(SCRef treeSha)
+{
     if (topLevelItemCount() == 0)
         // get working dir info only once after each TreeView::clear()
         git->getWorkDirFiles(modifiedFiles, modifiedDirs, RevFile::ANY);
@@ -116,20 +116,20 @@ void TreeView::setTree(SCRef treeSha) {
     }
 }
 
-bool TreeView::getTree(SCRef treeSha, Git::TreeInfo& ti, bool wd, SCRef treePath) {
-
+bool TreeView::getTree(SCRef treeSha, Git::TreeInfo& ti, bool wd, SCRef treePath)
+{
     // calls qApp->processEvents()
     treeIsValid = git->getTree(treeSha, ti, wd, treePath);
     return treeIsValid;
 }
 
-void TreeView::on_itemCollapsed(QTreeWidgetItem* item) {
-
+void TreeView::on_itemCollapsed(QTreeWidgetItem* item)
+{
     item->setData(0, Qt::DecorationRole, *folderClosed);
 }
 
-void TreeView::on_itemExpanded(QTreeWidgetItem* itm) {
-
+void TreeView::on_itemExpanded(QTreeWidgetItem* itm)
+{
     DirItem* item = dynamic_cast<DirItem*>(itm);
     if (!item)
         return;
@@ -178,8 +178,8 @@ void TreeView::on_itemExpanded(QTreeWidgetItem* itm) {
         QApplication::restoreOverrideCursor();
 }
 
-void TreeView::updateTree() {
-
+void TreeView::updateTree()
+{
     if (st->sha().isEmpty())
         return;
 
@@ -262,8 +262,8 @@ void TreeView::updateTree() {
     restoreStuff();
 }
 
-void TreeView::restoreStuff() {
-
+void TreeView::restoreStuff()
+{
     ignoreCurrentChanged = false;
     QApplication::restoreOverrideCursor();
 }

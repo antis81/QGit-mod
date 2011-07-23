@@ -10,6 +10,7 @@
 #include <QAbstractItemModel>
 #include "exceptionmanager.h"
 #include "common.h"
+#include "domain.h"
 //#include "filehistory.h"
 
 template <class, class> struct QPair;
