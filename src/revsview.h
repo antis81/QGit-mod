@@ -11,7 +11,7 @@
 #include "ui_revsview.h" // needed by moc_* file to understand tab() function
 #include "common.h"
 #include "domain.h"
-#include "customtabwidget.h"
+#include "ui/customtabwidget.h"
 class MainImpl;
 class Git;
 class FileHistory;

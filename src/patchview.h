@@ -9,8 +9,8 @@
 
 #include "ui_patchview.h"
 #include "domain.h"
-#include "customtabwidget.h"
-#include "customtab.h"
+#include "ui/customtabwidget.h"
+#include "ui/customtab.h"
 
 class Git;
 

@@ -14,6 +14,7 @@
 #include <QLatin1String>
 #include <QVariant>
 #include <QVector>
+#include "model/shastring.h"
 
 /*
    QVariant does not support size_t type used in Qt containers, this is
@@ -50,7 +51,6 @@ class QDataStream;
 class QProcess;
 class QSplitter;
 class QWidget;
-class ShaString;
 
 // type shortcuts
 typedef const QString&              SCRef;
@@ -284,20 +284,6 @@ namespace QGit
     extern const QString QUOTE_CHAR;
     extern const QString SCRIPT_EXT;
 }
-
-class ShaString : public QLatin1String
-{
-public:
-    inline ShaString() : QLatin1String(NULL) {}
-    inline ShaString(const ShaString& sha) : QLatin1String(sha.latin1()) {}
-    inline explicit ShaString(const char* sha) : QLatin1String(sha) {}
-
-    inline bool operator!=(const ShaString& o) const { return !operator==(o); }
-    inline bool operator==(const ShaString& o) const {
-
-        return (latin1() == o.latin1()) || !qstrcmp(latin1(), o.latin1());
-    }
-};
 
 class Rev
 {

@@ -24,7 +24,7 @@ contains(QMAKE_CC,.*gcc.*) {
 # General stuff
 TEMPLATE = app
 CONFIG += qt warn_on exceptions debug_and_release
-INCLUDEPATH += ../src
+INCLUDEPATH += ../src:../src/model:../src/ui
 MAKEFILE = qmake
 RESOURCES += icons.qrc
 
@@ -81,10 +81,10 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
            treeview.h \
     branchestree.h \
     findsupport.h \
-    customtabwidget.h \
+    ui\customtabwidget.h \
     branchestreeitem.h \
     externaldiffproc.h \
-    customtab.h \
+    ui\customtab.h \
     reachinfo.h \
     rangeinfo.h \
     updatedomainevent.h \
@@ -96,7 +96,8 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
     patchtextblockuserdata.h \
     filehistory.h \
     listviewproxy.h \
-    listviewdelegate.h
+    listviewdelegate.h \
+    model\shastring.h
 
 SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
            customactionimpl.cpp dataloader.cpp domain.cpp exceptionmanager.cpp \
@@ -107,10 +108,10 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
     branchestree.cpp \
     main.cpp \
     findsupport.cpp \
-    customtabwidget.cpp \
+    ui\customtabwidget.cpp \
     branchestreeitem.cpp \
     externaldiffproc.cpp \
-    customtab.cpp \
+    ui\customtab.cpp \
     reachinfo.cpp \
     rangeinfo.cpp \
     updatedomainevent.cpp \
@@ -122,7 +123,8 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
     patchtextblockuserdata.cpp \
     filehistory.cpp \
     listviewproxy.cpp \
-    listviewdelegate.cpp
+    listviewdelegate.cpp \
+    model\shastring.cpp
 
 DISTFILES += app_icon.rc helpgen.sh resources/* Src.vcproj todo.txt
 DISTFILES += ../COPYING ../exception_manager.txt ../README ../README_WIN.txt
