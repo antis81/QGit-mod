@@ -13,31 +13,6 @@
 #include "mainimpl.h"
 #include "treeview.h"
 
-QString FileItem::fullName() const {
-
-    QTreeWidgetItem* p = parent();
-    QString s(p ? text(0) : ""); // root directory has no fullName
-
-    while (p && p->parent()) {
-        s.prepend(p->text(0) + '/');
-        p = p->parent();
-    }
-    return s;
-}
-
-void FileItem::setBold(bool b) {
-
-    if (font(0).bold() == b)
-        return;
-
-    QFont fnt(font(0));
-    fnt.setBold(b);
-    setFont(0, fnt);
-}
-
-DirItem::DirItem(DirItem* p, SCRef ts, SCRef nm) : FileItem(p, nm), treeSha(ts) {}
-DirItem::DirItem(QTreeWidget* p, SCRef ts, SCRef nm) : FileItem(p, nm), treeSha(ts) {}
-
 void TreeView::setup(Domain* dm, Git* g) {
 
     d = dm;

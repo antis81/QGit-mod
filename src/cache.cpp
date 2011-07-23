@@ -12,6 +12,11 @@
 
 using namespace QGit;
 
+Cache::Cache(QObject *parent) : QObject(parent)
+{
+
+}
+
 bool Cache::save(const QString& gitDir, const RevFileMap& rf, const StrVect& dirs,
                  const StrVect& files)
 {

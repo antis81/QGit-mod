@@ -7,18 +7,16 @@
 
 #include "customtab.h"
 
-//class CustomTab;
-
 class CustomTabWidget : public QTabWidget
 {
     Q_OBJECT
 public:
     explicit CustomTabWidget(QWidget *parent = 0);
-    void addTab(CustomTab* tab);
+    void addTab(CustomTab *tab);
     int addTab(QWidget *widget, const QString &label);
 
 private:
-    int findTabByCloseButton(QToolButton* closeButton);
+    int findTabByCloseButton(QToolButton *closeButton);
 signals:
 
 private slots:

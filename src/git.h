@@ -10,6 +10,7 @@
 #include <QAbstractItemModel>
 #include "exceptionmanager.h"
 #include "common.h"
+//#include "filehistory.h"
 
 template <class, class> struct QPair;
 class QRegExp;
@@ -21,65 +22,10 @@ class Domain;
 class Git;
 class Lanes;
 class MyProcess;
+class FileHistory;
 
-class FileHistory : public QAbstractItemModel
+struct Reference  // stores tag information associated to a revision
 {
-    Q_OBJECT
-public:
-    FileHistory(QObject* parent, Git* git);
-    ~FileHistory();
-    void clear(bool complete = true);
-    const QString sha(int row) const;
-    int row(SCRef sha) const;
-    const QStringList fileNames() const { return fNames; }
-    void resetFileNames(SCRef fn);
-    void setEarlyOutputState(bool b = true) { earlyOutputCnt = (b ? earlyOutputCntBase : -1); }
-    void setAnnIdValid(bool b = true) { annIdValid = b; }
-
-    virtual QVariant data(const QModelIndex &index, int role) const;
-    virtual Qt::ItemFlags flags(const QModelIndex& index) const;
-    virtual QVariant headerData(int s, Qt::Orientation o, int role = Qt::DisplayRole) const;
-    virtual QModelIndex index(int r, int c, const QModelIndex& par = QModelIndex()) const;
-    virtual QModelIndex parent(const QModelIndex& index) const;
-    virtual int rowCount(const QModelIndex& par = QModelIndex()) const;
-    virtual bool hasChildren(const QModelIndex& par = QModelIndex()) const;
-    virtual int columnCount(const QModelIndex&) const { return 5; }
-
-public slots:
-    void on_changeFont(const QFont&);
-
-private slots:
-    void on_newRevsAdded(const FileHistory*, const QVector<ShaString>&);
-    void on_loadCompleted(const FileHistory*, const QString&);
-
-private:
-    friend class Annotate;
-    friend class DataLoader;
-    friend class Git;
-
-    void flushTail();
-    const QString timeDiff(unsigned long secs) const;
-
-    Git* git;
-    RevMap revs;
-    ShaVect revOrder;
-    Lanes* lns;
-    uint firstFreeLane;
-    QList<QByteArray*> rowData;
-    QList<QVariant> headerInfo;
-    int rowCnt;
-    bool annIdValid;
-    unsigned long secs;
-    int loadTime;
-    int earlyOutputCnt;
-    int earlyOutputCntBase;
-    QStringList fNames;
-    QStringList curFNames;
-    QStringList renamedRevs;
-    QHash<QString, QString> renamedPatches;
-};
-
-struct Reference { // stores tag information associated to a revision
     Reference() : type(0) {}
     uint type;
     QStringList branches;
@@ -90,14 +36,14 @@ struct Reference { // stores tag information associated to a revision
     QString     tagMsg;
     QString     stgitPatch;
 };
-typedef QHash<ShaString, Reference> RefMap;
 
+typedef QHash<ShaString, Reference> RefMap;
 
 class Git : public QObject
 {
     Q_OBJECT
 public:
-    explicit Git(QObject* parent);
+    explicit Git(QObject *parent);
 
     // used as self-documenting boolean parameters
     static const bool optFalse       = false;
@@ -110,7 +56,8 @@ public:
     static const bool optOnlyInIndex = true;
     static const bool optCreate      = true;
 
-    enum RefType {
+    enum RefType
+    {
         TAG        = 1,
         BRANCH     = 2,
         RMT_BRANCH = 4,
@@ -121,13 +68,15 @@ public:
         ANY_REF    = 127
     };
 
-    struct TreeEntry {
+    struct TreeEntry
+    {
         TreeEntry(SCRef n, SCRef s, SCRef t) : name(n), sha(s), type(t) {}
         bool operator<(const TreeEntry&) const;
         QString name;
         QString sha;
         QString type;
     };
+
     typedef QList<TreeEntry> TreeInfo;
 
     void setDefaultModel(FileHistory* fh) { revData = fh; }
@@ -206,10 +155,12 @@ public:
     void removeExtraFileInfo(QString* rowName);
     void formatPatchFileHeader(QString* rowName, SCRef sha, SCRef dts, bool cmb, bool all);
     int findFileIndex(const RevFile& rf, SCRef name);
-    const QString filePath(const RevFile& rf, uint i) const {
 
+    const QString filePath(const RevFile& rf, uint i) const
+    {
         return dirNamesVec[rf.dirAt(i)] + fileNamesVec[rf.nameAt(i)];
     }
+
     void setCurContext(Domain* d) { curDomain = d; }
     Domain* curContext() const { return curDomain; }
     bool updateCurrentBranch();
@@ -243,28 +194,34 @@ private:
     friend class ConsoleImpl;
     friend class RevsView;
 
-    struct WorkingDirInfo {
+    struct WorkingDirInfo
+    {
         void clear() { diffIndex = diffIndexCached = ""; otherFiles.clear(); }
         QString diffIndex;
         QString diffIndexCached;
         QStringList otherFiles;
     };
+
     WorkingDirInfo workingDirInfo;
 
-    struct LoadArguments { // used to pass arguments to init2()
+    struct LoadArguments
+    { // used to pass arguments to init2()
         QStringList args;
         bool filteredLoading;
         QStringList filterList;
     };
+
     LoadArguments loadArguments;
 
-    struct FileNamesLoader {
+    struct FileNamesLoader
+    {
         FileNamesLoader() : rf(NULL) {}
 
         RevFile* rf;
         QVector<int> rfDirs;
         QVector<int> rfNames;
     };
+
     FileNamesLoader fileLoader;
 
     void init2();

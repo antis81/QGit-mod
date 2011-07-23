@@ -15,6 +15,7 @@
 #include "domain.h"
 #include "git.h"
 #include "listview.h"
+#include "filehistory.h"
 
 using namespace QGit;
 

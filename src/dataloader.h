@@ -10,9 +10,10 @@
 #include <QProcess>
 #include <QTime>
 #include <QTimer>
+#include "filehistory.h"
 
 class Git;
-class FileHistory;
+//class FileHistory;
 class QString;
 class UnbufferedTemporaryFile;
 
@@ -24,9 +25,9 @@ class DataLoader : public QProcess
 {
     Q_OBJECT
 public:
-    DataLoader(Git* g, FileHistory* f);
+    DataLoader(Git *g, FileHistory *f);
     ~DataLoader();
-    bool start(const QStringList& args, const QString& wd, const QString& buf);
+    bool start(const QStringList &args, const QString &wd, const QString &buf);
 
 signals:
     void newDataReady(const FileHistory*);
@@ -39,16 +40,16 @@ private slots:
     void on_timeout();
 
 private:
-    void parseSingleBuffer(const QByteArray& ba);
-    void baAppend(QByteArray** src, const char* ascii, int len);
-    void addSplittedChunks(const QByteArray* halfChunk);
+    void parseSingleBuffer(const QByteArray &ba);
+    void baAppend(QByteArray **src, const char *ascii, int len);
+    void addSplittedChunks(const QByteArray *halfChunk);
     bool createTemporaryFile();
     ulong readNewData(bool lastBuffer);
 
-    Git* git;
-    FileHistory* fh;
-    QByteArray* halfChunk;
-    UnbufferedTemporaryFile* dataFile;
+    Git *git;
+    FileHistory *fh;
+    QByteArray *halfChunk;
+    UnbufferedTemporaryFile *dataFile;
     QTime loadTime;
     QTimer guiUpdateTimer;
     ulong loadedBytes;

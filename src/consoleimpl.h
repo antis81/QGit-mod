@@ -20,24 +20,24 @@ class ConsoleImpl : public QMainWindow, Ui_Console // we need a statusbar
 {
     Q_OBJECT
 public:
-    ConsoleImpl(const QString& nm, Git* g);
-    bool start(const QString& cmd,const QString& args);
+    ConsoleImpl(const QString &nm, Git *g);
+    bool start(const QString &cmd,const QString &args);
 
 signals:
-    void customAction_exited(const QString& name);
+    void customAction_exited(const QString &name);
 
 public slots:
     void typeWriterFontChanged();
-    void procReadyRead(const QByteArray& data);
+    void procReadyRead(const QByteArray &data);
     void procFinished();
 
 protected slots:
-    virtual void closeEvent(QCloseEvent* ce);
+    virtual void closeEvent(QCloseEvent *ce);
     void pushButtonTerminate_clicked();
     void pushButtonOk_clicked();
 
 private:
-    Git* git;
+    Git *git;
     QString actionName;
     QPointer<MyProcess> proc;
     QString inpBuf;

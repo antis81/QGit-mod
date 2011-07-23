@@ -11,6 +11,7 @@
 #include "mainimpl.h"
 #include "git.h"
 #include "domain.h"
+#include "filehistory.h"
 
 using namespace QGit;
 

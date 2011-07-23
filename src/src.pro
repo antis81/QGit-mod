@@ -86,7 +86,15 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
     externaldiffproc.h \
     customtab.h \
     reachinfo.h \
-    rangeinfo.h
+    rangeinfo.h \
+    updatedomainevent.h \
+    stateinfo.h \
+    fileitem.h \
+    diritem.h \
+    linenumberarea.h \
+    patchcontentfindsupport.h \
+    patchtextblockuserdata.h \
+    filehistory.h
 
 SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
            customactionimpl.cpp dataloader.cpp domain.cpp exceptionmanager.cpp \
@@ -102,7 +110,15 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
     externaldiffproc.cpp \
     customtab.cpp \
     reachinfo.cpp \
-    rangeinfo.cpp
+    rangeinfo.cpp \
+    updatedomainevent.cpp \
+    stateinfo.cpp \
+    fileitem.cpp \
+    diritem.cpp \
+    linenumberarea.cpp \
+    patchcontentfindsupport.cpp \
+    patchtextblockuserdata.cpp \
+    filehistory.cpp
 
 DISTFILES += app_icon.rc helpgen.sh resources/* Src.vcproj todo.txt
 DISTFILES += ../COPYING ../exception_manager.txt ../README ../README_WIN.txt

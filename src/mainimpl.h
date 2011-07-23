@@ -55,7 +55,7 @@ public:
         CS_PATCH_REGEXP
     };
 
-    QComboBox* cmbSearch;
+    QComboBox *cmbSearch;
 
     void changeBranch(QString branchName);
     void checkout(const QString& branchName);

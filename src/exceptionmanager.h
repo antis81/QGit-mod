@@ -46,7 +46,8 @@ protected:
     ExceptionManager& operator=(const ExceptionManager&);
 
 public:
-    static ExceptionManager* em() {
+    static ExceptionManager* em()
+    {
         static ExceptionManager private_em;
         return &private_em;
     }
@@ -66,7 +67,8 @@ private:
     int regionId;
     int currentRegionId;
 
-    class Exception {
+    class Exception
+    {
     public:
         Exception() {}
         Exception(int ex, bool v) : excpId(ex), verbose(v), isRaised(false) {}
@@ -74,6 +76,7 @@ private:
         bool verbose;
         bool isRaised;
     };
+
     typedef QList<Exception> ThrowableSet;
     typedef ThrowableSet::iterator SetIt;
     QMap<int, ThrowableSet> throwableSetMap;

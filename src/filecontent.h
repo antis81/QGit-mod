@@ -36,8 +36,8 @@ public:
     void goToAnnotation(int id, int direction);
     bool goToRangeStart();
     bool rangeFilter(bool b);
-    bool getRange(SCRef sha, RangeInfo* r);
-    bool startAnnotate(FileHistory* fh, SCRef histTime);
+    bool getRange(SCRef sha, RangeInfo *r);
+    bool startAnnotate(FileHistory *fh, SCRef histTime);
     void setShowAnnotate(bool b);
     void setHighlightSource(bool b);
     void setSelection(int paraFrom, int indexFrom, int paraTo, int indexTo);
@@ -57,7 +57,7 @@ public slots:
     void typeWriterFontChanged();
 
 protected:
-    virtual void resizeEvent(QResizeEvent* e);
+    virtual void resizeEvent(QResizeEvent *e);
 
 private slots:
     void on_list_doubleClicked(QListWidgetItem*);
@@ -83,12 +83,12 @@ private:
     void adjustAnnListSize(int width);
     void setAnnList();
 
-    Domain* d;
-    Git* git;
-    QListWidget* listWidgetAnn;
-    StateInfo* st;
-    RangeInfo* rangeInfo;
-    FileHighlighter* fileHighlighter;
+    Domain *d;
+    Git *git;
+    QListWidget *listWidgetAnn;
+    StateInfo *st;
+    RangeInfo *rangeInfo;
+    FileHighlighter *fileHighlighter;
     QPointer<MyProcess> proc;
     QPointer<Annotate> annotateObj; // valid from beginning of annotation loading
     const FileAnnotation* curAnn; // valid at the end of annotation loading
@@ -102,13 +102,21 @@ private:
     bool isHtmlSource;
     bool isImageFile;
 
-    struct ScreenState {
-        bool isValid, hasSelectedText;
-        int topPara, paraFrom, indexFrom, paraTo, indexTo;
+    struct ScreenState
+    {
+        bool isValid;
+        bool hasSelectedText;
+        int topPara;
+        int paraFrom;
+        int indexFrom;
+        int paraTo;
+        int indexTo;
     };
+
     ScreenState ss;
 
-    enum BoolOption { // used as self-documenting boolean parameters
+    enum BoolOption // used as self-documenting boolean parameters
+    {
         optFalse,
         optEmitSignal
     };

@@ -11,31 +11,27 @@
 #include <QTime>
 #include "exceptionmanager.h"
 #include "common.h"
-
 #include "reachinfo.h"
 #include "rangeinfo.h"
+#include "filehistory.h"
 
 class Git;
-class FileHistory;
+//class FileHistory;
 class MyProcess;
-
-// не используется на самом деле. FIXME :)
-typedef QVector<ReachInfo> ReachList;
-// и вообще это надо в класс внести ибо нефик
-typedef QHash<QString, RangeInfo> Ranges;
 
 class Annotate : public QObject
 {
     Q_OBJECT
 public:
-    Annotate(Git* parent, QObject* guiObj);
+    typedef QHash<QString, RangeInfo> Ranges;
+    Annotate(Git *parent, QObject *guiObj);
     void deleteWhenDone();
-    const FileAnnotation* lookupAnnotation(SCRef sha);
-    bool start(const FileHistory* fh);
-    bool isCanceled() { return canceled; }
-    const QString getAncestor(SCRef sha, int* shaIdx);
-    bool getRange(SCRef sha, RangeInfo* r);
-    bool seekPosition(int* rangeStart, int* rangeEnd, SCRef fromSha, SCRef toSha);
+    const FileAnnotation *lookupAnnotation(SCRef sha);
+    bool start(const FileHistory *fh);
+    bool isCanceled();
+    const QString getAncestor(SCRef sha, int *shaIdx);
+    bool getRange(SCRef sha, RangeInfo *r);
+    bool seekPosition(int *rangeStart, int *rangeEnd, SCRef fromSha, SCRef toSha);
     const QString computeRanges(SCRef sha, int paraFrom, int paraTo, SCRef target = "");
 
 signals:
@@ -47,24 +43,24 @@ private slots:
 
 private:
     void annotateFileHistory();
-    void doAnnotate(const ShaString& sha);
+    void doAnnotate(const ShaString &sha);
     FileAnnotation* getFileAnnotation(SCRef sha);
-    void setInitialAnnotation(SCRef fileSha, FileAnnotation* fa);
+    void setInitialAnnotation(SCRef fileSha, FileAnnotation *fa);
     const QString setupAuthor(SCRef origAuthor, int annId);
     bool setAnnotation(SCRef diff, SCRef aut, SCList pAnn, SList nAnn, int ofs = 0);
-    bool getNextLine(SCRef d, int& idx, QString& line);
+    bool getNextLine(SCRef d, int &idx, QString &line);
     static void unify(SList dst, SCList src);
     const QString getPatch(SCRef sha, int parentNum = 0);
-    bool getNextSection(SCRef d, int& idx, QString& sec, SCRef target);
-    void updateRange(RangeInfo* r, SCRef diff, bool reverse);
-    void updateCrossRanges(SCRef cnk, bool rev, int oStart, int oLineCnt, RangeInfo* r);
+    bool getNextSection(SCRef d, int &idx, QString &sec, SCRef target);
+    void updateRange(RangeInfo *r, SCRef diff, bool reverse);
+    void updateCrossRanges(SCRef cnk, bool rev, int oStart, int oLineCnt, RangeInfo *r);
     bool isDescendant(SCRef sha, SCRef target);
 
     EM_DECLARE(exAnnCanceled);
 
-    Git* git;
-    QObject* gui;
-    const FileHistory* fh;
+    Git *git;
+    QObject *gui;
+    const FileHistory *fh;
     AnnotateHistory ah;
     bool cancelingAnnotate;
     bool annotateRunning;

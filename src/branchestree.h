@@ -20,18 +20,19 @@ public:
         LeafTag = 262,
         HeaderRemote = 263
     };
+
     BranchesTree(QWidget *parent = 0);
     void setup(Domain *domain, Git *git);
     void update();
 
 public slots:
     void changeBranch(QTreeWidgetItem *item, int column);
-    void contextMenu(const QPoint & pos);
+    void contextMenu(const QPoint &pos);
     void checkout();
     void removeTag();
 
 public:
-    void selectBranch(const QString& branch);
+    void selectBranch(const QString &branch);
 private:
     Git *g;
     Domain *d;
@@ -39,15 +40,13 @@ private:
     QAction *expandAllAction;
     QAction *checkoutAction;
     QAction *removeTagAction;
-    void addNode(ItemType headerType, Git::RefType type);
-    void addRemotesNodes();
-
-    QTreeWidgetItem* recursiveFindBranch(const QString& branch);
-    QTreeWidgetItem* recursiveFindBranch(QTreeWidgetItem* parent, const QString& branch);
-
     QIcon branchIcon;
     QIcon masterBranchIcon;
     QIcon tagIcon;
+    void addNode(ItemType headerType, Git::RefType type);
+    void addRemotesNodes();
+    QTreeWidgetItem *recursiveFindBranch(const QString &branch);
+    QTreeWidgetItem *recursiveFindBranch(QTreeWidgetItem *parent, const QString &branch);
 };
 
 #endif // BRANCHESTREE_H

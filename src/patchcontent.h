@@ -12,6 +12,7 @@
 #include <QSyntaxHighlighter>
 #include "common.h"
 #include "findsupport.h"
+//#include "patchcontentfindsupport.h"
 
 class Domain;
 class Git;
@@ -31,11 +32,10 @@ public:
     void refresh();
     void update(StateInfo& st);
 
-
-
     QSize sizeHint() const;
 
-    enum RowType {
+    enum RowType
+    {
         ROW_FILE_HEADER,
         ROW_PART_HEADER,
         ROW_FILE_OLD,
@@ -51,7 +51,6 @@ public:
     ~PatchContent();
 
 protected:
-
     void resizeEvent(QResizeEvent *event);
 
 public slots:
@@ -59,7 +58,6 @@ public slots:
     void typeWriterFontChanged();
     void procReadyRead(const QByteArray& data);
     void procFinished();
-
 
 private:
     friend class DiffHighlighter;
@@ -84,13 +82,13 @@ private:
     QString target;
     bool seekTarget;
 
-
 private slots:
     void onTextChanged();
 
 // Filter
 public:
-    enum PatchFilter {
+    enum PatchFilter
+    {
         VIEW_ALL,
         VIEW_ADDED,
         VIEW_REMOVED
@@ -102,7 +100,6 @@ public:
 protected:
     PatchFilter curFilter;
     PatchFilter prevFilter;
-
 
 // Line numbers
 public:
@@ -117,7 +114,6 @@ private slots:
     void highlightCurrentLine();
     void updateLineNumberArea(const QRect &, int);
 
-
 // Auto size
 private:
     int fitted_height;
@@ -131,72 +127,6 @@ public:
 private:
     friend class PatchContentFindSupport;
     void updateMatchesHighlight();
-};
-
-class LineNumberArea : public QWidget
-{
-public:
-    LineNumberArea(PatchContent *editor) : QWidget(editor) {
-        codeEditor = editor;
-    }
-
-    QSize sizeHint() const {
-        return QSize(codeEditor->lineNumberAreaWidth(), 0);
-    }
-
-protected:
-    void paintEvent(QPaintEvent *event) {
-        codeEditor->lineNumberAreaPaintEvent(event);
-    }
-
-private:
-    PatchContent *codeEditor;
-};
-
-class PatchTextBlockUserData : public QTextBlockUserData
-{
-public:
-    PatchContent::RowType rowType;
-
-    long* rowNumbers;
-    int partCount;
-
-    PatchTextBlockUserData() : rowNumbers(NULL), partCount(0), rowType(PatchContent::ROW_OTHER) {}
-    ~PatchTextBlockUserData() {
-        if (rowNumbers) {
-            delete[] rowNumbers;
-            rowNumbers = NULL;
-        }
-    }
-};
-
-class PatchContentFindSupport : public FindSupport
-{
-public:
-    PatchContentFindSupport(PatchContent* patchContent);
-
-    bool find();
-    bool findNext();
-
-    void setText(QString text, bool re);
-    void setText(QString text);
-private:
-    friend class PatchContent;
-
-    PatchContent* m_patchContent;
-    bool isRegExp;
-    QRegExp pickAxeRE;
-
-    struct MatchSelection {
-        int from;
-        int to;
-    };
-    typedef QVector<MatchSelection> Matches;
-
-    Matches matches;
-
-    QTextCursor findNextMatch(const QTextDocument* document, QTextCursor& cursor);
-    bool computeMatches();
 };
 
 #endif

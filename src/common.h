@@ -344,8 +344,8 @@ public:
 typedef QHash<ShaString, const Rev*> RevMap;  // faster then a map
 
 
-class RevFile {
-
+class RevFile
+{
     friend class Cache; // to directly load status
     friend class Git;
 

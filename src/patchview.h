@@ -14,8 +14,9 @@
 
 class Git;
 
-class PatchView :public Domain, public CustomTab {
-Q_OBJECT
+class PatchView :public Domain, public CustomTab
+{
+    Q_OBJECT
 public:
     PatchView() {}
     PatchView(MainImpl* mi, Git* g);
@@ -43,10 +44,11 @@ private:
     void updatePatch();
     void saveRestoreSizes(bool startup = false);
 
-    Ui_TabPatch* patchTab;
+    Ui_TabPatch *patchTab;
     QString normalizedSha;
 
-    enum ButtonId {
+    enum ButtonId
+    {
         DIFF_TO_PARENT = 0,
         DIFF_TO_HEAD   = 1,
         DIFF_TO_SHA    = 2

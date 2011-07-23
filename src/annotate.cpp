@@ -95,6 +95,11 @@ bool Annotate::start(const FileHistory* _fh) {
     return true;
 }
 
+bool Annotate::isCanceled()
+{
+    return canceled;
+}
+
 void Annotate::slotComputeDiffs() {
 
     processingTime.start();
