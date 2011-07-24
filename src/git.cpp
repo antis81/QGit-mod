@@ -24,18 +24,8 @@
 #include "lanes.h"
 #include "myprocess.h"
 
-/*
-    Description: start-up repository opening and reading
-
-    Author: Marco Costalba (C) 2005-2007
-
-    Copyright: See COPYING file that comes with this distribution
-
-*/
-#include <QApplication>
 #include <QPair>
 #include <QSettings>
-#include <QTextCodec>
 #include "exceptionmanager.h"
 #include "ui/rangeselectimpl.h"
 #include "lanes.h"
