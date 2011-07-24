@@ -31,7 +31,7 @@
 #include "listview.h"
 #include "mainimpl.h"
 #include "patchview.h"
-#include "rangeselectimpl.h"
+#include "ui/rangeselectimpl.h"
 #include "revdesc.h"
 #include "revsview.h"
 #include "settingsimpl.h"

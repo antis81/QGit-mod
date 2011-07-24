@@ -37,7 +37,7 @@
 #include <QSettings>
 #include <QTextCodec>
 #include "exceptionmanager.h"
-#include "rangeselectimpl.h"
+#include "ui/rangeselectimpl.h"
 #include "lanes.h"
 #include "mainimpl.h"
 #include "dataloader.h"
