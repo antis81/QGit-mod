@@ -255,7 +255,7 @@ bool Domain::event(QEvent* e)
 
 void Domain::populateState()
 {
-    const Rev* r = git->revLookup(st.sha());
+    const Revision* r = git->revLookup(st.sha());
     if (r)
         st.setIsMerge(r->parentsCount() > 1);
 }

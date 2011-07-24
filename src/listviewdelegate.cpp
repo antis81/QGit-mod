@@ -21,7 +21,7 @@ void ListViewDelegate::diffTargetChanged(int row) {
     }
 }
 
-const Rev* ListViewDelegate::revLookup(int row, FileHistory** fhPtr) const {
+const Revision* ListViewDelegate::revLookup(int row, FileHistory** fhPtr) const {
 
     ListView* lv = static_cast<ListView*>(parent());
     FileHistory* fh = static_cast<FileHistory*>(lv->model());
@@ -239,7 +239,7 @@ void ListViewDelegate::paintGraph(QPainter* p, const QStyleOptionViewItem& opt,
         p->fillRect(opt.rect, opt.palette.base());
 
     FileHistory* fh;
-    const Rev* r = revLookup(i.row(), &fh);
+    const Revision* r = revLookup(i.row(), &fh);
     if (!r)
         return;
 
@@ -286,7 +286,7 @@ void ListViewDelegate::paintLog(QPainter* p, const QStyleOptionViewItem& opt,
                                 const QModelIndex& index) const {
 
     int row = index.row();
-    const Rev* r = revLookup(row);
+    const Revision* r = revLookup(row);
     if (!r)
         return;
 

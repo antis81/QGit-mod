@@ -17,7 +17,7 @@ bool ListViewProxy::isMatch(SCRef sha) const {
         // in this case shaMap contains all good sha to search for
         return shaSet.contains(sha);
 
-    const Rev* r = git->revLookup(sha);
+    const Revision* r = git->revLookup(sha);
     if (!r) {
         dbp("ASSERT in ListViewFilter::isMatch, sha <%1> not found", sha);
         return false;

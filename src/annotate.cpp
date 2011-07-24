@@ -138,7 +138,7 @@ void Annotate::doAnnotate(const ShaString& ss) {
     if (fa == NULL || fa->isValid || isError || cancelingAnnotate)
         return;
 
-    const Rev* r = git->revLookup(ss, fh); // historyRevs
+    const Revision* r = git->revLookup(ss, fh); // historyRevs
     if (r == NULL) {
         dbp("ASSERT doAnnotate: no revision %1", sha);
         isError = true;
@@ -352,7 +352,7 @@ const QString Annotate::getPatch(SCRef sha, int parentNum) {
     if (parentNum)
         mergeSha = QString::number(parentNum) + " m " + sha;
 
-    const Rev* r = git->revLookup(mergeSha, fh);
+    const Revision* r = git->revLookup(mergeSha, fh);
     if (!r)
         return QString();
 
@@ -687,7 +687,7 @@ bool Annotate::isDescendant(SCRef sha, SCRef target) {
 // a merge is found the search returns false because you'll need,
 // in general, all the previous ranges to compute the target one.
 
-    const Rev* r = git->revLookup(sha, fh);
+    const Revision* r = git->revLookup(sha, fh);
     if (!r)
         return false;
 
@@ -743,7 +743,7 @@ const QString Annotate::computeRanges(SCRef sha, int paraFrom, int paraTo, SCRef
 
     // going back in history, to oldest following first parent lane
     const QString oldest(histRevOrder.last()); // causes a detach!
-    const Rev* curRev = git->revLookup(ancestor, fh); // historyRevs
+    const Revision* curRev = git->revLookup(ancestor, fh); // historyRevs
     QString curRevSha(curRev->sha());
     while (curRevSha != oldest && !isDirectDescendant) {
 

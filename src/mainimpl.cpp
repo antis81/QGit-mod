@@ -251,7 +251,7 @@ void MainImpl::getExternalDiffArgs(QStringList* args, QStringList* filenames) {
     QFileInfo f(rv->st.fileName());
     QString prevRevSha(rv->st.diffToSha());
     if (prevRevSha.isEmpty()) { // default to first parent
-        const Rev* r = git->revLookup(rv->st.sha());
+        const Revision* r = git->revLookup(rv->st.sha());
         prevRevSha = (r && r->parentsCount() > 0 ? r->parent(0) : rv->st.sha());
     }
     QFileInfo fi(f);
@@ -433,7 +433,7 @@ void MainImpl::updateContextActions(SCRef newRevSha, SCRef newFileName,
     isTag = isUnApplied = isApplied = false;
 
     if (found) {
-        const Rev* r = git->revLookup(newRevSha);
+        const Revision* r = git->revLookup(newRevSha);
         isTag = git->checkRef(newRevSha, Git::TAG);
         isUnApplied = r->isUnApplied;
         isApplied = r->isApplied;

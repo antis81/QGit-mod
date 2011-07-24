@@ -166,7 +166,7 @@ const QString ListView::currentText(int column)
 
 LaneType ListView::getLaneType(SCRef sha, int pos) const
 {
-    const Rev* r = git->revLookup(sha, fh);
+    const Revision* r = git->revLookup(sha, fh);
     return (r && pos < r->lanes.count() && pos >= 0 ? r->lanes.at(pos) : LANE_UNDEFINED);
 }
 

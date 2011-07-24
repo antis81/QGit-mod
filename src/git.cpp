@@ -311,7 +311,7 @@ const QString Git::getRefSha(SCRef refName, RefType type, bool askGit)
 
 void Git::appendNamesWithId(QStringList& names, SCRef sha, SCList data, bool onlyLoaded)
 {
-    const Rev* r = revLookup(sha);
+    const Revision* r = revLookup(sha);
     if (onlyLoaded && !r)
         return;
 
@@ -490,12 +490,12 @@ void Git::cancelDataLoading(const FileHistory* fh)
     emit cancelLoading(fh); // non blocking
 }
 
-const Rev* Git::revLookup(SCRef sha, const FileHistory* fh) const
+const Revision* Git::revLookup(SCRef sha, const FileHistory* fh) const
 {
     return revLookup(toTempSha(sha), fh);
 }
 
-const Rev* Git::revLookup(const ShaString& sha, const FileHistory* fh) const
+const Revision* Git::revLookup(const ShaString& sha, const FileHistory* fh) const
 {
     const RevMap& r = (fh ? fh->revs : revData->revs);
     return (sha.latin1() ? r.value(sha) : NULL);
@@ -575,13 +575,13 @@ int Git::findFileIndex(const RevFile& rf, SCRef name)
 
 const QString Git::getLaneParent(SCRef fromSHA, int laneNum)
 {
-    const Rev* rs = revLookup(fromSHA);
+    const Revision* rs = revLookup(fromSHA);
     if (!rs)
         return "";
 
     for (int idx = rs->orderIdx - 1; idx >= 0; idx--) {
 
-        const Rev* r = revLookup(revData->revOrder[idx]);
+        const Revision* r = revLookup(revData->revOrder[idx]);
         if (laneNum >= r->lanes.count())
             return "";
 
@@ -605,7 +605,7 @@ const QString Git::getLaneParent(SCRef fromSHA, int laneNum)
 const QStringList Git::getChilds(SCRef parent)
 {
     QStringList childs;
-    const Rev* r = revLookup(parent);
+    const Revision* r = revLookup(parent);
     if (!r)
         return childs;
 
@@ -615,7 +615,7 @@ const QStringList Git::getChilds(SCRef parent)
     // reorder childs by loading order
     QStringList::iterator itC(childs.begin());
     for ( ; itC != childs.end(); ++itC) {
-        const Rev* r = revLookup(*itC);
+        const Revision* r = revLookup(*itC);
         (*itC).prepend(QString("%1 ").arg(r->orderIdx, 6));
     }
     childs.sort();
@@ -627,7 +627,7 @@ const QStringList Git::getChilds(SCRef parent)
 
 const QString Git::getShortLog(SCRef sha)
 {
-    const Rev* r = revLookup(sha);
+    const Revision* r = revLookup(sha);
     return (r ? r->shortLog() : "");
 }
 
@@ -863,7 +863,7 @@ bool Git::isTreeModified(SCRef sha)
 
 bool Git::isParentOf(SCRef par, SCRef child)
 {
-    const Rev* c = revLookup(child);
+    const Revision* c = revLookup(child);
     return (c && c->parentsCount() == 1 && QString(c->parent(0)) == par); // no merges
 }
 
@@ -890,7 +890,7 @@ bool Git::isSameFiles(SCRef tree1Sha, SCRef tree2Sha)
 const QStringList Git::getDescendantBranches(SCRef sha, bool shaOnly)
 {
     QStringList tl;
-    const Rev* r = revLookup(sha);
+    const Revision* r = revLookup(sha);
     if (!r || (r->descBrnMaster == -1))
         return tl;
 
@@ -920,7 +920,7 @@ const QStringList Git::getDescendantBranches(SCRef sha, bool shaOnly)
 const QStringList Git::getNearTags(bool goDown, SCRef sha)
 {
     QStringList tl;
-    const Rev* r = revLookup(sha);
+    const Revision* r = revLookup(sha);
     if (!r)
         return tl;
 
@@ -956,7 +956,7 @@ const QString Git::getLastCommitMsg()
         return "";
     }
 
-    const Rev* c = revLookup(sha);
+    const Revision* c = revLookup(sha);
     if (!c) {
         dbp("ASSERT: getLastCommitMsg sha <%1> not found", sha);
         return "";
@@ -967,7 +967,7 @@ const QString Git::getLastCommitMsg()
 
 const QString Git::getNewCommitMsg()
 {
-    const Rev* c = revLookup(ZERO_SHA);
+    const Revision* c = revLookup(ZERO_SHA);
     if (!c) {
         dbs("ASSERT: getNewCommitMsg zero_sha not found");
         return "";
@@ -1018,7 +1018,7 @@ const QString Git::getDesc(SCRef sha, QRegExp& shortLogRE, QRegExp& longLogRE, b
     if (sha.isEmpty())
         return "";
 
-    const Rev* c = revLookup(sha, fh);
+    const Revision* c = revLookup(sha, fh);
     if (!c)            // sha of a not loaded revision, as
         return ""; // example asked from file history
 
@@ -1082,7 +1082,7 @@ const QString Git::getDesc(SCRef sha, QRegExp& shortLogRE, QRegExp& longLogRE, b
     while ((pos = text.indexOf(reSHA, pos)) != -1) {
 
         SCRef ref = reSHA.cap(0).mid(2);
-        const Rev* r = (ref.length() == 40 ? revLookup(ref) : revLookup(getRefSha(ref)));
+        const Revision* r = (ref.length() == 40 ? revLookup(ref) : revLookup(getRefSha(ref)));
         if (r && r->sha() != ZERO_SHA_RAW) {
             QString slog(r->shortLog());
             if (slog.isEmpty()) // very rare but possible
@@ -1136,7 +1136,7 @@ bool Git::runDiffTreeWithRenameDetection(SCRef runCmd, QString* runOutput)
     return true;
 }
 
-const RevFile* Git::getAllMergeFiles(const Rev* r)
+const RevFile* Git::getAllMergeFiles(const Revision* r)
 {
     SCRef mySha(ALL_MERGE_FILES + r->sha());
     if (revsFiles.contains(toTempSha(mySha)))
@@ -1153,7 +1153,7 @@ const RevFile* Git::getAllMergeFiles(const Rev* r)
 
 const RevFile* Git::getFiles(SCRef sha, SCRef diffToSha, bool allFiles, SCRef path)
 {
-    const Rev* r = revLookup(sha);
+    const Revision* r = revLookup(sha);
     if (!r)
         return NULL;
 
@@ -1874,7 +1874,7 @@ const QStringList Git::getOthersFiles() {
     return runOutput.split('\n', QString::SkipEmptyParts);
 }
 
-Rev* Git::fakeRevData(SCRef sha, SCList parents, SCRef author, SCRef date, SCRef log, SCRef longLog,
+Revision* Git::fakeRevData(SCRef sha, SCList parents, SCRef author, SCRef date, SCRef log, SCRef longLog,
                       SCRef patch, int idx, FileHistory* fh) {
 
     QString data('>' + sha + 'X' + parents.join(" ") + " \n");
@@ -1891,11 +1891,11 @@ Rev* Git::fakeRevData(SCRef sha, SCList parents, SCRef author, SCRef date, SCRef
 
     fh->rowData.append(ba);
     int dummy;
-    Rev* c = new Rev(*ba, 0, idx, &dummy, !isMainHistory(fh));
+    Revision* c = new Revision(*ba, 0, idx, &dummy, !isMainHistory(fh));
     return c;
 }
 
-const Rev* Git::fakeWorkDirRev(SCRef parent, SCRef log, SCRef longLog, int idx, FileHistory* fh) {
+const Revision* Git::fakeWorkDirRev(SCRef parent, SCRef log, SCRef longLog, int idx, FileHistory* fh) {
 
     QString patch;
     if (!isMainHistory(fh))
@@ -1904,7 +1904,7 @@ const Rev* Git::fakeWorkDirRev(SCRef parent, SCRef log, SCRef longLog, int idx, 
     QString date(QString::number(QDateTime::currentDateTime().toTime_t()));
     QString author("Working Dir");
     QStringList parents(parent);
-    Rev* c = fakeRevData(ZERO_SHA, parents, author, date, log, longLog, patch, idx, fh);
+    Revision* c = fakeRevData(ZERO_SHA, parents, author, date, log, longLog, patch, idx, fh);
     c->isDiffCache = true;
     c->lanes.append(LANE_EMPTY);
     return c;
@@ -1962,7 +1962,7 @@ void Git::getDiffIndex() {
 
     // then mockup the corresponding Rev
     SCRef log = (isNothingToCommit() ? "Nothing to commit" : "Working dir changes");
-    const Rev* r = fakeWorkDirRev(head, log, status, revData->revOrder.count(), revData);
+    const Revision* r = fakeWorkDirRev(head, log, status, revData->revOrder.count(), revData);
     revData->revs.insert(ZERO_SHA_RAW, r);
     revData->revOrder.append(ZERO_SHA_RAW);
     revData->earlyOutputCntBase = revData->revOrder.count();
@@ -2489,7 +2489,7 @@ void Git::loadFileNames() {
     FOREACH (ShaVect, it, revData->revOrder) {
 
         if (!revsFiles.contains(*it)) {
-            const Rev* c = revLookup(*it);
+            const Revision* c = revLookup(*it);
             if (c->parentsCount() == 1) { // skip initials and merges
                 diffTreeBuf.append(*it).append('\n');
                 revCnt++;
@@ -2506,12 +2506,12 @@ void Git::loadFileNames() {
     }
 }
 
-bool Git::filterEarlyOutputRev(FileHistory* fh, Rev* rev) {
+bool Git::filterEarlyOutputRev(FileHistory* fh, Revision* rev) {
 
     if (fh->earlyOutputCnt < fh->revOrder.count()) {
 
         const ShaString& sha = fh->revOrder[fh->earlyOutputCnt++];
-        const Rev* c = revLookup(sha, fh);
+        const Revision* c = revLookup(sha, fh);
         if (c) {
             if (rev->sha() != sha || rev->parents() != c->parents()) {
                 // mismatch found! set correct value, 'rev' will
@@ -2531,11 +2531,11 @@ int Git::addChunk(FileHistory* fh, const QByteArray& ba, int start) {
 
     RevMap& r = fh->revs;
     int nextStart;
-    Rev* rev;
+    Revision* rev;
 
     do {
         // only here we create a new rev
-        rev = new Rev(ba, start, fh->revOrder.count(), &nextStart, !isMainHistory(fh));
+        rev = new Revision(ba, start, fh->revOrder.count(), &nextStart, !isMainHistory(fh));
 
         if (nextStart == -2) {
             delete rev;
@@ -2604,8 +2604,8 @@ int Git::addChunk(FileHistory* fh, const QByteArray& ba, int start) {
 
         // this is the new rev with renamed file, the rev is correct but
         // the patch, create a new rev with proper patch and use that instead
-        const Rev* prevSha = revLookup(sha, fh);
-        Rev* c = fakeRevData(sha, rev->parents(), rev->author(),
+        const Revision* prevSha = revLookup(sha, fh);
+        Revision* c = fakeRevData(sha, rev->parents(), rev->author(),
                              rev->authorDate(), rev->shortLog(), rev->longLog(),
                              fh->renamedPatches[sha], prevSha->orderIdx, fh);
 
@@ -2640,7 +2640,7 @@ int Git::addChunk(FileHistory* fh, const QByteArray& ba, int start) {
         // has been reset so update the lanes now.
         if (loadingUnAppliedPatches) {
 
-            Rev* c = const_cast<Rev*>(revLookup(sha, fh));
+            Revision* c = const_cast<Revision*>(revLookup(sha, fh));
             c->isUnApplied = true;
             c->lanes.append(LANE_UNAPPLIED);
 
@@ -2649,7 +2649,7 @@ int Git::addChunk(FileHistory* fh, const QByteArray& ba, int start) {
             Reference* rf = lookupReference(sha);
             if (rf && (rf->type & APPLIED)) {
 
-                Rev* c = const_cast<Rev*>(revLookup(sha, fh));
+                Revision* c = const_cast<Revision*>(revLookup(sha, fh));
                 c->isApplied = true;
                 if (isMainHistory(fh)) {
                     patchesStillToFind--;
@@ -2671,7 +2671,7 @@ bool Git::copyDiffIndex(FileHistory* fh, SCRef parent) {
         dbs("ASSERT in copyDiffIndex: called with wrong context");
         return false;
     }
-    const Rev* r = revLookup(ZERO_SHA);
+    const Revision* r = revLookup(ZERO_SHA);
     if (!r)
         return false;
 
@@ -2680,7 +2680,7 @@ bool Git::copyDiffIndex(FileHistory* fh, SCRef parent) {
         return false;
 
     // insert a custom ZERO_SHA rev with proper parent
-    const Rev* rf = fakeWorkDirRev(parent, "Working dir changes", "long log\n", 0, fh);
+    const Revision* rf = fakeWorkDirRev(parent, "Working dir changes", "long log\n", 0, fh);
     fh->revs.insert(ZERO_SHA_RAW, rf);
     fh->revOrder.append(ZERO_SHA_RAW);
     return true;
@@ -2697,7 +2697,7 @@ void Git::setLane(SCRef sha, FileHistory* fh) {
     for (uint cnt = shaVec.count(); i < cnt; ++i) {
 
         const ShaString& curSha = shaVec[i];
-        Rev* r = const_cast<Rev*>(revLookup(curSha, fh));
+        Revision* r = const_cast<Revision*>(revLookup(curSha, fh));
         if (r->lanes.count() == 0)
             updateLanes(*r, *l, curSha);
 
@@ -2707,7 +2707,7 @@ void Git::setLane(SCRef sha, FileHistory* fh) {
     fh->firstFreeLane = ++i;
 }
 
-void Git::updateLanes(Rev& c, Lanes& lns, SCRef sha) {
+void Git::updateLanes(Revision& c, Lanes& lns, SCRef sha) {
 // we could get third argument from c.sha(), but we are in fast path here
 // and c.sha() involves a deep copy, so we accept a little redundancy
 
@@ -2852,13 +2852,13 @@ void Git::appendFileName(RevFile& rf, SCRef name, FileNamesLoader& fl) {
         fl.rfNames.append(*it);
 }
 
-void Git::updateDescMap(const Rev* r,uint idx, QHash<QPair<uint, uint>, bool>& dm,
+void Git::updateDescMap(const Revision* r,uint idx, QHash<QPair<uint, uint>, bool>& dm,
                         QHash<uint, QVector<int> >& dv) {
 
     QVector<int> descVec;
     if (r->descRefsMaster != -1) {
 
-        const Rev* tmp = revLookup(revData->revOrder[r->descRefsMaster]);
+        const Revision* tmp = revLookup(revData->revOrder[r->descRefsMaster]);
         const QVector<int>& nr = tmp->descRefs;
 
         for (int i = 0; i < nr.count(); i++) {
@@ -2892,7 +2892,7 @@ void Git::updateDescMap(const Rev* r,uint idx, QHash<QPair<uint, uint>, bool>& d
     dv.insert(idx, descVec);
 }
 
-void Git::mergeBranches(Rev* p, const Rev* r) {
+void Git::mergeBranches(Revision* p, const Revision* r) {
 
     int r_descBrnMaster = (checkRef(r->sha(), BRANCH | RMT_BRANCH) ? r->orderIdx : r->descBrnMaster);
 
@@ -2911,7 +2911,7 @@ void Git::mergeBranches(Rev* p, const Rev* r) {
     p->descBrnMaster = p->orderIdx;
 }
 
-void Git::mergeNearTags(bool down, Rev* p, const Rev* r, const QHash<QPair<uint, uint>, bool>& dm) {
+void Git::mergeNearTags(bool down, Revision* p, const Revision* r, const QHash<QPair<uint, uint>, bool>& dm) {
 
     bool isTag = checkRef(r->sha(), TAG);
     int r_descRefsMaster = isTag ? r->orderIdx : r->descRefsMaster;
@@ -2986,10 +2986,10 @@ void Git::indexTree() {
         bool isB = (type & (BRANCH | RMT_BRANCH));
         bool isT = (type & TAG);
 
-        const Rev* r = revLookup(ro[i]);
+        const Revision* r = revLookup(ro[i]);
 
         if (isB) {
-            Rev* rr = const_cast<Rev*>(r);
+            Revision* rr = const_cast<Revision*>(r);
             if (r->descBrnMaster != -1) {
                 const ShaString& sha = ro[r->descBrnMaster];
                 rr->descBranches = revLookup(sha)->descBranches;
@@ -2998,13 +2998,13 @@ void Git::indexTree() {
         }
         if (isT) {
             updateDescMap(r, i, descMap, descVect);
-            Rev* rr = const_cast<Rev*>(r);
+            Revision* rr = const_cast<Revision*>(r);
             rr->descRefs.clear();
             rr->descRefs.append(i);
         }
         for (uint y = 0; y < r->parentsCount(); y++) {
 
-            Rev* p = const_cast<Rev*>(revLookup(r->parent(y)));
+            Revision* p = const_cast<Revision*>(revLookup(r->parent(y)));
             if (p) {
                 p->childs.append(i);
 
@@ -3023,17 +3023,17 @@ void Git::indexTree() {
     // walk backward through the tree and compute nearest tagged ancestors
     for (int i = ro.count() - 1; i >= 0; i--) {
 
-        const Rev* r = revLookup(ro[i]);
+        const Revision* r = revLookup(ro[i]);
         bool isTag = checkRef(ro[i], TAG);
 
         if (isTag) {
-            Rev* rr = const_cast<Rev*>(r);
+            Revision* rr = const_cast<Revision*>(r);
             rr->ancRefs.clear();
             rr->ancRefs.append(i);
         }
         for (int y = 0; y < r->childs.count(); y++) {
 
-            Rev* c = const_cast<Rev*>(revLookup(ro[r->childs[y]]));
+            Revision* c = const_cast<Revision*>(revLookup(ro[r->childs[y]]));
             if (c) {
                 if (c->ancRefsMaster == -1)
                     c->ancRefsMaster = isTag ? r->orderIdx:r->ancRefsMaster;
@@ -3044,186 +3044,4 @@ void Git::indexTree() {
     }
 }
 
-// ********************************* Rev **************************
-
-const QString Rev::mid(int start, int len) const {
-
-    // warning no sanity check is done on arguments
-    const char* data = ba.constData();
-    return QString::fromAscii(data + start, len);
-}
-
-const QString Rev::midSha(int start, int len) const {
-
-    // warning no sanity check is done on arguments
-    const char* data = ba.constData();
-    return QString::fromLatin1(data + start, len); // faster then formAscii
-}
-
-const ShaString Rev::parent(int idx) const {
-
-    return ShaString(ba.constData() + shaStart + 41 + 41 * idx);
-}
-
-const QStringList Rev::parents() const {
-
-    QStringList p;
-    int idx = shaStart + 41;
-
-    for (int i = 0; i < parentsCnt; i++) {
-        p.append(midSha(idx, 40));
-        idx += 41;
-    }
-    return p;
-}
-
-int Rev::indexData(bool quick, bool withDiff) const {
-/*
-  This is what 'git log' produces:
-
-    - a possible one line with "Final output:\n" in case of --early-output option
-    - one line with "log size" + len of this record
-    - one line with boundary info + sha + an arbitrary amount of parent's sha
-    - one line with committer name + e-mail
-    - one line with author name + e-mail
-    - one line with author date as unix timestamp
-    - zero or more non blank lines with other info, as the encoding FIXME
-    - one blank line
-    - zero or one line with log title
-    - zero or more lines with log message
-    - zero or more lines with diff content (only for file history)
-    - a terminating '\0'
-*/
-    const int last = ba.size() - 1;
-    int logSize = 0, idx = start;
-    int logEnd, revEnd;
-
-    // direct access is faster then QByteArray.at()
-    const char* data = ba.constData();
-    char* fixup = const_cast<char*>(data); // to build '\0' terminating strings
-
-    if (start + 42 > last) // at least sha + 'X' + 'X' + '\n' + must be present
-        return -1;
-
-    if (data[start] == 'F') // "Final output", let caller handle this
-        return (ba.indexOf('\n', start) != -1 ? -2 : -1);
-
-    // parse log size if present
-    if (data[idx] == 'l') { // 'log size xxx\n'
-
-        idx += 9; // move idx to beginning of log size
-        int tmp;
-        while ((tmp = data[idx++]) != '\n')
-            logSize = logSize * 10 + tmp - 48;
-    }
-    // idx points to the boundary information
-    if (++idx + 42 > last)
-        return -1;
-
-    shaStart = idx;
-
-    // ok, now shaStart is valid but msgSize
-    // could be still 0 if not available
-    logEnd = shaStart - 1 + logSize;
-    if (logEnd > last)
-        return -1;
-
-    idx += 40; // now points to 'X' place holder
-
-    fixup[idx] = '\0'; // we want sha to be a '\0' terminated ascii string
-
-    parentsCnt = 0;
-
-    if (data[idx + 2] == '\n') // initial revision
-        ++idx;
-    else do {
-        parentsCnt++;
-        idx += 41;
-
-        if (idx + 1 >= last)
-            break;
-
-        fixup[idx] = '\0'; // we want parents '\0' terminated
-
-    } while (data[idx + 1] != '\n');
-
-    ++idx; // now points to the trailing '\n' of sha line
-
-    // check for !msgSize
-    if (withDiff || !logSize) {
-
-        revEnd = (logEnd > idx) ? logEnd - 1: idx;
-        do { // search for "\n\0" to handle (rare) cases of '\0'
-             // in content, see c42012 and bb8d8a6 in Linux tree
-            revEnd = ba.indexOf('\0', revEnd + 1);
-            if (revEnd == -1)
-                return -1;
-
-        } while (data[revEnd - 1] != '\n');
-
-    } else
-        revEnd = logEnd;
-
-    if (revEnd > last) // after this point we know to have the whole record
-        return -1;
-
-    // ok, now revEnd is valid but logEnd could be not if !logSize
-    // in case of diff we are sure content will be consumed so
-    // we go all the way
-    if (quick && !withDiff)
-        return ++revEnd;
-
-    comStart = ++idx;
-    idx = ba.indexOf('\n', idx); // committer line end
-    if (idx == -1) {
-        dbs("ASSERT in indexData: unexpected end of data");
-        return -1;
-    }
-
-    autStart = ++idx;
-    idx = ba.indexOf('\n', idx); // author line end
-    if (idx == -1) {
-        dbs("ASSERT in indexData: unexpected end of data");
-        return -1;
-    }
-    autDateStart = ++idx;
-    idx += 11; // date length + trailing '\n'
-
-    diffStart = diffLen = 0;
-    if (withDiff) {
-        diffStart = logSize ? logEnd : ba.indexOf("\ndiff ", idx);
-
-        if (diffStart != -1 && diffStart < revEnd)
-            diffLen = revEnd - ++diffStart;
-        else
-            diffStart = 0;
-    }
-    if (!logSize)
-        logEnd = diffStart ? diffStart : revEnd;
-
-    // ok, now logEnd is valid and we can handle the log
-    sLogStart = idx;
-
-    if (logEnd < sLogStart) { // no shortlog no longLog
-
-        sLogStart = sLogLen = 0;
-        lLogStart = lLogLen = 0;
-    } else {
-        lLogStart = ba.indexOf('\n', sLogStart);
-        if (lLogStart != -1 && lLogStart < logEnd - 1) {
-
-            sLogLen = lLogStart - sLogStart; // skip sLog trailing '\n'
-            lLogLen = logEnd - lLogStart; // include heading '\n' in long log
-
-        } else { // no longLog
-            sLogLen = logEnd - sLogStart;
-            if (data[sLogStart + sLogLen - 1] == '\n')
-                sLogLen--; // skip trailing '\n' if any
-
-            lLogStart = lLogLen = 0;
-        }
-    }
-    indexed = true;
-    return ++revEnd;
-}
 
