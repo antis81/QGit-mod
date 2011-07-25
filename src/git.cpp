@@ -200,7 +200,7 @@ QTextCodec* Git::getTextCodec(bool* isGitArchive)
         return NULL;
 
     QString runOutput;
-   if (!run("git config i18n.commitencoding", &runOutput))
+    if (!run("git config i18n.commitencoding", &runOutput))
         return NULL;
 
     if (runOutput.isEmpty()) // git docs says default is utf-8
@@ -209,19 +209,23 @@ QTextCodec* Git::getTextCodec(bool* isGitArchive)
     return QTextCodec::codecForName(runOutput.trimmed().toLatin1());
 }
 
+// TODO: make as static
 const QString Git::escape(QString s) {
     return s.replace(QRegExp("([\\\\\\ \\\"\\\'])"), "\\\\1");
 }
 
+// TODO: make as static
 const QString Git::unescape(QString s) {
     return s.replace(QRegExp("(\\\\([\\ \\\\\\\'\\\"]))"), "\\2");
 }
 
+// TODO: make as static
 const QString Git::quote(SCRef nm) {
 
     return (QUOTE_CHAR + nm + QUOTE_CHAR);
 }
 
+// TODO: make as static
 const QString Git::quote(SCList sl)
 {
     QString q(sl.join(QUOTE_CHAR + ' ' + QUOTE_CHAR));
@@ -281,7 +285,7 @@ const QString Git::getRefSha(SCRef refName, RefType type, bool askGit)
 
     FOREACH (RefMap, it, refsShaMap) {
 
-            const Reference& rf = *it;
+        const Reference& rf = *it;
 
         if ((any || type == TAG) && rf.tags.contains(refName))
             return it.key();
@@ -344,13 +348,15 @@ const QStringList Git::getAllRefNames(uint mask, bool onlyLoaded)
 
         if ((mask & (APPLIED | UN_APPLIED)) && !onlyLoaded)
             names.append((*it).stgitPatch); // doesn't work with 'onlyLoaded'
-        }
-        if (onlyLoaded) {
+    }
+
+    if (onlyLoaded) {
         names.sort();
         QStringList::iterator itN(names.begin());
         for ( ; itN != names.end(); ++itN) // strip 'idx'
             (*itN) = (*itN).section(' ', -1, -1);
     }
+
     return names;
 }
 
@@ -391,6 +397,7 @@ const QString Git::getRevInfo(SCRef sha)
     return refsInfo.trimmed();
 }
 
+// TODO: move to reference property
 const QString Git::getTagMsg(SCRef sha)
 {
     if (!checkRef(sha, TAG)) {
@@ -641,16 +648,17 @@ MyProcess* Git::getDiff(SCRef sha, QObject* receiver, SCRef diffToSha, bool comb
         runCmd = "git diff-tree --no-color -r --patch-with-stat ";
         runCmd.append(combined ? "-c " : "-C -m "); // TODO rename for combined
         runCmd.append(diffToSha + " " + sha); // diffToSha could be empty
-        } else {
+    } else {
         runCmd = "git diff-index --no-color -r -m --patch-with-stat HEAD";
-        }
+    }
 
     return runAsync(runCmd, receiver);
 }
 
 const QString Git::getWorkDirDiff(SCRef fileName)
 {
-    QString runCmd("git diff-index --no-color -r -z -m -p --full-index --no-commit-id HEAD"), runOutput;
+    QString runCmd("git diff-index --no-color -r -z -m -p --full-index --no-commit-id HEAD");
+    QString runOutput;
     if (!fileName.isEmpty())
         runCmd.append(" -- " + quote(fileName));
 
@@ -697,19 +705,17 @@ MyProcess* Git::getFile(SCRef fileSha, QObject* receiver, QByteArray* result, SC
       from an old plain file. In this case annotation will fail until
       change is committed.
     */
-    if (fileSha == ZERO_SHA)
+    if (fileSha == ZERO_SHA) {
 
 #ifdef Q_OS_WIN32
-    {
         QString winPath = quote(fileName);
         winPath.replace("/", "\\");
         runCmd = "type " + winPath;
-    }
 #else
         runCmd = "cat " + quote(fileName);
 #endif
 
-    else {
+    } else {
         if (fileSha.isEmpty()) // deleted
             runCmd = "git diff-tree HEAD HEAD"; // fake an empty file reading
         else
@@ -978,6 +984,7 @@ const QString Git::getNewCommitMsg()
     return status;
 }
 
+// TODO: make as static
 const QString Git::colorMatch(SCRef txt, QRegExp& regExp)
 {
     QString text;
@@ -1000,6 +1007,7 @@ const QString Git::colorMatch(SCRef txt, QRegExp& regExp)
     return text;
 }
 
+// TODO: make as static
 const QString Git::formatList(SCList sl, SCRef name, bool inOneLine)
 {
     if (sl.isEmpty())
@@ -1012,6 +1020,7 @@ const QString Git::formatList(SCList sl, SCRef name, bool inOneLine)
     return ls;
 }
 
+// TODO: move to a view
 const QString Git::getDesc(SCRef sha, QRegExp& shortLogRE, QRegExp& longLogRE, bool showHeader,
                            FileHistory* fh)
 {
@@ -1144,7 +1153,8 @@ const RevFile* Git::getAllMergeFiles(const Revision* r)
 
     EM_PROCESS_EVENTS; // 'git diff-tree' could be slow
 
-    QString runCmd("git diff-tree --no-color -r -m " + r->sha()), runOutput;
+    QString runCmd("git diff-tree --no-color -r -m " + r->sha());
+    QString runOutput;
     if (!runDiffTreeWithRenameDetection(runCmd, &runOutput))
         return NULL;
 
@@ -1643,6 +1653,7 @@ static bool startup = true; // it's OK to be unique among qgit windows
 
 static QHash<QString, QString> localDates;
 
+// TODO: move to a view
 const QString Git::getLocalDate(SCRef gitDate) {
 // fast path here, we use a cache to avoid the slow date calculation
 
@@ -1997,6 +2008,7 @@ void Git::parseDiffFormatLine(RevFile& rf, SCRef line, int parNum, FileNamesLoad
     }
 }
 
+// TODO: move into RevFile ?
 void Git::setStatus(RevFile& rf, SCRef rowSt) {
 
     char status = rowSt.at(0).toLatin1();
@@ -2026,6 +2038,7 @@ void Git::setStatus(RevFile& rf, SCRef rowSt) {
     }
 }
 
+// TODO: move into RevFile ?
 void Git::setExtStatus(RevFile& rf, SCRef rowSt, int parNum, FileNamesLoader& fl) {
 
     const QStringList sl(rowSt.split('\t', QString::SkipEmptyParts));
