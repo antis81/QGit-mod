@@ -20,23 +20,23 @@ RangeSelectImpl::RangeSelectImpl(QWidget* par, QString* r, bool repoChanged, Git
     setupUi(this);
 
     QStringList orl, tmp;
-    orderRefs(git->getAllRefNames(Git::BRANCH, !Git::optOnlyLoaded), tmp);
+    orderRefs(git->getAllRefNames(Reference::BRANCH, !Git::optOnlyLoaded), tmp);
     if (!tmp.isEmpty())
         orl << tmp << "";
 
-    orderRefs(git->getAllRefNames(Git::RMT_BRANCH, !Git::optOnlyLoaded), tmp);
+    orderRefs(git->getAllRefNames(Reference::REMOTE_BRANCH, !Git::optOnlyLoaded), tmp);
     if (!tmp.isEmpty())
         orl << tmp << "";
 
-    orderRefs(git->getAllRefNames(Git::TAG, !Git::optOnlyLoaded), tmp);
+    orderRefs(git->getAllRefNames(Reference::TAG, !Git::optOnlyLoaded), tmp);
     if (!tmp.isEmpty())
         orl << tmp;
 
     // as default select first tag that is not also the current HEAD
     int defIdx = orl.count() - tmp.count();
     if (!tmp.empty()) {
-        SCRef tagSha(git->getRefSha(tmp.first(), Git::TAG, false));
-        if (!tagSha.isEmpty() && git->checkRef(tagSha, Git::CUR_BRANCH))
+        SCRef tagSha(git->getRefSha(tmp.first(), Reference::TAG, false));
+        if (!tagSha.isEmpty() && git->shaMap.checkRef(tagSha, Reference::CUR_BRANCH))
             // in this case set as default tag the next one if any
             defIdx += (tmp.count() > 1 ? 1 : -1);
     }

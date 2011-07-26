@@ -434,7 +434,7 @@ void MainImpl::updateContextActions(SCRef newRevSha, SCRef newFileName,
 
     if (found) {
         const Revision* r = git->revLookup(newRevSha);
-        isTag = git->checkRef(newRevSha, Git::TAG);
+        isTag = git->shaMap.checkRef(newRevSha, Reference::TAG);
         isUnApplied = r->isUnApplied;
         isApplied = r->isApplied;
     }
@@ -1554,7 +1554,7 @@ void MainImpl::doBranchOrTag(bool isTag) {
                      "are not allowed in " + refDesc + " name.");
         return;
     }
-    if (!git->getRefSha(ref, isTag ? Git::TAG : Git::BRANCH, false).isEmpty()) {
+    if (!git->getRefSha(ref, isTag ? Reference::TAG : Reference::BRANCH, false).isEmpty()) {
         QMessageBox::warning(this, boxDesc,
                      "Sorry, " + refDesc + " name already exists.\n"
                      "Please choose a different name.");
@@ -1579,7 +1579,8 @@ void MainImpl::doBranchOrTag(bool isTag) {
         statusBar()->showMessage("Sorry, unable to tag the revision");
 }
 
-void MainImpl::ActTagDelete_activated() {
+void MainImpl::ActTagDelete_activated()
+{
 
     if (QMessageBox::question(this, "Delete tag - QGit",
                      "Do you want to un-tag selected revision?",
@@ -1595,12 +1596,13 @@ void MainImpl::ActTagDelete_activated() {
         statusBar()->showMessage("Sorry, unable to un-tag the revision");
 }
 
-void MainImpl::ActPush_activated() {
+void MainImpl::ActPush_activated()
+{
 
     QStringList selectedItems;
     rv->tab()->listViewLog->getSelectedItems(selectedItems);
     for (int i = 0; i < selectedItems.count(); i++) {
-        if (!git->checkRef(selectedItems[i], Git::UN_APPLIED)) {
+        if (!git->shaMap.checkRef(selectedItems[i], Reference::UN_APPLIED)) {
             statusBar()->showMessage("Please, select only unapplied patches");
             return;
         }
@@ -1625,7 +1627,8 @@ void MainImpl::ActPush_activated() {
     refreshRepo(false);
 }
 
-void MainImpl::ActPop_activated() {
+void MainImpl::ActPop_activated()
+{
 
     QStringList selectedItems;
     rv->tab()->listViewLog->getSelectedItems(selectedItems);

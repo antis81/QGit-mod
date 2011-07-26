@@ -43,7 +43,7 @@ private:
     QIcon branchIcon;
     QIcon masterBranchIcon;
     QIcon tagIcon;
-    void addNode(ItemType headerType, Git::RefType type);
+    void addNode(ItemType headerType, Reference::Type type);
     void addRemotesNodes();
     QTreeWidgetItem *recursiveFindBranch(const QString &branch);
     QTreeWidgetItem *recursiveFindBranch(QTreeWidgetItem *parent, const QString &branch);

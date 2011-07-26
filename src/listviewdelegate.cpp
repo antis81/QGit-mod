@@ -341,46 +341,46 @@ bool ListViewDelegate::changedFiles(SCRef sha) const {
 
 QPixmap* ListViewDelegate::getTagMarks(SCRef sha, const QStyleOptionViewItem& opt) const {
 
-    uint rt = git->checkRef(sha);
+    uint rt = git->shaMap.checkRef(sha);
     if (rt == 0)
         return NULL; // common case
 
     QPixmap* pm = new QPixmap(); // must be deleted by caller
 
-    if (rt & Git::BRANCH)
-        addRefPixmap(&pm, sha, Git::BRANCH, opt);
+    if (rt & Reference::BRANCH)
+        addRefPixmap(&pm, sha, Reference::BRANCH, opt);
 
-    if (rt & Git::RMT_BRANCH)
-        addRefPixmap(&pm, sha, Git::RMT_BRANCH, opt);
+    if (rt & Reference::REMOTE_BRANCH)
+        addRefPixmap(&pm, sha, Reference::REMOTE_BRANCH, opt);
 
-    if (rt & Git::TAG)
-        addRefPixmap(&pm, sha, Git::TAG, opt);
+    if (rt & Reference::TAG)
+        addRefPixmap(&pm, sha, Reference::TAG, opt);
 
-    if (rt & Git::REF)
-        addRefPixmap(&pm, sha, Git::REF, opt);
+    if (rt & Reference::REF)
+        addRefPixmap(&pm, sha, Reference::REF, opt);
 
     return pm;
 }
 
 void ListViewDelegate::addRefPixmap(QPixmap** pp, SCRef sha, int type, QStyleOptionViewItem opt) const {
 
-    SCList refs = git->getRefName(sha, (Git::RefType)type);
+    SCList refs = git->shaMap.getRefName(sha, (Reference::Type)type);
     FOREACH_SL (it, refs) {
 
         bool isCur = git->currentBranch().compare(*it) == 0;
         opt.font.setBold(isCur);
 
         QColor clr;
-        if (type == Git::BRANCH)
+        if (type == Reference::BRANCH)
             clr = (isCur ? Qt::green : DARK_GREEN);
 
-        else if (type == Git::RMT_BRANCH)
+        else if (type == Reference::REMOTE_BRANCH)
             clr = LIGHT_ORANGE;
 
-        else if (type == Git::TAG)
+        else if (type == Reference::TAG)
             clr = Qt::yellow;
 
-        else if (type == Git::REF)
+        else if (type == Reference::REF)
             clr = PURPLE;
 
         opt.palette.setColor(QPalette::Window, clr);

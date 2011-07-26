@@ -149,6 +149,7 @@ bool Git::isImageFile(SCRef file)
     return QImageReader::supportedImageFormats().contains(ext.toAscii());
 }
 
+// TODO: this may work not correctly for others extensions. May be use internal GIT algorithm?
 bool Git::isBinaryFile(SCRef file)
 {
     static const char* binaryFileExtensions[] = {"bmp", "gif", "jpeg", "jpg",
@@ -233,73 +234,27 @@ const QString Git::quote(SCList sl)
     return q;
 }
 
-uint Git::checkRef(const ShaString& sha, uint mask) const
+const QString Git::getRefSha(SCRef refName, Reference::Type type, bool askGit)
 {
-    RefMap::const_iterator it(refsShaMap.constFind(sha));
-    return (it != refsShaMap.constEnd() ? (*it).type & mask : 0);
-}
+    bool any = (type == Reference::ANY_REF);
 
-uint Git::checkRef(SCRef sha, uint mask) const
-{
-    RefMap::const_iterator it(refsShaMap.constFind(toTempSha(sha)));
-    return (it != refsShaMap.constEnd() ? (*it).type & mask : 0);
-}
-
-const QStringList Git::getRefName(SCRef sha, RefType type) const
-{
-    if (!checkRef(sha, type))
-        return QStringList();
-
-    const Reference& rf = refsShaMap[toTempSha(sha)];
-
-    if (type == TAG)
-        return rf.tags;
-
-    else if (type == BRANCH)
-        return rf.branches;
-
-    else if (type == RMT_BRANCH)
-        return rf.remoteBranches;
-
-    else if (type == REF)
-        return rf.refs;
-
-    else if (type == APPLIED || type == UN_APPLIED)
-        return QStringList(rf.stgitPatch);
-
-    return QStringList();
-}
-
-const QStringList Git::getAllRefSha(uint mask)
-{
-    QStringList shas;
-    FOREACH (RefMap, it, refsShaMap)
-        if ((*it).type & mask)
-            shas.append(it.key());
-    return shas;
-}
-
-const QString Git::getRefSha(SCRef refName, RefType type, bool askGit)
-{
-    bool any = (type == ANY_REF);
-
-    FOREACH (RefMap, it, refsShaMap) {
+    FOREACH (ShaMap, it, shaMap) {
 
         const Reference& rf = *it;
 
-        if ((any || type == TAG) && rf.tags.contains(refName))
+        if ((any || type == Reference::TAG) && rf.tags.contains(refName))
             return it.key();
 
-        else if ((any || type == BRANCH) && rf.branches.contains(refName))
+        else if ((any || type == Reference::BRANCH) && rf.branches.contains(refName))
             return it.key();
 
-        else if ((any || type == RMT_BRANCH) && rf.remoteBranches.contains(refName))
+        else if ((any || type == Reference::REMOTE_BRANCH) && rf.remoteBranches.contains(refName))
             return it.key();
 
-        else if ((any || type == REF) && rf.refs.contains(refName))
+        else if ((any || type == Reference::REF) && rf.refs.contains(refName))
             return it.key();
 
-        else if ((any || type == APPLIED || type == UN_APPLIED) && rf.stgitPatch == refName)
+        else if ((any || type == Reference::APPLIED || type == Reference::UN_APPLIED) && rf.stgitPatch == refName)
             return it.key();
     }
     if (!askGit)
@@ -310,6 +265,7 @@ const QString Git::getRefSha(SCRef refName, RefType type, bool askGit)
     errorReportingEnabled = false;
     bool ok = run("git rev-parse --revs-only " + refName, &runOutput);
     errorReportingEnabled = true;
+    // TODO: cache the result
     return (ok ? runOutput.trimmed() : "");
 }
 
@@ -332,21 +288,21 @@ const QStringList Git::getAllRefNames(uint mask, bool onlyLoaded)
 // returns reference names sorted by loading order if 'onlyLoaded' is set
 
     QStringList names;
-    FOREACH (RefMap, it, refsShaMap) {
+    FOREACH (ShaMap, it, shaMap) {
 
-        if (mask & TAG)
+        if (mask & Reference::TAG)
             appendNamesWithId(names, it.key(), (*it).tags, onlyLoaded);
 
-        if (mask & BRANCH)
+        if (mask & Reference::BRANCH)
             appendNamesWithId(names, it.key(), (*it).branches, onlyLoaded);
 
-        if (mask & RMT_BRANCH)
+        if (mask & Reference::REMOTE_BRANCH)
             appendNamesWithId(names, it.key(), (*it).remoteBranches, onlyLoaded);
 
-        if (mask & REF)
+        if (mask & Reference::REF)
             appendNamesWithId(names, it.key(), (*it).refs, onlyLoaded);
 
-        if ((mask & (APPLIED | UN_APPLIED)) && !onlyLoaded)
+        if ((mask & (Reference::APPLIED | Reference::UN_APPLIED)) && !onlyLoaded)
             names.append((*it).stgitPatch); // doesn't work with 'onlyLoaded'
     }
 
@@ -365,31 +321,31 @@ const QString Git::getRevInfo(SCRef sha)
     if (sha.isEmpty())
         return "";
 
-    uint type = checkRef(sha);
+    uint type = shaMap.checkRef(sha);
     if (type == 0)
         return "";
 
     QString refsInfo;
-    if (type & BRANCH) {
-        const QString cap(type & CUR_BRANCH ? "HEAD: " : "Branch: ");
-        refsInfo =  cap + getRefName(sha, BRANCH).join(" ");
+    if (type & Reference::BRANCH) {
+        const QString cap(type & Reference::CUR_BRANCH ? "HEAD: " : "Branch: ");
+        refsInfo =  cap + shaMap.getRefName(sha, Reference::BRANCH).join(" ");
     }
-    if (type & RMT_BRANCH)
-        refsInfo.append("   Remote branch: " + getRefName(sha, RMT_BRANCH).join(" "));
+    if (type & Reference::REMOTE_BRANCH)
+        refsInfo.append("   Remote branch: " + shaMap.getRefName(sha, Reference::REMOTE_BRANCH).join(" "));
 
-    if (type & TAG)
-        refsInfo.append("   Tag: " + getRefName(sha, TAG).join(" "));
+    if (type & Reference::TAG)
+        refsInfo.append("   Tag: " + shaMap.getRefName(sha, Reference::TAG).join(" "));
 
-    if (type & REF)
-        refsInfo.append("   Ref: " + getRefName(sha, REF).join(" "));
+    if (type & Reference::REF)
+        refsInfo.append("   Ref: " + shaMap.getRefName(sha, Reference::REF).join(" "));
 
-    if (type & APPLIED)
-        refsInfo.append("   Patch: " + getRefName(sha, APPLIED).join(" "));
+    if (type & Reference::APPLIED)
+        refsInfo.append("   Patch: " + shaMap.getRefName(sha, Reference::APPLIED).join(" "));
 
-    if (type & UN_APPLIED)
-        refsInfo.append("   Patch: " + getRefName(sha, UN_APPLIED).join(" "));
+    if (type & Reference::UN_APPLIED)
+        refsInfo.append("   Patch: " + shaMap.getRefName(sha, Reference::UN_APPLIED).join(" "));
 
-    if (type & TAG) {
+    if (type & Reference::TAG) {
         SCRef msg(getTagMsg(sha));
         if (!msg.isEmpty())
             refsInfo.append("  [" + msg + "]");
@@ -400,15 +356,17 @@ const QString Git::getRevInfo(SCRef sha)
 // TODO: move to reference property
 const QString Git::getTagMsg(SCRef sha)
 {
-    if (!checkRef(sha, TAG)) {
+    ShaString shaString = toTempSha(sha);
+    if (!shaMap.checkRef(shaString, Reference::TAG)) {
         dbs("ASSERT in Git::getTagMsg, tag not found");
         return "";
     }
-    Reference& rf = refsShaMap[toTempSha(sha)];
+    Reference& rf = shaMap[shaString];
 
     if (!rf.tagMsg.isEmpty())
         return rf.tagMsg;
 
+    // TODO: may be incorrect syntax of RegExp (asterisk)
     QRegExp pgp("-----BEGIN PGP SIGNATURE*END PGP SIGNATURE-----",
                 Qt::CaseSensitive, QRegExp::Wildcard);
 
@@ -422,10 +380,10 @@ const QString Git::getTagMsg(SCRef sha)
 
 bool Git::isPatchName(SCRef nm)
 {
-    if (!getRefSha(nm, UN_APPLIED, false).isEmpty())
+    if (!getRefSha(nm, Reference::UN_APPLIED, false).isEmpty())
         return true;
 
-    return !getRefSha(nm, APPLIED, false).isEmpty();
+    return !getRefSha(nm, Reference::APPLIED, false).isEmpty();
 }
 
 void Git::addExtraFileInfo(QString* rowName, SCRef sha, SCRef diffToSha, bool allMergeFiles)
@@ -910,8 +868,8 @@ const QStringList Git::getDescendantBranches(SCRef sha, bool shaOnly)
             continue;
         }
         SCRef cap = " (" + sha + ") ";
-        RefMap::const_iterator it(refsShaMap.find(sha));
-        if (it == refsShaMap.constEnd())
+        ShaMap::const_iterator it(shaMap.find(sha));
+        if (it == shaMap.constEnd())
             continue;
 
         if (!(*it).branches.empty())
@@ -941,8 +899,8 @@ const QStringList Git::getNearTags(bool goDown, SCRef sha)
 
         const ShaString& sha = revData->revOrder[nr[i]];
         SCRef cap = " (" + sha + ")";
-        RefMap::const_iterator it(refsShaMap.find(sha));
-        if (it != refsShaMap.constEnd())
+        ShaMap::const_iterator it(shaMap.find(sha));
+        if (it != shaMap.constEnd())
             tl.append((*it).tags.join(cap).append(cap));
     }
     return tl;
@@ -1059,8 +1017,8 @@ const QString Git::getDesc(SCRef sha, QRegExp& shortLogRE, QRegExp& longLogRE, b
 
             if (c->isUnApplied || c->isApplied) {
 
-                QStringList patches(getRefName(sha, APPLIED));
-                patches += getRefName(sha, UN_APPLIED);
+                QStringList patches(shaMap.getRefName(sha, Reference::APPLIED));
+                patches += shaMap.getRefName(sha, Reference::UN_APPLIED);
                 ts << formatList(patches, "Patch");
             } else {
                 ts << formatList(c->parents(), "Parent", false);
@@ -1221,7 +1179,7 @@ bool Git::startFileHistory(SCRef sha, SCRef startingFileName, FileHistory* fh)
     fh->resetFileNames(newestFileName);
 
     args.clear(); // load history from all the branches
-    args << getAllRefSha(BRANCH | RMT_BRANCH);
+    args << shaMap.getAllSha(Reference::BRANCH | Reference::REMOTE_BRANCH);
 
     args << "--" << newestFileName;
     return startRevList(args, fh);
@@ -1595,7 +1553,7 @@ bool Git::makeTag(SCRef sha, SCRef tagName, SCRef msg)
 
 bool Git::deleteTag(SCRef sha)
 {
-    const QStringList tags(getRefName(sha, TAG));
+    const QStringList tags(shaMap.getRefName(sha, Reference::TAG));
     if (!tags.empty())
         return run("git tag -d " + tags.first()); // only one
 
@@ -1611,7 +1569,7 @@ bool Git::checkout(SCRef sha)
 
 bool Git::stgPush(SCRef sha)
 {
-    const QStringList patch(getRefName(sha, UN_APPLIED));
+    const QStringList patch(shaMap.getRefName(sha, Reference::UN_APPLIED));
     if (patch.count() != 1) {
         dbp("ASSERT in Git::stgPush, found %1 patches instead of 1", patch.count());
         return false;
@@ -1621,7 +1579,7 @@ bool Git::stgPush(SCRef sha)
 
 bool Git::stgPop(SCRef sha)
 {
-    const QStringList patch(getRefName(sha, APPLIED));
+    const QStringList patch(shaMap.getRefName(sha, Reference::APPLIED));
     if (patch.count() != 1) {
         dbp("ASSERT in Git::stgPop, found %1 patches instead of 1", patch.count());
         return false;
@@ -1724,11 +1682,11 @@ const QString Git::getBaseDir(bool* changed, SCRef wd, bool* ok, QString* gd) {
 Reference* Git::lookupReference(const ShaString& sha, bool create) {
 /* Note: if create flag is set then sha MUST point to persistent data */
 
-    RefMap::iterator it(refsShaMap.find(sha));
-    if (it == refsShaMap.end() && create)
-        it = refsShaMap.insert(sha, Reference());
+    ShaMap::iterator it(shaMap.find(sha));
+    if (it == shaMap.end() && create)
+        it = shaMap.insert(sha, Reference());
 
-    return (it != refsShaMap.end() ? &(*it) : NULL);
+    return (it != shaMap.end() ? &(*it) : NULL);
 }
 
 bool Git::getRefs() {
@@ -1760,7 +1718,7 @@ bool Git::getRefs() {
     if (!run("git show-ref -d", &runOutput))
         return false;
 
-    refsShaMap.clear();
+    shaMap.clear();
     shaBackupBuf.clear(); // revs are already empty now
 
     QString prevRefSha;
@@ -1802,35 +1760,35 @@ bool Git::getRefs() {
 
                 // tagObj must be removed from ref map
                 if (!prevRefSha.isEmpty())
-                    refsShaMap.remove(toTempSha(prevRefSha));
+                    shaMap.remove(toTempSha(prevRefSha));
 
             } else
                 cur->tags.append(refName.mid(10));
 
-            cur->type |= TAG;
+            cur->type |= Reference::TAG;
 
         } else if (refName.startsWith("refs/heads/")) {
 
             cur->branches.append(refName.mid(11));
-            cur->type |= BRANCH;
+            cur->type |= Reference::BRANCH;
             if (curBranchSHA == revSha) {
-                cur->type |= CUR_BRANCH;
+                cur->type |= Reference::CUR_BRANCH;
             }
         } else if (refName.startsWith("refs/remotes/") && !refName.endsWith("HEAD")) {
             cur->remoteBranches.append(refName.mid(13));
-            cur->type |= RMT_BRANCH;
+            cur->type |= Reference::REMOTE_BRANCH;
 
         } else if (!refName.startsWith("refs/bases/") && !refName.endsWith("HEAD")) {
 
             cur->refs.append(refName);
-            cur->type |= REF;
+            cur->type |= Reference::REF;
         }
         prevRefSha = revSha;
     }
     if (isStGIT && !patchNames.isEmpty())
         parseStGitPatches(patchNames, patchShas);
 
-    return !refsShaMap.empty();
+    return !shaMap.empty();
 }
 
 void Git::parseStGitPatches(SCList patchNames, SCList patchShas) {
@@ -1858,7 +1816,7 @@ void Git::parseStGitPatches(SCList patchNames, SCList patchShas) {
         const ShaString& ss = toPersistentSha(patchShas.at(pos), shaBackupBuf);
         Reference* cur = lookupReference(ss, optCreate);
         cur->stgitPatch = patchName;
-        cur->type |= (applied ? APPLIED : UN_APPLIED);
+        cur->type |= (applied ? Reference::APPLIED : Reference::UN_APPLIED);
 
         if (applied)
             patchesStillToFind++;
@@ -2145,7 +2103,7 @@ bool Git::startRevList(SCList args, FileHistory* fh) {
 
 bool Git::startUnappliedList() {
 
-    QStringList unAppliedShaList(getAllRefSha(UN_APPLIED));
+    QStringList unAppliedShaList(shaMap.getAllSha(Reference::UN_APPLIED));
     if (unAppliedShaList.isEmpty())
         return false;
 
@@ -2574,7 +2532,7 @@ int Git::addChunk(FileHistory* fh, const QByteArray& ba, int start) {
         if (loadingUnAppliedPatches) { // filter out possible spurious revs
 
             Reference* rf = lookupReference(sha);
-            if (!(rf && (rf->type & UN_APPLIED))) {
+            if (!(rf && (rf->type & Reference::UN_APPLIED))) {
                 delete rev;
                 return nextStart;
             }
@@ -2590,7 +2548,7 @@ int Git::addChunk(FileHistory* fh, const QByteArray& ba, int start) {
             !loadingUnAppliedPatches && isMainHistory(fh)) {
 
             Reference* rf = lookupReference(sha);
-            if (!(rf && (rf->type & APPLIED))) {
+            if (!(rf && (rf->type & Reference::APPLIED))) {
                 delete rev;
                 return nextStart;
             }
@@ -2660,7 +2618,7 @@ int Git::addChunk(FileHistory* fh, const QByteArray& ba, int start) {
         } else if (patchesStillToFind > 0 || !isMainHistory(fh)) { // try to avoid costly lookup
 
             Reference* rf = lookupReference(sha);
-            if (rf && (rf->type & APPLIED)) {
+            if (rf && (rf->type & Reference::APPLIED)) {
 
                 Revision* c = const_cast<Revision*>(revLookup(sha, fh));
                 c->isApplied = true;
@@ -2907,7 +2865,7 @@ void Git::updateDescMap(const Revision* r,uint idx, QHash<QPair<uint, uint>, boo
 
 void Git::mergeBranches(Revision* p, const Revision* r) {
 
-    int r_descBrnMaster = (checkRef(r->sha(), BRANCH | RMT_BRANCH) ? r->orderIdx : r->descBrnMaster);
+    int r_descBrnMaster = (shaMap.checkRef(r->sha(), Reference::BRANCH | Reference::REMOTE_BRANCH) ? r->orderIdx : r->descBrnMaster);
 
     if (p->descBrnMaster == r_descBrnMaster || r_descBrnMaster == -1)
         return;
@@ -2926,7 +2884,7 @@ void Git::mergeBranches(Revision* p, const Revision* r) {
 
 void Git::mergeNearTags(bool down, Revision* p, const Revision* r, const QHash<QPair<uint, uint>, bool>& dm) {
 
-    bool isTag = checkRef(r->sha(), TAG);
+    bool isTag = shaMap.checkRef(r->sha(), Reference::TAG);
     int r_descRefsMaster = isTag ? r->orderIdx : r->descRefsMaster;
     int r_ancRefsMaster = isTag ? r->orderIdx : r->ancRefsMaster;
 
@@ -2995,9 +2953,9 @@ void Git::indexTree() {
     // compute children and nearest descendants
     for (uint i = 0, cnt = ro.count(); i < cnt; i++) {
 
-        uint type = checkRef(ro[i]);
-        bool isB = (type & (BRANCH | RMT_BRANCH));
-        bool isT = (type & TAG);
+        uint type = shaMap.checkRef(ro[i]);
+        bool isB = (type & (Reference::BRANCH | Reference::REMOTE_BRANCH));
+        bool isT = (type & Reference::TAG);
 
         const Revision* r = revLookup(ro[i]);
 
@@ -3037,7 +2995,7 @@ void Git::indexTree() {
     for (int i = ro.count() - 1; i >= 0; i--) {
 
         const Revision* r = revLookup(ro[i]);
-        bool isTag = checkRef(ro[i], TAG);
+        bool isTag = shaMap.checkRef(ro[i], Reference::TAG);
 
         if (isTag) {
             Revision* rr = const_cast<Revision*>(r);

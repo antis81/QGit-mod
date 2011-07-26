@@ -12,6 +12,7 @@
 #include "common.h"
 #include "domain.h"
 #include "model/revision.h"
+#include "model/shamap.h"
 //#include "filehistory.h"
 
 template <class, class> struct QPair;
@@ -28,27 +29,13 @@ class FileHistory;
 
 // Need to add in class (conflict in git_startup.cpp)
 
-struct Reference  // stores tag information associated to a revision
-{
-    Reference() : type(0) {}
-    uint type;
-    QStringList branches;
-    QStringList remoteBranches;
-    QStringList tags;
-    QStringList refs;
-    QString     tagObj; // TODO support more then one obj
-    QString     tagMsg;
-    QString     stgitPatch;
-};
-
-typedef QHash<ShaString, Reference> RefMap;
-
-
 
 class Git : public QObject
 {
     Q_OBJECT
 public:
+    ShaMap shaMap;
+
     explicit Git(QObject *parent);
 
     // used as self-documenting boolean parameters
@@ -61,18 +48,6 @@ public:
     static const bool optAmend       = true;
     static const bool optOnlyInIndex = true;
     static const bool optCreate      = true;
-
-    enum RefType
-    {
-        TAG        = 1,
-        BRANCH     = 2,
-        RMT_BRANCH = 4,
-        CUR_BRANCH = 8,
-        REF        = 16,
-        APPLIED    = 32,
-        UN_APPLIED = 64,
-        ANY_REF    = 127
-    };
 
     struct TreeEntry
     {
@@ -134,13 +109,9 @@ public:
     const QString getTagMsg(SCRef sha);
     const Revision* revLookup(const ShaString& sha, const FileHistory* fh = NULL) const;
     const Revision* revLookup(SCRef sha, const FileHistory* fh = NULL) const;
-    uint checkRef(const ShaString& sha, uint mask = ANY_REF) const;
-    uint checkRef(SCRef sha, uint mask = ANY_REF) const;
     const QString getRevInfo(SCRef sha);
-    const QString getRefSha(SCRef refName, RefType type = ANY_REF, bool askGit = true);
-    const QStringList getRefName(SCRef sha, RefType type) const;
+    const QString getRefSha(SCRef refName, Reference::Type type = Reference::ANY_REF, bool askGit = true);
     const QStringList getAllRefNames(uint mask, bool onlyLoaded);
-    const QStringList getAllRefSha(uint mask);
     const QStringList sortShaListByIndex(SCList shaList);
     void getWorkDirFiles(SList files, SList dirs, RevFile::StatusFlag status);
     QTextCodec* getTextCodec(bool* isGitArchive);
@@ -304,7 +275,6 @@ private:
     QString firstNonStGitPatch;
     RevFileMap revsFiles;
     QVector<QByteArray> revsFilesShaBackupBuf;
-    RefMap refsShaMap;
     QVector<QByteArray> shaBackupBuf;
     StrVect fileNamesVec;
     StrVect dirNamesVec;
