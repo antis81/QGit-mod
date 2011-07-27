@@ -47,13 +47,13 @@ void BranchesTree::setup(Domain *domain, Git *git)
 void BranchesTree::update()
 {
     clear();
-    addNode(BranchesTree::HeaderBranches, Git::BRANCH);
+    addNode(BranchesTree::HeaderBranches, Reference::BRANCH);
     addRemotesNodes();
-    addNode(BranchesTree::HeaderTags, Git::TAG);
+    addNode(BranchesTree::HeaderTags, Reference::TAG);
     expandAll();
 }
 
-void BranchesTree::addNode(ItemType headerType, Git::RefType type)
+void BranchesTree::addNode(ItemType headerType, Reference::Type type)
 {
     // получаем нужную инфу по типу
     QStringList tempList = g->getAllRefNames(type, !Git::optOnlyLoaded);
@@ -124,7 +124,7 @@ void BranchesTree::addRemotesNodes()
     headerNode->setFont(0, font);
 
     // получаем нужную инфу по типу
-    QStringList tempList = g->getAllRefNames(Git::RMT_BRANCH, !Git::optOnlyLoaded);
+    QStringList tempList = g->getAllRefNames(Reference::REMOTE_BRANCH, !Git::optOnlyLoaded);
     tempList.sort();
 
 

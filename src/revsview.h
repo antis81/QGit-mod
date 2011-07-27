@@ -11,7 +11,7 @@
 #include "ui_revsview.h" // needed by moc_* file to understand tab() function
 #include "common.h"
 #include "domain.h"
-#include "customtabwidget.h"
+#include "ui/customtabwidget.h"
 class MainImpl;
 class Git;
 class FileHistory;
@@ -47,7 +47,7 @@ private:
 
 public:
     bool canCloseTab() { return false; };
-    bool closeTab() {};
+    bool closeTab() { return false; };
     QString tabLabel() { return "&Rev list"; };
     QWidget* tabWidget() { return tabPage(); };
 

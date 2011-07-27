@@ -31,6 +31,7 @@ void CustomTabWidget::onCloseTabButtonClicked()
     if (!sender) {
         return;
     }
+
     QToolButton* closeButton = (QToolButton*)sender;
     int tabIndex = findTabByCloseButton(closeButton);
     if (tabIndex < 0) return;
@@ -43,7 +44,6 @@ void CustomTabWidget::onCloseTabButtonClicked()
     }
 
     removeTab(tabIndex);
-
 }
 
 int CustomTabWidget::addTab(QWidget *widget, const QString &label)

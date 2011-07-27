@@ -892,7 +892,7 @@
   <customwidget>
    <class>CustomTabWidget</class>
    <extends>QTabWidget</extends>
-   <header>customtabwidget.h</header>
+   <header>ui/customtabwidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

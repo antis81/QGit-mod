@@ -15,82 +15,9 @@
 
 using namespace QGit;
 
-void StateInfo::S::clear()
+Domain::Domain()
 {
-    sha = fn = dtSha = "";
-    isM = allM = false;
-    sel = true;
 }
-
-bool StateInfo::S::operator==(const StateInfo::S& st) const
-{
-    if (&st == this)
-        return true;
-
-    return (   sha   == st.sha
-            && fn    == st.fn
-            && dtSha == st.dtSha
-            && sel   == st.sel
-            && isM   == st.isM
-            && allM  == st.allM);
-}
-
-bool StateInfo::S::operator!=(const StateInfo::S& st) const
-{
-    return !(StateInfo::S::operator==(st));
-}
-
-void StateInfo::clear()
-{
-    nextS.clear();
-    curS.clear();
-    prevS.clear();
-    isLocked = false;
-}
-
-StateInfo& StateInfo::operator=(const StateInfo& newState)
-{
-    if (&newState != this) {
-        if (isLocked)
-            nextS = newState.curS;
-        else
-            curS = newState.curS; // prevS is mot modified to allow a rollback
-    }
-    return *this;
-}
-
-bool StateInfo::operator==(const StateInfo& newState) const
-{
-    if (&newState == this)
-        return true;
-
-    return (curS == newState.curS); // compare is made on curS only
-}
-
-bool StateInfo::operator!=(const StateInfo& newState) const
-{
-    return !(StateInfo::operator==(newState));
-}
-
-bool StateInfo::isChanged(uint what) const
-{
-    bool ret = false;
-    if (what & SHA)
-        ret = (sha(true) != sha(false));
-
-    if (!ret && (what & FILE_NAME))
-        ret = (fileName(true) != fileName(false));
-
-    if (!ret && (what & DIFF_TO_SHA))
-        ret = (diffToSha(true) != diffToSha(false));
-
-    if (!ret && (what & ALL_MERGE_FILES))
-        ret = (allMergeFiles(true) != allMergeFiles(false));
-
-    return ret;
-}
-
-// ************************* Domain ****************************
 
 Domain::Domain(MainImpl* m, Git* g, bool isMain) : QObject(m), git(g)
 {
@@ -166,6 +93,45 @@ MainImpl* Domain::m() const
     return static_cast<MainImpl*>(parent());
 }
 
+FileHistory* Domain::model() const
+{
+    return fileHistory;
+}
+
+bool Domain::isReadyToDrag() const
+{
+    return readyToDrag;
+}
+
+bool Domain::isDragging() const
+{
+    return dragging;
+}
+
+bool Domain::isDropping() const
+{
+    return dropping;
+}
+
+void Domain::setDropping(bool b)
+{
+    dropping = b;
+}
+
+bool Domain::isLinked() const
+{
+    return linked;
+}
+
+QWidget* Domain::tabPage() const
+{
+    return container;
+}
+
+bool Domain::isMatch(SCRef)
+{
+    return false;
+}
 
 void Domain::showStatusBarMessage(const QString& msg, int timeout)
 {
@@ -255,7 +221,7 @@ bool Domain::event(QEvent* e)
 
 void Domain::populateState()
 {
-    const Rev* r = git->revLookup(st.sha());
+    const Revision* r = git->revLookup(st.sha());
     if (r)
         st.setIsMerge(r->parentsCount() > 1);
 }

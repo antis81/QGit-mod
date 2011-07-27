@@ -27,7 +27,7 @@ class Domain: public QObject
 {
     Q_OBJECT
 public:
-    Domain() {}
+    Domain();
     Domain(MainImpl *m, Git *git, bool isMain);
     virtual ~Domain();
     void deleteWhenDone(); // will delete when no more run() are pending
@@ -35,16 +35,16 @@ public:
     void setThrowOnDelete(bool b);
     bool isThrowOnDeleteRaised(int excpId, SCRef curContext);
     MainImpl* m() const ;
-    FileHistory* model() const { return fileHistory; }
-    bool isReadyToDrag() const { return readyToDrag; }
+    FileHistory* model() const;
+    bool isReadyToDrag() const;
     bool setReadyToDrag(bool b);
-    bool isDragging() const { return dragging; }
+    bool isDragging() const;
     bool setDragging(bool b);
-    bool isDropping() const { return dropping; }
-    void setDropping(bool b) { dropping = b; }
-    bool isLinked() const { return linked; }
-    QWidget* tabPage() const { return container; }
-    virtual bool isMatch(SCRef) { return false; }
+    bool isDropping() const;
+    void setDropping(bool b);
+    bool isLinked() const;
+    QWidget* tabPage() const;
+    virtual bool isMatch(SCRef);
 
     StateInfo st;
 

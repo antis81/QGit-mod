@@ -11,6 +11,8 @@
 #include "exceptionmanager.h"
 #include "common.h"
 #include "domain.h"
+#include "model/revision.h"
+#include "model/shamap.h"
 //#include "filehistory.h"
 
 template <class, class> struct QPair;
@@ -27,27 +29,13 @@ class FileHistory;
 
 // Need to add in class (conflict in git_startup.cpp)
 
-struct Reference  // stores tag information associated to a revision
-{
-    Reference() : type(0) {}
-    uint type;
-    QStringList branches;
-    QStringList remoteBranches;
-    QStringList tags;
-    QStringList refs;
-    QString     tagObj; // TODO support more then one obj
-    QString     tagMsg;
-    QString     stgitPatch;
-};
-
-typedef QHash<ShaString, Reference> RefMap;
-
-
 
 class Git : public QObject
 {
     Q_OBJECT
 public:
+    ShaMap shaMap;
+
     explicit Git(QObject *parent);
 
     // used as self-documenting boolean parameters
@@ -60,18 +48,6 @@ public:
     static const bool optAmend       = true;
     static const bool optOnlyInIndex = true;
     static const bool optCreate      = true;
-
-    enum RefType
-    {
-        TAG        = 1,
-        BRANCH     = 2,
-        RMT_BRANCH = 4,
-        CUR_BRANCH = 8,
-        REF        = 16,
-        APPLIED    = 32,
-        UN_APPLIED = 64,
-        ANY_REF    = 127
-    };
 
     struct TreeEntry
     {
@@ -131,15 +107,11 @@ public:
     const QStringList getDescendantBranches(SCRef sha, bool shaOnly = false);
     const QString getShortLog(SCRef sha);
     const QString getTagMsg(SCRef sha);
-    const Rev* revLookup(const ShaString& sha, const FileHistory* fh = NULL) const;
-    const Rev* revLookup(SCRef sha, const FileHistory* fh = NULL) const;
-    uint checkRef(const ShaString& sha, uint mask = ANY_REF) const;
-    uint checkRef(SCRef sha, uint mask = ANY_REF) const;
+    const Revision* revLookup(const ShaString& sha, const FileHistory* fh = NULL) const;
+    const Revision* revLookup(SCRef sha, const FileHistory* fh = NULL) const;
     const QString getRevInfo(SCRef sha);
-    const QString getRefSha(SCRef refName, RefType type = ANY_REF, bool askGit = true);
-    const QStringList getRefName(SCRef sha, RefType type) const;
+    const QString getRefSha(SCRef refName, Reference::Type type = Reference::ANY_REF, bool askGit = true);
     const QStringList getAllRefNames(uint mask, bool onlyLoaded);
-    const QStringList getAllRefSha(uint mask);
     const QStringList sortShaListByIndex(SCList shaList);
     void getWorkDirFiles(SList files, SList dirs, RevFile::StatusFlag status);
     QTextCodec* getTextCodec(bool* isGitArchive);
@@ -244,27 +216,27 @@ private:
     bool startParseProc(SCList initCmd, FileHistory* fh, SCRef buf);
     bool tryFollowRenames(FileHistory* fh);
     bool populateRenamedPatches(SCRef sha, SCList nn, FileHistory* fh, QStringList* on, bool bt);
-    bool filterEarlyOutputRev(FileHistory* fh, Rev* rev);
+    bool filterEarlyOutputRev(FileHistory* fh, Revision* rev);
     int addChunk(FileHistory* fh, const QByteArray& ba, int ofs);
     void parseDiffFormat(RevFile& rf, SCRef buf, FileNamesLoader& fl);
     void parseDiffFormatLine(RevFile& rf, SCRef line, int parNum, FileNamesLoader& fl);
     void getDiffIndex();
-    Rev* fakeRevData(SCRef sha, SCList parents, SCRef author, SCRef date, SCRef log,
+    Revision* fakeRevData(SCRef sha, SCList parents, SCRef author, SCRef date, SCRef log,
                          SCRef longLog, SCRef patch, int idx, FileHistory* fh);
-    const Rev* fakeWorkDirRev(SCRef parent, SCRef log, SCRef longLog, int idx, FileHistory* fh);
+    const Revision* fakeWorkDirRev(SCRef parent, SCRef log, SCRef longLog, int idx, FileHistory* fh);
     const RevFile* fakeWorkDirRevFile(const WorkingDirInfo& wd);
     bool copyDiffIndex(FileHistory* fh, SCRef parent);
     const RevFile* insertNewFiles(SCRef sha, SCRef data);
-    const RevFile* getAllMergeFiles(const Rev* r);
+    const RevFile* getAllMergeFiles(const Revision* r);
     bool runDiffTreeWithRenameDetection(SCRef runCmd, QString* runOutput);
     bool isParentOf(SCRef par, SCRef child);
     bool isTreeModified(SCRef sha);
     void indexTree();
-    void updateDescMap(const Rev* r, uint i, QHash<QPair<uint, uint>,bool>& dm,
+    void updateDescMap(const Revision* r, uint i, QHash<QPair<uint, uint>,bool>& dm,
                        QHash<uint, QVector<int> >& dv);
-    void mergeNearTags(bool down, Rev* p, const Rev* r, const QHash<QPair<uint, uint>, bool>&dm);
-    void mergeBranches(Rev* p, const Rev* r);
-    void updateLanes(Rev& c, Lanes& lns, SCRef sha);
+    void mergeNearTags(bool down, Revision* p, const Revision* r, const QHash<QPair<uint, uint>, bool>&dm);
+    void mergeBranches(Revision* p, const Revision* r);
+    void updateLanes(Revision& c, Lanes& lns, SCRef sha);
     bool mkPatchFromWorkDir(SCRef msg, SCRef patchFile, SCList files);
     const QStringList getOthersFiles();
     const QStringList getOtherFiles(SCList selFiles, bool onlyInIndex);
@@ -303,7 +275,6 @@ private:
     QString firstNonStGitPatch;
     RevFileMap revsFiles;
     QVector<QByteArray> revsFilesShaBackupBuf;
-    RefMap refsShaMap;
     QVector<QByteArray> shaBackupBuf;
     StrVect fileNamesVec;
     StrVect dirNamesVec;

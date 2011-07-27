@@ -10,8 +10,8 @@
 #include "ui_fileview.h" // needed by moc_* file to understand tab() function
 #include "common.h"
 #include "domain.h"
-#include "customtabwidget.h"
-#include "customtab.h"
+#include "ui/customtabwidget.h"
+#include "ui/customtab.h"
 
 class MainImpl;
 class Git;

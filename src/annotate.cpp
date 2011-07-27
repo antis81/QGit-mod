@@ -16,8 +16,8 @@
 
 using namespace QGit;
 
-Annotate::Annotate(Git* parent, QObject* guiObj) : QObject(parent) {
-
+Annotate::Annotate(Git* parent, QObject* guiObj) : QObject(parent)
+{
     EM_INIT(exAnnCanceled, "Canceling annotation");
 
     git = parent;
@@ -29,8 +29,8 @@ Annotate::Annotate(Git* parent, QObject* guiObj) : QObject(parent) {
             git, SIGNAL(annotateReady(Annotate*, bool, const QString&)));
 }
 
-const FileAnnotation* Annotate::lookupAnnotation(SCRef sha) {
-
+const FileAnnotation* Annotate::lookupAnnotation(SCRef sha)
+{
     if (!valid || sha.isEmpty())
         return NULL;
 
@@ -41,16 +41,18 @@ const FileAnnotation* Annotate::lookupAnnotation(SCRef sha) {
     // ok, we are not lucky. Check for an ancestor before to give up
     int shaIdx;
     const QString ancestorSha = getAncestor(sha, &shaIdx);
+
     if (!ancestorSha.isEmpty()) {
         it = ah.constFind(toTempSha(ancestorSha));
         if (it != ah.constEnd())
             return &(it.value());
     }
+
     return NULL;
 }
 
-void Annotate::deleteWhenDone() {
-
+void Annotate::deleteWhenDone()
+{
     if (!EM_IS_PENDING(exAnnCanceled))
         EM_RAISE(exAnnCanceled);
 
@@ -60,16 +62,16 @@ void Annotate::deleteWhenDone() {
     on_deleteWhenDone();
 }
 
-void Annotate::on_deleteWhenDone() {
-
+void Annotate::on_deleteWhenDone()
+{
     if (!(annotateRunning || EM_IS_PENDING(exAnnCanceled)))
         deleteLater();
     else
         QTimer::singleShot(20, this, SLOT(on_deleteWhenDone()));
 }
 
-bool Annotate::start(const FileHistory* _fh) {
-
+bool Annotate::start(const FileHistory* _fh)
+{
     // could change during annotation, so save them
     fh = _fh;
     histRevOrder = fh->revOrder;
@@ -78,6 +80,7 @@ bool Annotate::start(const FileHistory* _fh) {
         valid = false;
         return false;
     }
+
     annotateRunning = true;
 
     // init AnnotateHistory
@@ -85,6 +88,7 @@ bool Annotate::start(const FileHistory* _fh) {
     annId = histRevOrder.count();
     annNumLen = QString::number(histRevOrder.count()).length();
     ShaVect::const_iterator it(histRevOrder.constBegin());
+
     do
         ah.insert(*it, FileAnnotation(annId--));
     while (++it != histRevOrder.constEnd());
@@ -100,8 +104,8 @@ bool Annotate::isCanceled()
     return canceled;
 }
 
-void Annotate::slotComputeDiffs() {
-
+void Annotate::slotComputeDiffs()
+{
     processingTime.start();
 
     if (!cancelingAnnotate)
@@ -110,20 +114,22 @@ void Annotate::slotComputeDiffs() {
     valid = !(isError || cancelingAnnotate);
     canceled = cancelingAnnotate;
     cancelingAnnotate = annotateRunning = false;
-    if (canceled)
+
+    if (canceled) {
         deleteWhenDone();
-    else {
+    } else {
         QString msg("%1 %2");
         msg = msg.arg(ah.count()).arg(processingTime.elapsed());
         emit annotateReady(this, valid, msg);
     }
 }
 
-void Annotate::annotateFileHistory() {
-
+void Annotate::annotateFileHistory()
+{
     // sweep from the oldest to newest so that parent
     // annotations are calculated before children
     ShaVect::const_iterator it(histRevOrder.constEnd());
+
     do {
         --it;
         doAnnotate(*it);
@@ -135,16 +141,20 @@ void Annotate::doAnnotate(const ShaString& ss) {
 
     const QString sha(ss);
     FileAnnotation* fa = getFileAnnotation(sha);
+
     if (fa == NULL || fa->isValid || isError || cancelingAnnotate)
         return;
 
-    const Rev* r = git->revLookup(ss, fh); // historyRevs
+    const Revision* r = git->revLookup(ss, fh); // historyRevs
+
     if (r == NULL) {
         dbp("ASSERT doAnnotate: no revision %1", sha);
         isError = true;
         return;
     }
+
     const QString& diff(getPatch(sha)); // set FileAnnotation::fileSha
+
     if (r->parentsCount() == 0) { // initial revision
         setInitialAnnotation(ah[ss].fileSha, fa); // calls Qt event loop
         fa->isValid = true;
@@ -160,6 +170,7 @@ void Annotate::doAnnotate(const ShaString& ss) {
         isError = true;
         return;
     }
+
     const QString& author(setupAuthor(r->author(), fa->annId));
     setAnnotation(diff, author, pa->lines, fa->lines);
 
@@ -167,8 +178,8 @@ void Annotate::doAnnotate(const ShaString& ss) {
     QStringList::const_iterator it(parents.constBegin());
     ++it;
     int parentNum = 1;
-    while (it != parents.constEnd()) {
 
+    while (it != parents.constEnd()) {
         FileAnnotation* pa = getFileAnnotation(*it);
         const QString& diff(getPatch(sha, parentNum++));
         QStringList tmpAnn;
@@ -181,27 +192,31 @@ void Annotate::doAnnotate(const ShaString& ss) {
             isError = true;
             return;
         }
+
         // finally we unify the annotations
         unify(tmpAnn, fa->lines);
         fa->lines = tmpAnn;
         ++it;
     }
+
     fa->isValid = true;
 }
 
-FileAnnotation* Annotate::getFileAnnotation(SCRef sha) {
-
+FileAnnotation* Annotate::getFileAnnotation(SCRef sha)
+{
     AnnotateHistory::iterator it(ah.find(toTempSha(sha)));
+
     if (it == ah.end()) {
         dbp("ASSERT getFileAnnotation: no revision %1", sha);
         isError = true;
         return NULL;
     }
+
     return &(*it);
 }
 
-void Annotate::setInitialAnnotation(SCRef fileSha, FileAnnotation* fa) {
-
+void Annotate::setInitialAnnotation(SCRef fileSha, FileAnnotation* fa)
+{
     QByteArray fileData;
 
     // fh->fileNames() are in cronological order, so we need the last one
@@ -218,15 +233,17 @@ void Annotate::setInitialAnnotation(SCRef fileSha, FileAnnotation* fa) {
         fa->lines.append(empty);
 }
 
-const QString Annotate::setupAuthor(SCRef origAuthor, int annId) {
-
+const QString Annotate::setupAuthor(SCRef origAuthor, int annId)
+{
     QString tmp(origAuthor.section('<', 0, 0).trimmed()); // strip e-mail address
+
     if (tmp.isEmpty()) { // probably only e-mail
         tmp = origAuthor;
         tmp.remove('<').remove('>');
         tmp = tmp.trimmed();
         tmp.truncate(MAX_AUTHOR_LEN);
     }
+
     // shrink author name if necessary
     if (tmp.length() > MAX_AUTHOR_LEN) {
         SCRef firstName(tmp.section(' ', 0, 0).trimmed());
@@ -236,20 +253,23 @@ const QString Annotate::setupAuthor(SCRef origAuthor, int annId) {
 
         tmp.truncate(MAX_AUTHOR_LEN);
     }
+
     return QString("%1.%2").arg(annId, annNumLen).arg(tmp);
 }
 
-void Annotate::unify(SList dst, SCList src) {
-
+void Annotate::unify(SList dst, SCList src)
+{
     const QString m("Merge");
+
     for (int i = 0; i < dst.size(); ++i) {
         if (dst.at(i) == m)
             dst[i] = src.at(i);
     }
+
 }
 
-bool Annotate::setAnnotation(SCRef diff, SCRef author, SCList prevAnn, SList newAnn, int ofs) {
-
+bool Annotate::setAnnotation(SCRef diff, SCRef author, SCList prevAnn, SList newAnn, int ofs)
+{
     newAnn.clear();
     QStringList::const_iterator cur(prevAnn.constBegin());
     QString line;
@@ -258,7 +278,6 @@ bool Annotate::setAnnotation(SCRef diff, SCRef author, SCList prevAnn, SList new
     bool inHeader = true;
 
     while (getNextSection(diff, idx, line, "\n")) {
-
         char firstChar = line.at(0).toLatin1();
 
         if (inHeader) {
@@ -267,6 +286,7 @@ bool Annotate::setAnnotation(SCRef diff, SCRef author, SCList prevAnn, SList new
             else
                 continue;
         }
+
         switch (firstChar) {
         case '@':
             // an unified diff fragment header has form '@@ -a,b +c,d @@'
@@ -338,21 +358,25 @@ bool Annotate::setAnnotation(SCRef diff, SCRef author, SCList prevAnn, SList new
             break;
         }
     }
+
     // copy the tail
     for ( ; curLineNum <= prevAnn.size(); ++curLineNum) {
         newAnn.append(*cur);
         ++cur;
     }
+
     return true;
 }
 
-const QString Annotate::getPatch(SCRef sha, int parentNum) {
-
+const QString Annotate::getPatch(SCRef sha, int parentNum)
+{
     QString mergeSha(sha);
+
     if (parentNum)
         mergeSha = QString::number(parentNum) + " m " + sha;
 
-    const Rev* r = git->revLookup(mergeSha, fh);
+    const Revision* r = git->revLookup(mergeSha, fh);
+
     if (!r)
         return QString();
 
@@ -362,18 +386,19 @@ const QString Annotate::getPatch(SCRef sha, int parentNum) {
     const ShaString& ss = toPersistentSha(sha, ba);
 
     if (ah[ss].fileSha.isEmpty() && !parentNum) {
-
         int idx = diff.indexOf("..");
+
         if (idx != -1)
             ah[ss].fileSha = diff.mid(idx + 2, 40);
         else // file mode change only, same sha of parent
             ah[ss].fileSha = ah[r->parent(0)].fileSha;
     }
+
     return diff;
 }
 
-bool Annotate::getNextSection(SCRef d, int& idx, QString& sec, SCRef target) {
-
+bool Annotate::getNextSection(SCRef d, int& idx, QString& sec, SCRef target)
+{
     if (idx >= d.length())
         return false;
 
@@ -386,13 +411,10 @@ bool Annotate::getNextSection(SCRef d, int& idx, QString& sec, SCRef target) {
     return true;
 }
 
-
 // ****************************** RANGE FILTER *****************************
 
-
-
-bool Annotate::getRange(SCRef sha, RangeInfo* r) {
-
+bool Annotate::getRange(SCRef sha, RangeInfo* r)
+{
     if (!ranges.contains(sha) || !valid || canceled) {
         r->clear();
         return false;
@@ -401,8 +423,8 @@ bool Annotate::getRange(SCRef sha, RangeInfo* r) {
     return true;
 }
 
-void Annotate::updateCrossRanges(SCRef chunk, bool rev, int fileLen, int ofs, RangeInfo* r) {
-
+void Annotate::updateCrossRanges(SCRef chunk, bool rev, int fileLen, int ofs, RangeInfo* r)
+{
 /* here the deal is to fake a file that will be modified by chunk, the
    file must contain also the whole output range.
 
@@ -426,6 +448,7 @@ void Annotate::updateCrossRanges(SCRef chunk, bool rev, int fileLen, int ofs, Ra
     // fileFirstLineNr = newLineId - beforePadding = fileOffset + 1
     QStringList beforeAnn;
     QStringList afterAnn;
+
     for (int lineNum = ofs + 1; lineNum <= ofs + fileLen; lineNum++)
         beforeAnn.append(QString::number(lineNum));
 
@@ -453,6 +476,7 @@ void Annotate::updateCrossRanges(SCRef chunk, bool rev, int fileLen, int ofs, Ra
         // if range boundary is a line added by the patch
         // we consider inclusive and extend the range
         ++itStart;
+
         do {
             --itStart;
             if (*itStart != fakedAuthor) {
@@ -462,13 +486,13 @@ void Annotate::updateCrossRanges(SCRef chunk, bool rev, int fileLen, int ofs, Ra
         } while (itStart != afterAnn.constBegin());
 
         while (itEnd != afterAnn.constEnd()) {
-
             if (*itEnd != fakedAuthor) {
                 newEnd = (*itEnd).toInt();
                 break;
             }
             ++itEnd;
         }
+
         if (leftExtended && *itStart != fakedAuthor)
             newStart++;
 
@@ -484,6 +508,7 @@ void Annotate::updateCrossRanges(SCRef chunk, bool rev, int fileLen, int ofs, Ra
                     break;
                 }
         }
+
         if (newStart > newEnd) // selected range is whole inside new added lines
             newStart = newEnd = 0;
 
@@ -509,6 +534,7 @@ void Annotate::updateCrossRanges(SCRef chunk, bool rev, int fileLen, int ofs, Ra
                 }
             }
         }
+
         if (itStart != afterAnn.constEnd() && (*itStart).toInt() < r->start)
             newStart++;
 
@@ -531,8 +557,8 @@ void Annotate::updateCrossRanges(SCRef chunk, bool rev, int fileLen, int ofs, Ra
     r->end = newEnd;
 }
 
-void Annotate::updateRange(RangeInfo* r, SCRef diff, bool reverse) {
-
+void Annotate::updateRange(RangeInfo* r, SCRef diff, bool reverse)
+{
     r->modified = false;
     if (r->start == 0)
         return;
@@ -546,6 +572,7 @@ void Annotate::updateRange(RangeInfo* r, SCRef diff, bool reverse) {
     int idx = 0;
     QString chunk;
     QStringList chunkList;
+
     while (getNextSection(diff, idx, chunk, "\n@"))
         if (reverse)
             chunkList.prepend(chunk);
@@ -553,8 +580,8 @@ void Annotate::updateRange(RangeInfo* r, SCRef diff, bool reverse) {
             chunkList.append(chunk);
 
     QStringList::const_iterator chunkIt(chunkList.constBegin());
-    while (chunkIt != chunkList.constEnd()) {
 
+    while (chunkIt != chunkList.constEnd()) {
         // an unified diff fragment header has form '@@ -a,b +c,d @@'
         // where 'a' is old file line number and 'b' is old file
         // number of lines of the hunk, 'c' and 'd' are the same
@@ -625,8 +652,8 @@ void Annotate::updateRange(RangeInfo* r, SCRef diff, bool reverse) {
     }
 }
 
-const QString Annotate::getAncestor(SCRef sha, int* shaIdx) {
-
+const QString Annotate::getAncestor(SCRef sha, int* shaIdx)
+{
     QString fileSha;
 
     try {
@@ -674,20 +701,21 @@ const QString Annotate::getAncestor(SCRef sha, int* shaIdx) {
     // ok still not found, this could happen if sha is an unapplied
     // stgit patch. In this case fall back on the first in the list
     // that is the newest.
-    if (git->getAllRefSha(Git::UN_APPLIED).contains(sha))
+    if (git->shaMap.getAllSha(Reference::UN_APPLIED).contains(sha))
         return histRevOrder.first();
 
     dbp("ASSERT in getAncestor: ancestor of %1 not found", sha);
     return "";
 }
 
-bool Annotate::isDescendant(SCRef sha, SCRef target) {
-// quickly check if target is a direct descendant of sha, i.e. if starting
-// from target, sha could be reached walking along his parents. In case
-// a merge is found the search returns false because you'll need,
-// in general, all the previous ranges to compute the target one.
+bool Annotate::isDescendant(SCRef sha, SCRef target)
+{
+    // quickly check if target is a direct descendant of sha, i.e. if starting
+    // from target, sha could be reached walking along his parents. In case
+    // a merge is found the search returns false because you'll need,
+    // in general, all the previous ranges to compute the target one.
 
-    const Rev* r = git->revLookup(sha, fh);
+    const Revision* r = git->revLookup(sha, fh);
     if (!r)
         return false;
 
@@ -710,8 +738,8 @@ bool Annotate::isDescendant(SCRef sha, SCRef target) {
   Only checking for copies would fix the corner case, but implementation
   is too difficult, so better accept this design limitation for now.
 */
-const QString Annotate::computeRanges(SCRef sha, int paraFrom, int paraTo, SCRef target) {
-
+const QString Annotate::computeRanges(SCRef sha, int paraFrom, int paraTo, SCRef target)
+{
     ranges.clear();
 
     if (!valid || canceled || sha.isEmpty()) {
@@ -743,10 +771,10 @@ const QString Annotate::computeRanges(SCRef sha, int paraFrom, int paraTo, SCRef
 
     // going back in history, to oldest following first parent lane
     const QString oldest(histRevOrder.last()); // causes a detach!
-    const Rev* curRev = git->revLookup(ancestor, fh); // historyRevs
+    const Revision* curRev = git->revLookup(ancestor, fh); // historyRevs
     QString curRevSha(curRev->sha());
-    while (curRevSha != oldest && !isDirectDescendant) {
 
+    while (curRevSha != oldest && !isDirectDescendant) {
         const QString& diff(getPatch(curRevSha));
         if (diff.isEmpty()) {
             if (curRev->parentsCount() == 0)  // is initial
@@ -830,8 +858,8 @@ const QString Annotate::computeRanges(SCRef sha, int paraFrom, int paraTo, SCRef
     return ancestor;
 }
 
-bool Annotate::seekPosition(int* paraFrom, int* paraTo, SCRef fromSha, SCRef toSha) {
-
+bool Annotate::seekPosition(int* paraFrom, int* paraTo, SCRef fromSha, SCRef toSha)
+{
     if ((*paraFrom == 0 && *paraTo == 0) || fromSha == toSha)
         return true;
 

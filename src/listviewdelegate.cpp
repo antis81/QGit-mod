@@ -21,7 +21,7 @@ void ListViewDelegate::diffTargetChanged(int row) {
     }
 }
 
-const Rev* ListViewDelegate::revLookup(int row, FileHistory** fhPtr) const {
+const Revision* ListViewDelegate::revLookup(int row, FileHistory** fhPtr) const {
 
     ListView* lv = static_cast<ListView*>(parent());
     FileHistory* fh = static_cast<FileHistory*>(lv->model());
@@ -70,10 +70,10 @@ void ListViewDelegate::paintGraphLane(QPainter* p, int type, int x1, int x2,
 
     // arc
     switch (type) {
-    case JOIN:
-    case JOIN_R:
-    case HEAD:
-    case HEAD_R: {
+    case LANE_JOIN:
+    case LANE_JOIN_R:
+    case LANE_HEAD:
+    case LANE_HEAD_R: {
         QConicalGradient gradient(CENTER_UR);
         gradient.setColorAt(0.375, col);
         gradient.setColorAt(0.625, activeCol);
@@ -82,7 +82,7 @@ void ListViewDelegate::paintGraphLane(QPainter* p, int type, int x1, int x2,
         p->drawArc(P_CENTER, DELTA_UR);
         break;
     }
-    case JOIN_L: {
+    case LANE_JOIN_L: {
         QConicalGradient gradient(CENTER_UL);
         gradient.setColorAt(0.375, activeCol);
         gradient.setColorAt(0.625, col);
@@ -91,8 +91,8 @@ void ListViewDelegate::paintGraphLane(QPainter* p, int type, int x1, int x2,
         p->drawArc(P_CENTER, DELTA_UL);
         break;
     }
-    case TAIL:
-    case TAIL_R: {
+    case LANE_TAIL:
+    case LANE_TAIL_R: {
         QConicalGradient gradient(CENTER_DR);
         gradient.setColorAt(0.375, activeCol);
         gradient.setColorAt(0.625, col);
@@ -110,27 +110,27 @@ void ListViewDelegate::paintGraphLane(QPainter* p, int type, int x1, int x2,
 
     // vertical line
     switch (type) {
-    case ACTIVE:
-    case NOT_ACTIVE:
-    case MERGE_FORK:
-    case MERGE_FORK_R:
-    case MERGE_FORK_L:
-    case JOIN:
-    case JOIN_R:
-    case JOIN_L:
-    case CROSS:
+    case LANE_ACTIVE:
+    case LANE_NOT_ACTIVE:
+    case LANE_MERGE_FORK:
+    case LANE_MERGE_FORK_R:
+    case LANE_MERGE_FORK_L:
+    case LANE_JOIN:
+    case LANE_JOIN_R:
+    case LANE_JOIN_L:
+    case LANE_CROSS:
         p->drawLine(P_90, P_270);
         break;
-    case HEAD_L:
-    case BRANCH:
+    case LANE_HEAD_L:
+    case LANE_BRANCH:
         p->drawLine(P_CENTER, P_270);
         break;
-    case TAIL_L:
-    case INITIAL:
-    case BOUNDARY:
-    case BOUNDARY_C:
-    case BOUNDARY_R:
-    case BOUNDARY_L:
+    case LANE_TAIL_L:
+    case LANE_INITIAL:
+    case LANE_BOUNDARY:
+    case LANE_BOUNDARY_C:
+    case LANE_BOUNDARY_R:
+    case LANE_BOUNDARY_L:
         p->drawLine(P_90, P_CENTER);
         break;
     default:
@@ -142,23 +142,23 @@ void ListViewDelegate::paintGraphLane(QPainter* p, int type, int x1, int x2,
 
     // horizontal line
     switch (type) {
-    case MERGE_FORK:
-    case JOIN:
-    case HEAD:
-    case TAIL:
-    case CROSS:
-    case CROSS_EMPTY:
-    case BOUNDARY_C:
+    case LANE_MERGE_FORK:
+    case LANE_JOIN:
+    case LANE_HEAD:
+    case LANE_TAIL:
+    case LANE_CROSS:
+    case LANE_CROSS_EMPTY:
+    case LANE_BOUNDARY_C:
         p->drawLine(P_180, P_0);
         break;
-    case MERGE_FORK_R:
-    case BOUNDARY_R:
+    case LANE_MERGE_FORK_R:
+    case LANE_BOUNDARY_R:
         p->drawLine(P_180, P_CENTER);
         break;
-    case MERGE_FORK_L:
-    case HEAD_L:
-    case TAIL_L:
-    case BOUNDARY_L:
+    case LANE_MERGE_FORK_L:
+    case LANE_HEAD_L:
+    case LANE_TAIL_L:
+    case LANE_BOUNDARY_L:
         p->drawLine(P_CENTER, P_0);
         break;
     default:
@@ -167,41 +167,41 @@ void ListViewDelegate::paintGraphLane(QPainter* p, int type, int x1, int x2,
 
     // center symbol, e.g. rect or ellipse
     switch (type) {
-    case ACTIVE:
-    case INITIAL:
-    case BRANCH:
+    case LANE_ACTIVE:
+    case LANE_INITIAL:
+    case LANE_BRANCH:
         p->setPen(Qt::black);
         p->setBrush(col);
         p->drawEllipse(R_CENTER);
         break;
-    case MERGE_FORK:
-    case MERGE_FORK_R:
-    case MERGE_FORK_L:
+    case LANE_MERGE_FORK:
+    case LANE_MERGE_FORK_R:
+    case LANE_MERGE_FORK_L:
         p->setPen(Qt::black);
         p->setBrush(col);
         p->drawRect(R_CENTER);
         break;
-    case UNAPPLIED:
+    case LANE_UNAPPLIED:
         // Red minus sign
         p->setPen(Qt::NoPen);
         p->setBrush(Qt::red);
         p->drawRect(m - r, h - 1, d, 2);
         break;
-    case APPLIED:
+    case LANE_APPLIED:
         // Green plus sign
         p->setPen(Qt::NoPen);
         p->setBrush(DARK_GREEN);
         p->drawRect(m - r, h - 1, d, 2);
         p->drawRect(m - 1, h - r, 2, d);
         break;
-    case BOUNDARY:
+    case LANE_BOUNDARY:
         p->setPen(Qt::black);
         p->setBrush(back);
         p->drawEllipse(R_CENTER);
         break;
-    case BOUNDARY_C:
-    case BOUNDARY_R:
-    case BOUNDARY_L:
+    case LANE_BOUNDARY_C:
+    case LANE_BOUNDARY_R:
+    case LANE_BOUNDARY_L:
         p->setPen(Qt::black);
         p->setBrush(back);
         p->drawRect(R_CENTER);
@@ -239,7 +239,7 @@ void ListViewDelegate::paintGraph(QPainter* p, const QStyleOptionViewItem& opt,
         p->fillRect(opt.rect, opt.palette.base());
 
     FileHistory* fh;
-    const Rev* r = revLookup(i.row(), &fh);
+    const Revision* r = revLookup(i.row(), &fh);
     if (!r)
         return;
 
@@ -252,7 +252,7 @@ void ListViewDelegate::paintGraph(QPainter* p, const QStyleOptionViewItem& opt,
         git->setLane(r->sha(), fh);
 
     QBrush back = opt.palette.base();
-    const QVector<int>& lanes(r->lanes);
+    const QVector<LaneType>& lanes(r->lanes);
     uint laneNum = lanes.count();
     uint activeLane = 0;
     for (uint i = 0; i < laneNum; i++)
@@ -273,7 +273,7 @@ void ListViewDelegate::paintGraph(QPainter* p, const QStyleOptionViewItem& opt,
         x2 += lw;
 
         int ln = lanes[i];
-        if (ln == EMPTY)
+        if (ln == LANE_EMPTY)
             continue;
 
         QColor color = i == activeLane ? activeColor : colors[i % COLORS_NUM];
@@ -286,7 +286,7 @@ void ListViewDelegate::paintLog(QPainter* p, const QStyleOptionViewItem& opt,
                                 const QModelIndex& index) const {
 
     int row = index.row();
-    const Rev* r = revLookup(row);
+    const Revision* r = revLookup(row);
     if (!r)
         return;
 
@@ -341,46 +341,46 @@ bool ListViewDelegate::changedFiles(SCRef sha) const {
 
 QPixmap* ListViewDelegate::getTagMarks(SCRef sha, const QStyleOptionViewItem& opt) const {
 
-    uint rt = git->checkRef(sha);
+    uint rt = git->shaMap.checkRef(sha);
     if (rt == 0)
         return NULL; // common case
 
     QPixmap* pm = new QPixmap(); // must be deleted by caller
 
-    if (rt & Git::BRANCH)
-        addRefPixmap(&pm, sha, Git::BRANCH, opt);
+    if (rt & Reference::BRANCH)
+        addRefPixmap(&pm, sha, Reference::BRANCH, opt);
 
-    if (rt & Git::RMT_BRANCH)
-        addRefPixmap(&pm, sha, Git::RMT_BRANCH, opt);
+    if (rt & Reference::REMOTE_BRANCH)
+        addRefPixmap(&pm, sha, Reference::REMOTE_BRANCH, opt);
 
-    if (rt & Git::TAG)
-        addRefPixmap(&pm, sha, Git::TAG, opt);
+    if (rt & Reference::TAG)
+        addRefPixmap(&pm, sha, Reference::TAG, opt);
 
-    if (rt & Git::REF)
-        addRefPixmap(&pm, sha, Git::REF, opt);
+    if (rt & Reference::REF)
+        addRefPixmap(&pm, sha, Reference::REF, opt);
 
     return pm;
 }
 
 void ListViewDelegate::addRefPixmap(QPixmap** pp, SCRef sha, int type, QStyleOptionViewItem opt) const {
 
-    SCList refs = git->getRefName(sha, (Git::RefType)type);
+    SCList refs = git->shaMap.getRefName(sha, (Reference::Type)type);
     FOREACH_SL (it, refs) {
 
         bool isCur = git->currentBranch().compare(*it) == 0;
         opt.font.setBold(isCur);
 
         QColor clr;
-        if (type == Git::BRANCH)
+        if (type == Reference::BRANCH)
             clr = (isCur ? Qt::green : DARK_GREEN);
 
-        else if (type == Git::RMT_BRANCH)
+        else if (type == Reference::REMOTE_BRANCH)
             clr = LIGHT_ORANGE;
 
-        else if (type == Git::TAG)
+        else if (type == Reference::TAG)
             clr = Qt::yellow;
 
-        else if (type == Git::REF)
+        else if (type == Reference::REF)
             clr = PURPLE;
 
         opt.palette.setColor(QPalette::Window, clr);

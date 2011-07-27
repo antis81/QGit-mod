@@ -11,7 +11,6 @@ public:
 
 protected:
     friend class TreeView;
-
     QString treeSha;
 };
 

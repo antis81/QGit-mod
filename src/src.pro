@@ -71,20 +71,19 @@ OBJECTS_DIR = $$BUILD_DIR
 
 # project files
 FORMS += commit.ui console.ui customaction.ui fileview.ui help.ui \
-         mainview.ui patchview.ui rangeselect.ui revsview.ui settings.ui
+         mainview.ui patchview.ui revsview.ui settings.ui \
+    ui/rangeselect.ui
 
 HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
            customactionimpl.h dataloader.h domain.h exceptionmanager.h \
            filecontent.h filelist.h fileview.h git.h help.h lanes.h \
            listview.h mainimpl.h myprocess.h patchcontent.h patchview.h \
-           rangeselectimpl.h revdesc.h revsview.h settingsimpl.h \
+            revdesc.h revsview.h settingsimpl.h \
            treeview.h \
     branchestree.h \
     findsupport.h \
-    customtabwidget.h \
     branchestreeitem.h \
     externaldiffproc.h \
-    customtab.h \
     reachinfo.h \
     rangeinfo.h \
     updatedomainevent.h \
@@ -96,21 +95,26 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
     patchtextblockuserdata.h \
     filehistory.h \
     listviewproxy.h \
-    listviewdelegate.h
+    listviewdelegate.h \
+    ui/rangeselectimpl.h \
+    ui/customtabwidget.h \
+    ui/customtab.h \
+    model/shastring.h \
+    model/revision.h \
+    model/shamap.h
+
 
 SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
            customactionimpl.cpp dataloader.cpp domain.cpp exceptionmanager.cpp \
            filecontent.cpp filelist.cpp fileview.cpp git.cpp \
            lanes.cpp listview.cpp mainimpl.cpp myprocess.cpp namespace_def.cpp \
-           patchcontent.cpp patchview.cpp rangeselectimpl.cpp \
+           patchcontent.cpp patchview.cpp  \
            revdesc.cpp revsview.cpp settingsimpl.cpp treeview.cpp \
     branchestree.cpp \
     main.cpp \
     findsupport.cpp \
-    customtabwidget.cpp \
     branchestreeitem.cpp \
     externaldiffproc.cpp \
-    customtab.cpp \
     reachinfo.cpp \
     rangeinfo.cpp \
     updatedomainevent.cpp \
@@ -122,7 +126,13 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
     patchtextblockuserdata.cpp \
     filehistory.cpp \
     listviewproxy.cpp \
-    listviewdelegate.cpp
+    listviewdelegate.cpp \
+    ui/rangeselectimpl.cpp \
+    ui/customtabwidget.cpp \
+    ui/customtab.cpp \
+    model/shastring.cpp \
+    model/revision.cpp \
+    model/shamap.cpp
 
 DISTFILES += app_icon.rc helpgen.sh resources/* Src.vcproj todo.txt
 DISTFILES += ../COPYING ../exception_manager.txt ../README ../README_WIN.txt

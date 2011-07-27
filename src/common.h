@@ -14,7 +14,8 @@
 #include <QLatin1String>
 #include <QVariant>
 #include <QVector>
-
+#include "model/shastring.h"
+#include "lanes.h"
 /*
    QVariant does not support size_t type used in Qt containers, this is
    a problem on 64bit systems where size_t != uint and when using debug
@@ -50,7 +51,6 @@ class QDataStream;
 class QProcess;
 class QSplitter;
 class QWidget;
-class ShaString;
 
 // type shortcuts
 typedef const QString&              SCRef;
@@ -75,50 +75,9 @@ namespace QGit
         TAB_FILE
     };
 
-    // graph elements
-    enum LaneType {
-        EMPTY,
-        ACTIVE,
-        NOT_ACTIVE,
-        MERGE_FORK,
-        MERGE_FORK_R,
-        MERGE_FORK_L,
-        JOIN,
-        JOIN_R,
-        JOIN_L,
-        HEAD,
-        HEAD_R,
-        HEAD_L,
-        TAIL,
-        TAIL_R,
-        TAIL_L,
-        CROSS,
-        CROSS_EMPTY,
-        INITIAL,
-        BRANCH,
-        UNAPPLIED,
-        APPLIED,
-        BOUNDARY,
-        BOUNDARY_C, // corresponds to MERGE_FORK
-        BOUNDARY_R, // corresponds to MERGE_FORK_R
-        BOUNDARY_L, // corresponds to MERGE_FORK_L
 
-        LANE_TYPES_NUM
-    };
 
     const int COLORS_NUM = 8;
-
-    // graph helpers
-    inline bool isHead(int x) { return (x == HEAD || x == HEAD_R || x == HEAD_L); }
-    inline bool isTail(int x) { return (x == TAIL || x == TAIL_R || x == TAIL_L); }
-    inline bool isJoin(int x) { return (x == JOIN || x == JOIN_R || x == JOIN_L); }
-    inline bool isFreeLane(int x) { return (x == NOT_ACTIVE || x == CROSS || isJoin(x)); }
-    inline bool isBoundary(int x) { return (x == BOUNDARY || x == BOUNDARY_C ||
-                                            x == BOUNDARY_R || x == BOUNDARY_L); }
-    inline bool isMerge(int x) { return (x == MERGE_FORK || x == MERGE_FORK_R ||
-                                         x == MERGE_FORK_L || isBoundary(x)); }
-    inline bool isActive(int x) { return (x == ACTIVE || x == INITIAL || x == BRANCH ||
-                                          isMerge(x)); }
 
     // custom events
     enum EventType
@@ -284,71 +243,6 @@ namespace QGit
     extern const QString QUOTE_CHAR;
     extern const QString SCRIPT_EXT;
 }
-
-class ShaString : public QLatin1String
-{
-public:
-    inline ShaString() : QLatin1String(NULL) {}
-    inline ShaString(const ShaString& sha) : QLatin1String(sha.latin1()) {}
-    inline explicit ShaString(const char* sha) : QLatin1String(sha) {}
-
-    inline bool operator!=(const ShaString& o) const { return !operator==(o); }
-    inline bool operator==(const ShaString& o) const {
-
-        return (latin1() == o.latin1()) || !qstrcmp(latin1(), o.latin1());
-    }
-};
-
-class Rev
-{
-    // prevent implicit C++ compiler defaults
-    Rev();
-    Rev(const Rev&);
-    Rev& operator=(const Rev&);
-public:
-    Rev(const QByteArray& b, uint s, int idx, int* next, bool withDiff)
-        : orderIdx(idx), ba(b), start(s) {
-
-        indexed = isDiffCache = isApplied = isUnApplied = false;
-        descRefsMaster = ancRefsMaster = descBrnMaster = -1;
-        *next = indexData(true, withDiff);
-    }
-    bool isBoundary() const { return (ba.at(shaStart - 1) == '-'); }
-    uint parentsCount() const { return parentsCnt; }
-    const ShaString parent(int idx) const;
-    const QStringList parents() const;
-    const ShaString sha() const { return ShaString(ba.constData() + shaStart); }
-    const QString committer() const { setup(); return mid(comStart, autStart - comStart - 1); }
-    const QString author() const { setup(); return mid(autStart, autDateStart - autStart - 1); }
-    const QString authorDate() const { setup(); return mid(autDateStart, 10); }
-    const QString shortLog() const { setup(); return mid(sLogStart, sLogLen); }
-    const QString longLog() const { setup(); return mid(lLogStart, lLogLen); }
-    const QString diff() const { setup(); return mid(diffStart, diffLen); }
-
-    QVector<int> lanes, childs;
-    QVector<int> descRefs;     // list of descendant refs index, normally tags
-    QVector<int> ancRefs;      // list of ancestor refs index, normally tags
-    QVector<int> descBranches; // list of descendant branches index
-    int descRefsMaster; // in case of many Rev have the same descRefs, ancRefs or
-    int ancRefsMaster;  // descBranches these are stored only once in a Rev pointed
-    int descBrnMaster;  // by corresponding index xxxMaster
-    int orderIdx;
-private:
-    inline void setup() const { if (!indexed) indexData(false, false); }
-    int indexData(bool quick, bool withDiff) const;
-    const QString mid(int start, int len) const;
-    const QString midSha(int start, int len) const;
-
-    const QByteArray& ba; // reference here!
-    const int start;
-    mutable int parentsCnt, shaStart, comStart, autStart, autDateStart;
-    mutable int sLogStart, sLogLen, lLogStart, lLogLen, diffStart, diffLen;
-    mutable bool indexed;
-public:
-    bool isDiffCache, isApplied, isUnApplied; // put here to optimize padding
-};
-typedef QHash<ShaString, const Rev*> RevMap;  // faster then a map
-
 
 class RevFile
 {
