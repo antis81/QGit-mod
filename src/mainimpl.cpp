@@ -43,8 +43,8 @@
 
 using namespace QGit;
 
-MainImpl::MainImpl(SCRef cd, QWidget* parent) : QMainWindow(parent)
-{
+MainImpl::MainImpl(SCRef cd, QWidget* p) : QMainWindow(p) {
+
     EM_INIT(exExiting, "Exiting");
 
     setAttribute(Qt::WA_DeleteOnClose);
@@ -59,9 +59,7 @@ MainImpl::MainImpl(SCRef cd, QWidget* parent) : QMainWindow(parent)
     toolBar->addWidget(lineEditSHA);
     QAction* act = toolBar->insertWidget(ActSearchAndFilter, lineEditFilter);
     toolBar->insertWidget(act, cmbSearch);
-
     connect(lineEditSHA, SIGNAL(returnPressed()), this, SLOT(lineEditSHA_returnPressed()));
-
     connect(lineEditFilter, SIGNAL(returnPressed()), this, SLOT(lineEditFilter_returnPressed()));
 
     // create light and dark colors for alternate background
@@ -74,7 +72,7 @@ MainImpl::MainImpl(SCRef cd, QWidget* parent) : QMainWindow(parent)
     qApp->installEventFilter(this);
 
     // init native types
-    setRepositoryBusy = false;
+        setRepositoryBusy = false;
 
     // init filter match highlighters
     shortLogRE.setMinimal(true);
@@ -85,15 +83,12 @@ MainImpl::MainImpl(SCRef cd, QWidget* parent) : QMainWindow(parent)
     // set-up standard revisions and files list font
     QSettings settings;
     QString font(settings.value(STD_FNT_KEY).toString());
-
     if (font.isEmpty())
         font = QApplication::font().toString();
-
     QGit::STD_FONT.fromString(font);
 
     // set-up typewriter (fixed width) font
     font = settings.value(TYPWRT_FNT_KEY).toString();
-
     if (font.isEmpty()) { // choose a sensible default
         QFont fnt = QApplication::font();
         fnt.setStyleHint(QFont::TypeWriter, QFont::PreferDefault);
@@ -101,13 +96,12 @@ MainImpl::MainImpl(SCRef cd, QWidget* parent) : QMainWindow(parent)
         fnt.setFamily(fnt.defaultFamily()); // the family corresponding
         font = fnt.toString();              // to current style hint
     }
-
     QGit::TYPE_WRITER_FONT.fromString(font);
 
     // set-up tab view
     delete tabWdg->currentWidget(); // cannot be done in Qt Designer
     rv = new RevsView(this, git, true); // set has main domain
-    tabWdg->addTab(rv);
+        tabWdg->addTab(rv);
 
     // set-up file names loading progress bar
     pbFileNamesLoading = new QProgressBar(statusBar());
@@ -121,12 +115,10 @@ MainImpl::MainImpl(SCRef cd, QWidget* parent) : QMainWindow(parent)
 
     // set-up menu for recent visited repositories
     connect(File, SIGNAL(triggered(QAction*)), this, SLOT(openRecent_triggered(QAction*)));
-
     doUpdateRecentRepoMenu("");
 
     // set-up menu for custom actions
     connect(Actions, SIGNAL(triggered(QAction*)), this, SLOT(customAction_triggered(QAction*)));
-
     doUpdateCustomActionMenu(settings.value(ACT_LIST_KEY).toStringList());
 
     // manual adjust lineEditSHA width
@@ -136,7 +128,7 @@ MainImpl::MainImpl(SCRef cd, QWidget* parent) : QMainWindow(parent)
 
     // disable all actions
     updateGlobalActions(false);
-    ActShowTree->toggle();
+        ActShowTree->toggle();
 
     connect(git, SIGNAL(fileNamesLoad(int, int)), this, SLOT(fileNamesLoad(int, int)));
 
@@ -154,44 +146,21 @@ MainImpl::MainImpl(SCRef cd, QWidget* parent) : QMainWindow(parent)
     connect(rv->tab()->fileList, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
             this, SLOT(fileList_itemDoubleClicked(QListWidgetItem*)));
 
-    connect(treeView, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),
+        connect(treeView, SIGNAL(itemDoubleClicked(QTreeWidgetItem*, int)),
             this, SLOT(treeView_doubleClicked(QTreeWidgetItem*, int)));
 
     // use most recent repo as startup dir if it exists and user opted to do so
     QStringList recents(settings.value(REC_REP_KEY).toStringList());
     QDir checkRepo;
-
-    if (recents.size() >= 1
-            && testFlag(REOPEN_REPO_F, FLAGS_KEY)
-            && checkRepo.exists(recents.at(0))) {
+    if (    recents.size() >= 1
+         && testFlag(REOPEN_REPO_F, FLAGS_KEY)
+         && checkRepo.exists(recents.at(0)))
+    {
         startUpDir = recents.at(0);
-    } else {
+    }
+    else {
         startUpDir = (cd.isEmpty() ? QDir::current().absolutePath() : cd);
     }
-
-    // FIXME: Temporary solution
-    // Don't work shortcut
-    // {
-    searchBranchLineEdit->hide();
-
-    showSearchBranchLineEditAction = new QAction(tr("Show"), this);
-    showSearchBranchLineEditAction->setShortcut(tr("Ctrl+F"));
-
-    hideSearchBranchLineEditAction = new QAction(tr("Hide"), this);
-    showSearchBranchLineEditAction->setShortcut(tr("Esc"));
-
-    connect(showSearchBranchLineEditAction, SIGNAL(triggered()),
-            searchBranchLineEdit, SLOT(show()));
-
-    connect(hideSearchBranchLineEditAction, SIGNAL(triggered()),
-            searchBranchLineEdit, SLOT(hide()));
-
-    connect(searchBranchLineEdit, SIGNAL(textChanged(QString)),
-            branchesTree, SLOT(update(QString)));
-
-    MenuBarEditor->addAction(showSearchBranchLineEditAction);
-    MenuBarEditor->addAction(hideSearchBranchLineEditAction);
-    // }
 
     // MainImpl c'tor is called before to enter event loop,
     // but some stuff requires event loop to init properly
@@ -441,7 +410,7 @@ void MainImpl::updateGlobalActions(bool b) {
     ActViewRev->setEnabled(b);
     ActViewDiff->setEnabled(b);
     ActViewDiffNewTab->setEnabled(b && firstTab<PatchView>());
-    ActShowTree->setEnabled(b);
+        ActShowTree->setEnabled(b);
     ActMailApplyPatch->setEnabled(b);
     ActMailFormatPatch->setEnabled(b);
 
@@ -478,27 +447,25 @@ void MainImpl::updateContextActions(SCRef newRevSha, SCRef newFileName,
 
 // ************************* cross-domain update Actions ***************************
 
-void MainImpl::listViewLog_doubleClicked(const QModelIndex& index)
-{
+void MainImpl::listViewLog_doubleClicked(const QModelIndex& index) {
+
     if (index.isValid() && ActViewDiff->isEnabled())
         ActViewDiff->activate(QAction::Trigger);
 }
 
-void MainImpl::histListView_doubleClicked(const QModelIndex& index)
-{
+void MainImpl::histListView_doubleClicked(const QModelIndex& index) {
+
     if (index.isValid() && ActViewRev->isEnabled())
         ActViewRev->activate(QAction::Trigger);
 }
 
-void MainImpl::fileList_itemDoubleClicked(QListWidgetItem* item)
-{
-    bool isFirst = (item && item->listWidget()->item(0) == item);
+void MainImpl::fileList_itemDoubleClicked(QListWidgetItem* item) {
 
+    bool isFirst = (item && item->listWidget()->item(0) == item);
     if (isFirst && rv->st.isMerge())
         return;
 
     bool isMainView = (item && item->listWidget() == rv->tab()->fileList);
-
     if (isMainView && ActViewDiff->isEnabled())
         ActViewDiff->activate(QAction::Trigger);
 
@@ -506,26 +473,25 @@ void MainImpl::fileList_itemDoubleClicked(QListWidgetItem* item)
         ActViewFile->activate(QAction::Trigger);
 }
 
-void MainImpl::treeView_doubleClicked(QTreeWidgetItem* item, int)
-{
+void MainImpl::treeView_doubleClicked(QTreeWidgetItem* item, int) {
+
     if (item && ActViewFile->isEnabled())
         ActViewFile->activate(QAction::Trigger);
 }
 
-void MainImpl::ActRangeDlg_activated()
-{
+void MainImpl::ActRangeDlg_activated() {
+
     QString args;
     RangeSelectImpl rs(this, &args, false, git);
     bool quit = (rs.exec() == QDialog::Rejected); // modal execution
-
     if (!quit) {
         const QStringList l(args.split(" "));
         setRepository(curDir, true, true, &l, true);
     }
 }
 
-void MainImpl::ActViewRev_activated()
-{
+void MainImpl::ActViewRev_activated() {
+
     Domain* t;
     if (currentTabType(&t) == TAB_FILE) {
         rv->st = t->st;
@@ -534,18 +500,18 @@ void MainImpl::ActViewRev_activated()
     tabWdg->setCurrentWidget(rv->tabPage());
 }
 
-void MainImpl::ActViewFile_activated()
-{
+void MainImpl::ActViewFile_activated() {
+
     openFileTab(firstTab<FileView>());
 }
 
-void MainImpl::ActViewFileNewTab_activated()
-{
+void MainImpl::ActViewFileNewTab_activated() {
+
     openFileTab();
 }
 
-void MainImpl::openFileTab(FileView* fv)
-{
+void MainImpl::openFileTab(FileView* fv) {
+
     if (!fv) {
         fv = new FileView(this, git);
                 tabWdg->addTab(fv);
@@ -557,21 +523,18 @@ void MainImpl::openFileTab(FileView* fv)
 
         ActViewFileNewTab->setEnabled(ActViewFile->isEnabled());
     }
-
     tabWdg->setCurrentWidget(fv->tabPage());
     fv->st = rv->st;
     UPDATE_DOMAIN(fv);
 }
 
-void MainImpl::ActViewDiff_activated()
-{
-    Domain* t;
+void MainImpl::ActViewDiff_activated() {
 
+    Domain* t;
     if (currentTabType(&t) == TAB_FILE) {
         rv->st = t->st;
         UPDATE_DOMAIN(rv);
     }
-
     rv->viewPatch(false);
     ActViewDiffNewTab->setEnabled(true);
 
@@ -581,8 +544,8 @@ void MainImpl::ActViewDiff_activated()
     }
 }
 
-void MainImpl::ActViewDiffNewTab_activated()
-{
+void MainImpl::ActViewDiffNewTab_activated() {
+
     rv->viewPatch(true);
 }
 
@@ -606,8 +569,8 @@ bool MainImpl::eventFilter(QObject* obj, QEvent* ev) {
     return QWidget::eventFilter(obj, ev);
 }
 
-void MainImpl::revisionsDragged(SCList selRevs)
-{
+void MainImpl::revisionsDragged(SCList selRevs) {
+
     const QString h(QString::fromLatin1("@") + curDir + '\n');
     const QString dragRevs = selRevs.join(h).append(h).trimmed();
     QDrag* drag = new QDrag(this);
@@ -617,24 +580,19 @@ void MainImpl::revisionsDragged(SCList selRevs)
     drag->start(); // blocking until drop event
 }
 
-void MainImpl::revisionsDropped(SCList remoteRevs)
-{
-    // remoteRevs is already sanity checked to contain some possible valid data
+void MainImpl::revisionsDropped(SCList remoteRevs) {
+// remoteRevs is already sanity checked to contain some possible valid data
 
     if (rv->isDropping()) // avoid reentrancy
         return;
 
     QDir dr(curDir + QGit::PATCHES_DIR);
-
     if (dr.exists()) {
         const QString tmp("Please remove stale import directory " + dr.absolutePath());
         statusBar()->showMessage(tmp);
         return;
     }
-
-    bool workDirOnly;
-    bool fold;
-
+    bool workDirOnly, fold;
     if (!askApplyPatchParameters(&workDirOnly, &fold))
         return;
 
@@ -664,13 +622,11 @@ void MainImpl::revisionsDropped(SCList remoteRevs)
             break;
 
         dr.refresh();
-
         if (dr.count() != 1) {
             qDebug("ASSERT in on_droppedRevisions: found %i files "
                    "in %s", dr.count(), QGit::PATCHES_DIR.toLatin1().constData());
             break;
         }
-
         SCRef fn(dr.absoluteFilePath(dr[0]));
         bool is_applied = git->applyPatchFile(fn, fold, Git::optDragDrop);
         dr.remove(fn);
@@ -695,8 +651,8 @@ void MainImpl::revisionsDropped(SCList remoteRevs)
 
 // ******************************* Filter ******************************
 
-void MainImpl::newRevsAdded(const FileHistory* fh, const QVector<ShaString>&)
-{
+void MainImpl::newRevsAdded(const FileHistory* fh, const QVector<ShaString>&) {
+
     if (!git->isMainHistory(fh))
         return;
 
@@ -707,49 +663,46 @@ void MainImpl::newRevsAdded(const FileHistory* fh, const QVector<ShaString>&)
         ActSearchAndHighlight_toggled(true); // filter again on new arrived data
 
     // first rev could be a StGIT unapplied patch so check more then once
-    if (!ActCommit->isEnabled()
-            && (!git->isNothingToCommit() || git->isUnknownFiles())
-            && !git->isCommittingMerge())
+    if (   !ActCommit->isEnabled()
+        && (!git->isNothingToCommit() || git->isUnknownFiles())
+        && !git->isCommittingMerge())
         ActCommit_setEnabled(true);
 }
 
-void MainImpl::lineEditFilter_returnPressed()
-{
+void MainImpl::lineEditFilter_returnPressed() {
+
     ActSearchAndFilter->setChecked(true);
 }
 
-void MainImpl::ActSearchAndFilter_toggled(bool isOn)
-{
+void MainImpl::ActSearchAndFilter_toggled(bool isOn) {
+
     ActSearchAndHighlight->setEnabled(!isOn);
     ActSearchAndFilter->setEnabled(false);
     filterList(isOn, false); // blocking call
     ActSearchAndFilter->setEnabled(true);
 }
 
-void MainImpl::ActSearchAndHighlight_toggled(bool isOn)
-{
+void MainImpl::ActSearchAndHighlight_toggled(bool isOn) {
+
     ActSearchAndFilter->setEnabled(!isOn);
     ActSearchAndHighlight->setEnabled(false);
     filterList(isOn, true); // blocking call
     ActSearchAndHighlight->setEnabled(true);
 }
 
-void MainImpl::filterList(bool isOn, bool onlyHighlight)
-{
+void MainImpl::filterList(bool isOn, bool onlyHighlight) {
+
     lineEditFilter->setEnabled(!isOn);
     cmbSearch->setEnabled(!isOn);
 
     SCRef filter(lineEditFilter->text());
-
     if (filter.isEmpty())
         return;
 
     ShaSet shaSet;
-    bool patchNeedsUpdate;
-    bool isRegExp;
+    bool patchNeedsUpdate, isRegExp;
     patchNeedsUpdate = isRegExp = false;
     int idx = cmbSearch->currentIndex(), colNum = 0;
-
     if (isOn) {
         switch (idx) {
         case CS_SHORT_LOG:
@@ -791,7 +744,6 @@ void MainImpl::filterList(bool isOn, bool onlyHighlight)
         shortLogRE.setPattern("");
         longLogRE.setPattern("");
     }
-
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 
     ListView* lv = rv->tab()->listViewLog;
@@ -810,10 +762,9 @@ void MainImpl::filterList(bool isOn, bool onlyHighlight)
     QApplication::postEvent(rv, new MessageEvent(msg)); // deferred message, after update
 }
 
-bool MainImpl::event(QEvent* e)
-{
-    BaseEvent *de = dynamic_cast<BaseEvent*>(e);
+bool MainImpl::event(QEvent* e) {
 
+    BaseEvent* de = dynamic_cast<BaseEvent*>(e);
     if (!de)
         return QWidget::event(e);
 

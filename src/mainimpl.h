@@ -172,10 +172,6 @@ private:
     RevsView* rv;
     QProgressBar* pbFileNamesLoading;
 
-    // Actions for searching in branchesTree
-    QAction *showSearchBranchLineEditAction;
-    QAction *hideSearchBranchLineEditAction;
-
     // curDir is the repository working dir, could be different from qgit running
     // directory QDir::current(). Note that qgit could be run from subdirectory
     // so only after git->isArchive() that updates curDir to point to working dir
