@@ -22,10 +22,12 @@ public:
     };
 
     BranchesTree(QWidget *parent = 0);
-    void setup(Domain *domain, Git *git);
-    void update();
+    void setup(Domain *domain, Git *git); // FIXME: Move to constructor
+//    void update();
 
 public slots:
+    //void update();
+    void update(QString inputText = "");
     void changeBranch(QTreeWidgetItem *item, int column);
     void contextMenu(const QPoint &pos);
     void checkout();
@@ -43,8 +45,9 @@ private:
     QIcon branchIcon;
     QIcon masterBranchIcon;
     QIcon tagIcon;
-    void addNode(ItemType headerType, Reference::Type type);
-    void addRemotesNodes();
+    //void addNode(ItemType headerType, Reference::Type type);
+    void addNode(ItemType headerType, Reference::Type type, QString textValue = "");
+    void addRemotesNodes(QString textValue = "");
     QTreeWidgetItem *recursiveFindBranch(const QString &branch);
     QTreeWidgetItem *recursiveFindBranch(QTreeWidgetItem *parent, const QString &branch);
 };

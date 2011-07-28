@@ -25,6 +25,7 @@ Annotate::Annotate(Git* parent, QObject* guiObj) : QObject(parent)
     cancelingAnnotate = annotateRunning = annotateActivity = false;
     valid = canceled = isError = false;
 
+    // FIXME: Superfluous redirrect
     connect(this, SIGNAL(annotateReady(Annotate*, bool, const QString&)),
             git, SIGNAL(annotateReady(Annotate*, bool, const QString&)));
 }
