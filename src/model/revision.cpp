@@ -1,34 +1,37 @@
 #include "revision.h"
 #include "common.h"
 
-const QString Revision::mid(int start, int len) const {
-
+const QString Revision::mid(int start, int len) const
+{
     // warning no sanity check is done on arguments
     const char* data = ba.constData();
     return QString::fromAscii(data + start, len);
 }
 
-const QString Revision::midSha(int start, int len) const {
-
+const QString Revision::midSha(int start, int len) const
+{
     // warning no sanity check is done on arguments
     const char* data = ba.constData();
     return QString::fromLatin1(data + start, len); // faster then formAscii
 }
 
-const ShaString Revision::parent(int idx) const {
-
+const ShaString Revision::parent(int idx) const
+{
+    // FIXME: Magic numbers!
     return ShaString(ba.constData() + shaStart + 41 + 41 * idx);
 }
 
-const QStringList Revision::parents() const {
-
+const QStringList Revision::parents() const
+{
     QStringList p;
     int idx = shaStart + 41;
 
+    // FIXME: Magic numbers!
     for (int i = 0; i < parentsCnt; i++) {
         p.append(midSha(idx, 40));
         idx += 41;
     }
+
     return p;
 }
 
@@ -57,6 +60,7 @@ int Revision::indexData(bool quick, bool withDiff) const {
     const char* data = ba.constData();
     char* fixup = const_cast<char*>(data); // to build '\0' terminating strings
 
+    // FIXME: Magic numbers!
     if (start + 42 > last) // at least sha + 'X' + 'X' + '\n' + must be present
         return -1;
 

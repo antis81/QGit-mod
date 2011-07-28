@@ -22,7 +22,7 @@ public:
     };
 
     BranchesTree(QWidget *parent = 0);
-    void setup(Domain *domain, Git *git); // FIXME: Move to constructor
+    void setup(Domain *domain, Git *git); // FIXME: Move to constructor - useless method
 //    void update();
 
 public slots:
@@ -36,6 +36,7 @@ public slots:
 public:
     void selectBranch(const QString &branch);
 private:
+    // FIXME: Too short names
     Git *g;
     Domain *d;
     QAction *collapseAllAction;

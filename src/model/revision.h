@@ -23,6 +23,9 @@ public:
         descRefsMaster = ancRefsMaster = descBrnMaster = -1;
         *next = indexData(true, withDiff);
     }
+    bool isDiffCache; //
+    bool isApplied;   //
+    bool isUnApplied; // put here to optimize padding
     bool isBoundary() const { return (ba.at(shaStart - 1) == '-'); }
     uint parentsCount() const { return parentsCnt; }
     const ShaString parent(int idx) const;
@@ -52,13 +55,15 @@ private:
 
     const QByteArray& ba; // reference here!
     const int start;
+    // FIXME: Soo many operators in one line
+    // {
     mutable int parentsCnt, shaStart, comStart, autStart, autDateStart;
     mutable int sLogStart, sLogLen, lLogStart, lLogLen, diffStart, diffLen;
+    // }
     mutable bool indexed;
-public:
-    bool isDiffCache, isApplied, isUnApplied; // put here to optimize padding
 };
 
+// FIXME: include in class
 typedef QHash<ShaString, const Revision*> RevMap;  // faster then a map
 
 #endif // REVISION_H

@@ -12,7 +12,8 @@
 #include <QStringList>
 
 // graph elements
-enum LaneType {
+enum LaneType
+{
     LANE_UNDEFINED = -1,
     LANE_EMPTY = 0,
     LANE_ACTIVE,
@@ -53,8 +54,8 @@ enum LaneType {
 //  The ListView class is responsible for rendering the glyphs.
 //
 
-namespace QGit {
-
+namespace QGit
+{
 // graph helpers
 inline bool isHead(LaneType x) { return (x == LANE_HEAD || x == LANE_HEAD_R || x == LANE_HEAD_L); }
 inline bool isTail(LaneType x) { return (x == LANE_TAIL || x == LANE_TAIL_R || x == LANE_TAIL_L); }

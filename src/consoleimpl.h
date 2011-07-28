@@ -32,6 +32,7 @@ public slots:
     void procFinished();
 
 protected slots:
+    // FIXME: Bad name for SLOTS
     virtual void closeEvent(QCloseEvent *ce);
     void pushButtonTerminate_clicked();
     void pushButtonOk_clicked();
