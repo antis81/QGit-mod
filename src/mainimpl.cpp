@@ -187,7 +187,7 @@ MainImpl::MainImpl(SCRef cd, QWidget* parent) : QMainWindow(parent)
             searchBranchLineEdit, SLOT(hide()));
 
     connect(searchBranchLineEdit, SIGNAL(textChanged(QString)),
-            branchesTree, SLOT(update(QString)));
+            branchesTree, SLOT(showSearchBranchesItems(QString)));
 
     MenuBarEditor->addAction(showSearchBranchLineEditAction);
     MenuBarEditor->addAction(hideSearchBranchLineEditAction);

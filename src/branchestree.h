@@ -23,11 +23,10 @@ public:
 
     BranchesTree(QWidget *parent = 0);
     void setup(Domain *domain, Git *git); // FIXME: Move to constructor
-//    void update();
+    void update(); // FIXME: Not update, but updateStatement!
 
 public slots:
-    //void update();
-    void update(QString inputText = "");
+    void showSearchBranchesItems(QString inputText = ""); // not change statement, but hide items
     void changeBranch(QTreeWidgetItem *item, int column);
     void contextMenu(const QPoint &pos);
     void checkout();
@@ -45,11 +44,11 @@ private:
     QIcon branchIcon;
     QIcon masterBranchIcon;
     QIcon tagIcon;
-    //void addNode(ItemType headerType, Reference::Type type);
-    void addNode(ItemType headerType, Reference::Type type, QString textValue = "");
-    void addRemotesNodes(QString textValue = "");
+    void addNode(ItemType headerType, Reference::Type type);
+    void addRemotesNodes();
     QTreeWidgetItem *recursiveFindBranch(const QString &branch);
     QTreeWidgetItem *recursiveFindBranch(QTreeWidgetItem *parent, const QString &branch);
+    bool isRegExpConformed(QString currentString, QString originalString);
 };
 
 #endif // BRANCHESTREE_H
