@@ -2,8 +2,6 @@
 #include "mainimpl.h"
 #include <QDebug>
 
-// {{{
-
 BranchesTree::BranchesTree(QWidget *parent) : QTreeWidget(parent),
     branchIcon(QString::fromUtf8(":/icons/resources/branch.png")),
     masterBranchIcon(QString::fromUtf8(":/icons/resources/branch_master.png")),
@@ -40,8 +38,6 @@ BranchesTree::BranchesTree(QWidget *parent) : QTreeWidget(parent),
     p.setColor(QPalette::Base, p.color(QPalette::Window));
     this->setPalette(p);
 }
-
-// }}}
 
 void BranchesTree::setup(Domain *domain, Git *git)
 {
@@ -166,12 +162,7 @@ void BranchesTree::addRemotesNodes()
 void BranchesTree::setAllItemsShown()
 {
     for (int i = 0; i < topLevelItemCount(); i++) {
-        //if (topLevelItem(i)->childCount() > 0) {
-            //topLevelItem(i)->setHidden(false);
-//        for (int i = 0; i < topLevelItem(i)->childCount(); j++) {
-                setShownItem(topLevelItem(i));
-//            }
-        //}
+        setShownItem(topLevelItem(i));
     }
 }
 
@@ -187,6 +178,7 @@ void BranchesTree::setShownItem(QTreeWidgetItem *item)
 
 void BranchesTree::changeBranch(QTreeWidgetItem *item, int column)  // REMEMBER: use this princip
                                                                     // of column to avoid magic numbers
+                                                                    // see at this class acurately
 {
     if ((item->type() != LeafBranch)
             && (item->type() != LeafRemote)
@@ -204,10 +196,10 @@ void BranchesTree::changeBranch(QTreeWidgetItem *item, int column)  // REMEMBER:
         stateTree[i] = this->topLevelItem(i)->isExpanded();
     }
 
-    // перестраиваем дерево
+    // rebuild tree
     d->m()->changeBranch(branch);
 
-    // возвращаем назад состояние
+    // set back statement
     for (int i = 0; i < topLevelItemCount(); i++) {
         this->topLevelItem(i)->setExpanded(stateTree[i]);
     }
@@ -257,6 +249,7 @@ void BranchesTree::contextMenu(const QPoint & pos)
     QMenu branchesTreeContextMenu(tr("Context menu"), this);
     QTreeWidgetItem *item = selectedItems().first();    
     BranchesTreeItem* branchItem;
+
     switch (item->type()) {
     case HeaderBranches:
         ;
@@ -295,36 +288,34 @@ void BranchesTree::checkout()
 
 void BranchesTree::removeTag()
 {
-
 }
 
 void BranchesTree::showSearchBranchesItems(QString inputText)
 {
     bool f = false;
-    // восстановить все в shown
     setAllItemsShown();
-    //setShown(true);
-//    this->setHidden(false); // FIXME: Change to load/save statement
+    // THINKME: Change to load/save statement of tree
     if (!(inputText.simplified().isEmpty())) {
         for (int i = 0; i < topLevelItemCount(); i++) {
-            f = isBranchesTreeItemContainedSearchString(topLevelItem(i), inputText);
+            f = isBranchesTreeItemShown(topLevelItem(i), inputText);
         }
     } // else load condition
 }
 
-bool BranchesTree::isBranchesTreeItemContainedSearchString(QTreeWidgetItem *item, QString currentString)
+bool BranchesTree::isBranchesTreeItemShown(QTreeWidgetItem *item, QString currentString)
 {
-//    BranchesTreeItem* branchItem = static_cast<BranchesTreeItem*>(item);
+    // Use it, if don't remove branchestreeitem class {
+    //      BranchesTreeItem* branchItem = static_cast<BranchesTreeItem*>(item);
+    // }
 
     if (isRegExpConformed(currentString, item->text(0))) { // FIXME: in class must be reimplement magic number "0"
         item->setHidden(false);
-        //item->setHidden(false);
         return true;
     } else {
         if (item->childCount() > 0) {
             bool flag = false; // FIXME: bad name
             for (int i = 0; i < item->childCount(); i++) {
-                if (isBranchesTreeItemContainedSearchString(item->child(i), currentString)) {
+                if (isBranchesTreeItemShown(item->child(i), currentString)) {
                     if (flag == false) {
                         flag = true;
                     }

@@ -183,16 +183,14 @@ MainImpl::MainImpl(SCRef cd, QWidget* parent) : QMainWindow(parent)
     connect(showSearchBranchLineEditAction, SIGNAL(triggered()),
             searchBranchLineEdit, SLOT(show()));
 
-// uncomment when realize searching
-//    connect(hideSearchBranchLineEditAction, SIGNAL(triggered()),
-//            branchesTree, SLOT(showSearchBranchesItems());
+    connect(hideSearchBranchLineEditAction, SIGNAL(triggered()),
+            branchesTree, SLOT(showSearchBranchesItems()));
 
     connect(hideSearchBranchLineEditAction, SIGNAL(triggered()),
             searchBranchLineEdit, SLOT(hide()));
 
     connect(searchBranchLineEdit, SIGNAL(textChanged(QString)),
             branchesTree, SLOT(showSearchBranchesItems(QString)));
-
 
 
     MenuBarEditor->addAction(showSearchBranchLineEditAction);

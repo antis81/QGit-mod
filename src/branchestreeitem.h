@@ -3,6 +3,10 @@
 
 #include <QTreeWidgetItem>
 
+// Скорее всего этот класс не нужен, объяснение смотри в branchestree.h
+
+// THINKME: Кстати, не переименовать ли всё это дело в BranchTree. так разумнее
+
 class BranchesTreeItem : public QTreeWidgetItem
 {
 public:

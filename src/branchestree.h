@@ -11,6 +11,9 @@
 // или = = по краям. Иначе мы введём пользователя в заблуждение. Я бы лично отказался от них совсем,
 // потому что KISS. Чем проще, тем лучше. И кастовать друг в друга не надо будет.
 
+// Класс необходимо упорядочить и придумать адекватные имена функциям. Ибо это ужас. И branch() не
+// должен возвращать QString!
+
 class BranchesTree : public QTreeWidget
 {
     Q_OBJECT
@@ -26,9 +29,12 @@ public:
         HeaderRemote = 263
     };
 
+    void selectBranch(const QString &branch); // THINKME: Why public?
+
     BranchesTree(QWidget *parent = 0);
     void setup(Domain *domain, Git *git); // FIXME: Move to constructor
     void update();                        // FIXME: Not update, but updateStatement!
+                                          // THINKME: Why public?
 
 public slots:
     void showSearchBranchesItems(QString inputText = ""); // not change statement, but hide items
@@ -37,10 +43,7 @@ public slots:
     void checkout();
     void removeTag();
 
-public:
-    void selectBranch(const QString &branch);
 private:
-    void setShownItem(QTreeWidgetItem *item);
     Git *g;     // FIXME: Too short names
     Domain *d;  //
     QAction *collapseAllAction;
@@ -50,13 +53,18 @@ private:
     QIcon branchIcon;
     QIcon masterBranchIcon;
     QIcon tagIcon;
+
     void addNode(ItemType headerType, Reference::Type type);
     void addRemotesNodes();
+
     void setAllItemsShown();
+    void setShownItem(QTreeWidgetItem *item);
+
     QTreeWidgetItem *recursiveFindBranch(const QString &branch);
     QTreeWidgetItem *recursiveFindBranch(QTreeWidgetItem *parent, const QString &branch);
-    bool isRegExpConformed(QString currentString, QString originalString); // ATTENTION: Don't used
-    bool isBranchesTreeItemContainedSearchString(QTreeWidgetItem *item, QString currentString);
+
+    bool isRegExpConformed(QString currentString, QString originalString);
+    bool isBranchesTreeItemShown(QTreeWidgetItem *item, QString currentString);
 };
 
 #endif // BRANCHESTREE_H
