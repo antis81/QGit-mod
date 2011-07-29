@@ -330,7 +330,7 @@ bool BranchesTree::isBranchesTreeItemContainedSearchString(QTreeWidgetItem *item
                     }
                 }
             }
-            item->setHidden(flag);
+            item->setHidden(!flag);
             return flag;
         } else {
             item->setHidden(true);
