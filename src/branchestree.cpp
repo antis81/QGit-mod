@@ -167,7 +167,7 @@ void BranchesTree::changeBranch(QTreeWidgetItem *item, int column)
 
     // запоминаем состояние закрытости/открытости хедеров
     // и текст выделенного узла
-    bool stateTree[topLevelItemCount()];
+    bool* stateTree = new bool[topLevelItemCount()];
     BranchesTreeItem* branchItem = static_cast<BranchesTreeItem*>(item);
     const QString& branch = branchItem->branch();
 
@@ -183,6 +183,7 @@ void BranchesTree::changeBranch(QTreeWidgetItem *item, int column)
         this->topLevelItem(i)->setExpanded(stateTree[i]);
     }
 
+    delete[] stateTree;
     clearSelection();
     selectBranch(branch);
 }
