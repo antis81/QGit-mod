@@ -175,13 +175,17 @@ MainImpl::MainImpl(SCRef cd, QWidget* parent) : QMainWindow(parent)
     searchBranchLineEdit->hide();
 
     showSearchBranchLineEditAction = new QAction(tr("Show"), this);
-    showSearchBranchLineEditAction->setShortcut(tr("Ctrl+F"));
+    showSearchBranchLineEditAction->setShortcut(tr("Ctrl+/"));
 
     hideSearchBranchLineEditAction = new QAction(tr("Hide"), this);
-    showSearchBranchLineEditAction->setShortcut(tr("Esc"));
+    hideSearchBranchLineEditAction->setShortcut(tr("Esc"));
 
+    // FIXME: Refactor as single slot {
     connect(showSearchBranchLineEditAction, SIGNAL(triggered()),
             searchBranchLineEdit, SLOT(show()));
+    connect(showSearchBranchLineEditAction, SIGNAL(triggered()),
+            searchBranchLineEdit, SLOT(setFocus()));
+    // }
 
     connect(hideSearchBranchLineEditAction, SIGNAL(triggered()),
             branchesTree, SLOT(showSearchBranchesItems()));
@@ -193,8 +197,8 @@ MainImpl::MainImpl(SCRef cd, QWidget* parent) : QMainWindow(parent)
             branchesTree, SLOT(showSearchBranchesItems(QString)));
 
 
-    MenuBarEditor->addAction(showSearchBranchLineEditAction);
-    MenuBarEditor->addAction(hideSearchBranchLineEditAction);
+    Search->addAction(showSearchBranchLineEditAction);
+    Search->addAction(hideSearchBranchLineEditAction);
     // }
 
     // MainImpl c'tor is called before to enter event loop,

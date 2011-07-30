@@ -212,7 +212,7 @@
      <x>0</x>
      <y>0</y>
      <width>905</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="Help">
@@ -285,9 +285,15 @@
     <addaction name="ActShowDescHeader"/>
     <addaction name="ActFilterTree"/>
    </widget>
+   <widget class="QMenu" name="Search">
+    <property name="title">
+     <string>&amp;Search</string>
+    </property>
+   </widget>
    <addaction name="File"/>
    <addaction name="Edit"/>
    <addaction name="View"/>
+   <addaction name="Search"/>
    <addaction name="Actions"/>
    <addaction name="separator"/>
    <addaction name="Help"/>
