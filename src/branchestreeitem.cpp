@@ -24,7 +24,7 @@ void BranchesTreeItem::setupStyle()
 QString BranchesTreeItem::branch()
 {
     return m_branch;
-};
+}
 
 void BranchesTreeItem::setBranch(QString branch)
 {
