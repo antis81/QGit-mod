@@ -29,7 +29,8 @@ private:
     const Revision* revLookup(int row, FileHistory** fhPtr = NULL) const;
     void paintLog(QPainter* p, const QStyleOptionViewItem& o, const QModelIndex &i) const;
     void paintGraph(QPainter* p, const QStyleOptionViewItem& o, const QModelIndex &i) const;
-    void paintGraphLane(QPainter* p, int type, int x1, int x2, const QColor& col, const QColor& activeCol, const QBrush& back) const;
+    void paintGraphLane(QPainter* p, int type, int x1, int x2, const QColor& col,
+                        const QColor& activeCol, const QBrush& back) const;
     QPixmap* getTagMarks(SCRef sha, const QStyleOptionViewItem& opt) const;
     void addRefPixmap(QPixmap** pp, SCRef sha, int type, QStyleOptionViewItem opt) const;
     void addTextPixmap(QPixmap** pp, SCRef txt, const QStyleOptionViewItem& opt) const;

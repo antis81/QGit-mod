@@ -32,7 +32,7 @@ public:
     void selectBranch(const QString &branch); // THINKME: Why public?
 
     BranchesTree(QWidget *parent = 0);
-    void setup(Domain *domain, Git *git); // FIXME: Move to constructor
+    void setup(Domain *domain, Git *git); // FIXME: Move to constructor - useless method
     void update();                        // FIXME: Not update, but updateStatement!
                                           // THINKME: Why public?
 
@@ -44,8 +44,9 @@ public slots:
     void removeTag();
 
 private:
-    Git *g;     // FIXME: Too short names
-    Domain *d;  //
+    // FIXME: Too short names
+    Git *g;
+    Domain *d;
     QAction *collapseAllAction;
     QAction *expandAllAction;
     QAction *checkoutAction;

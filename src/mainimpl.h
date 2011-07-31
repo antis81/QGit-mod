@@ -81,6 +81,7 @@ protected:
     virtual bool event(QEvent* e);
 
 protected slots:
+    // FIXME: I am angry of so named slots :(((
     void initWithEventLoopActive();
     void refreshRepo(bool setCurRevAfterLoad = true);
     void listViewLog_doubleClicked(const QModelIndex&);

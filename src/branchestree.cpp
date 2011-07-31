@@ -56,10 +56,10 @@ void BranchesTree::update()
 
 void BranchesTree::addNode(ItemType headerType, Reference::Type type)
 {
-    // get info by type
+    // получаем нужную инфу по типу
     QStringList tempList = g->getAllRefNames(type, !Git::optOnlyLoaded);
 
-    // make header and put up to tree
+    // делаем хедер и добавляем на верхний уровень
     BranchesTreeItem *node;
     switch (headerType) {
     case (BranchesTree::HeaderBranches):
@@ -139,7 +139,6 @@ void BranchesTree::addRemotesNodes()
     FOREACH_SL (it, tempList) {
         const QString& branchName = *it;
         int i = branchName.indexOf("/");
-
         if (i > 0) {
             remoteName = branchName.left(i);
             text = branchName.mid(i + 1);
