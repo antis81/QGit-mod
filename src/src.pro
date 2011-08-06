@@ -101,7 +101,8 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
     ui/customtab.h \
     model/shastring.h \
     model/revision.h \
-    model/shamap.h
+    model/shamap.h \
+    model/referenceinfo.h
 
 
 SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
@@ -132,7 +133,8 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
     ui/customtab.cpp \
     model/shastring.cpp \
     model/revision.cpp \
-    model/shamap.cpp
+    model/shamap.cpp \
+    model/referenceinfo.cpp
 
 DISTFILES += app_icon.rc helpgen.sh resources/* Src.vcproj todo.txt
 DISTFILES += ../COPYING ../exception_manager.txt ../README ../README_WIN.txt

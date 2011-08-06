@@ -19,21 +19,13 @@ struct Reference  // stores tag information associated to a revision
     QString     tagMsg;
     QString     stgitPatch;
 
-    enum Type
-    {
-        TAG        = 1,
-        BRANCH     = 2,
-        REMOTE_BRANCH = 4,
-        CUR_BRANCH = 8,
-        REF        = 16,
-        APPLIED    = 32,
-        UN_APPLIED = 64,
-        ANY_REF    = 127
-    };
+
 };
 
-class ShaMap : public QHash<ShaString, Reference>
+class ShaMap
 {
+private:
+    QHash<ShaString, Reference> map;
 public:
     ShaMap();
     uint checkRef(const ShaString& sha, uint typeMask = Reference::ANY_REF) const;
