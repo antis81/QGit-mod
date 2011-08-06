@@ -12,7 +12,12 @@
 #include "common.h"
 #include "domain.h"
 #include "model/revision.h"
-#include "model/shamap.h"
+#include "model/reference.h"
+#include "model/tagreference.h"
+
+class Git;
+#include "git/references.h"
+#include "git/rungit_interface.h"
 //#include "filehistory.h"
 
 template <class, class> struct QPair;
@@ -30,14 +35,14 @@ class FileHistory;
 // Need to add in class (conflict in git_startup.cpp)
 
 
-class Git : public QObject
+class Git : public QObject, RunGitInterface
 {
     Q_OBJECT
 public:
-    ShaMap shaMap;
+    References m_references;
 
     explicit Git(QObject *parent);
-
+    virtual ~Git();
     // used as self-documenting boolean parameters
     static const bool optFalse       = false;
     static const bool optSaveCache   = true;
@@ -78,7 +83,6 @@ public:
     void cancelProcess(MyProcess* p);
     bool isCommittingMerge() const { return isMergeHead; }
     bool isStGITStack() const { return isStGIT; }
-    bool isPatchName(SCRef nm);
     bool isSameFiles(SCRef tree1Sha, SCRef tree2Sha);
     static bool isImageFile(SCRef file);
     static bool isBinaryFile(SCRef file);
@@ -105,11 +109,9 @@ public:
     const QStringList getNearTags(bool goDown, SCRef sha);
     const QStringList getDescendantBranches(SCRef sha, bool shaOnly = false);
     const QString getShortLog(SCRef sha);
-    const QString getTagMsg(SCRef sha);
     const Revision* revLookup(const ShaString& sha, const FileHistory* fh = NULL) const;
     const Revision* revLookup(SCRef sha, const FileHistory* fh = NULL) const;
-    const QString getRevInfo(SCRef sha);
-    const QString getRefSha(SCRef refName, Reference::Type type = Reference::ANY_REF, bool askGit = true);
+    const QString getRevInfo(const ShaString &sha);
     const QStringList getAllRefNames(uint mask, bool onlyLoaded);
     const QStringList sortShaListByIndex(SCList shaList);
     void getWorkDirFiles(SList files, SList dirs, RevFile::StatusFlag status);
@@ -119,13 +121,13 @@ public:
     bool commitFiles(SCList files, SCRef msg, bool amend);
     bool makeBranch(SCRef sha, SCRef branchName);
     bool makeTag(SCRef sha, SCRef tag, SCRef msg);
-    bool deleteTag(SCRef sha);
+    bool deleteTag(const QString &tagName);
     bool checkout(SCRef sha);
     bool applyPatchFile(SCRef patchPath, bool fold, bool sign);
     bool resetCommits(int parentDepth);
     bool stgCommit(SCList selFiles, SCRef msg, SCRef patchName, bool fold);
-    bool stgPush(SCRef sha);
-    bool stgPop(SCRef sha);
+    bool stgPush(const ShaString& sha);
+    bool stgPop(const ShaString& sha);
     void setTextCodec(QTextCodec* tc);
     void addExtraFileInfo(QString* rowName, SCRef sha, SCRef diffToSha, bool allMergeFiles);
     void removeExtraFileInfo(QString* rowName);
@@ -143,6 +145,13 @@ public:
     QString& currentBranch();
     static const QString escape(QString s);
     static const QString unescape(QString s);
+
+    // FIXME: this is the public delegate for the private function. This will be removed in the future.
+    bool runGit(const QString& cmd, QString* out = NULL, QObject* rcv = NULL, const QString& buf = "")
+    {
+        return run(cmd, out, rcv, buf);
+    }
+
 signals:
     void newRevsAdded(const FileHistory*, const QVector<ShaString>&);
     void loadCompleted(const FileHistory*, const QString&);
@@ -207,7 +216,6 @@ private:
     MyProcess* runAsScript(SCRef cmd, QObject* rcv = NULL, SCRef buf = "");
     const QStringList getArgs(bool* quit, bool repoChanged);
     bool getRefs();
-    void parseStGitPatches(SCList patchNames, SCList patchShas);
     void clearRevs();
     void clearFileNames();
     bool startRevList(SCList args, FileHistory* fh);
@@ -252,7 +260,6 @@ private:
     void setStatus(RevFile& rf, SCRef rowSt);
     void setExtStatus(RevFile& rf, SCRef rowSt, int parNum, FileNamesLoader& fl);
     void appendNamesWithId(QStringList& names, SCRef sha, SCList data, bool onlyLoaded);
-    Reference* lookupReference(const ShaString& sha, bool create = false);
     EM_DECLARE(exGitStopped);
 
     Domain* curDomain;
@@ -269,10 +276,10 @@ private:
     bool isTextHighlighterFound;
     bool loadingUnAppliedPatches;
     bool fileCacheAccessed;
-    int patchesStillToFind;
     QString firstNonStGitPatch;
     RevFileMap revsFiles;
     QVector<QByteArray> revsFilesShaBackupBuf;
+    // TODO: move to References
     QVector<QByteArray> shaBackupBuf;
     StrVect fileNamesVec;
     StrVect dirNamesVec;

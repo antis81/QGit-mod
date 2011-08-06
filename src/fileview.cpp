@@ -176,7 +176,7 @@ bool FileView::doUpdate(bool force)
     } else if (fileTab->histListView->update() || st.sha().isEmpty()) {
 
         updateSpinBoxValue();
-        showStatusBarMessage(git->getRevInfo(st.sha()));
+        showStatusBarMessage(git->getRevInfo(QGit::toTempSha(st.sha())));
     }
     if (!fileTab->toolButtonPin->isChecked())
         fileTab->textEditFile->doUpdate();

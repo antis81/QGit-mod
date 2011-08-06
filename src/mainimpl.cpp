@@ -481,7 +481,7 @@ void MainImpl::updateContextActions(SCRef newRevSha, SCRef newFileName, bool isD
 
     if (found) {
         const Revision* r = git->revLookup(newRevSha);
-        isTag = git->shaMap.checkRef(newRevSha, Reference::TAG);
+        isTag = git->m_references.containsType(QGit::toTempSha(newRevSha), Reference::TAG);
         isUnApplied = r->isUnApplied;
         isApplied = r->isApplied;
     }
@@ -1287,7 +1287,7 @@ void MainImpl::goRef_triggered(QAction* act)
     if (!act || act->data() != "Ref")
         return;
 
-    SCRef refSha(git->getRefSha(act->text()));
+    SCRef refSha(git->m_references.getRefSha(act->text()));
     rv->st.setSha(refSha);
     UPDATE_DOMAIN(rv);
 }
@@ -1675,7 +1675,7 @@ void MainImpl::doBranchOrTag(bool isTag)
         return;
     }
 
-    if (!git->getRefSha(ref, isTag ? Reference::TAG : Reference::BRANCH, false).isEmpty()) {
+    if (git->m_references.containsType(toTempSha(ref), isTag ? Reference::TAG : Reference::BRANCH)) {
         QMessageBox::warning(this, boxDesc,
                              "Sorry, " + refDesc + " name already exists.\n"
                              "Please choose a different name.");
@@ -1730,7 +1730,7 @@ void MainImpl::ActPush_activated()
     rv->tab()->listViewLog->getSelectedItems(selectedItems);
 
     for (int i = 0; i < selectedItems.count(); i++) {
-        if (!git->shaMap.checkRef(selectedItems[i], Reference::UN_APPLIED)) {
+        if (!git->m_references.containsType(QGit::toTempSha(selectedItems[i]), Reference::UN_APPLIED)) {
             statusBar()->showMessage("Please, select only unapplied patches");
             return;
         }
@@ -1744,7 +1744,7 @@ void MainImpl::ActPush_activated()
                           .arg(i+1).arg(selectedItems.count()));
         statusBar()->showMessage(tmp);
         SCRef sha = selectedItems[selectedItems.count() - i - 1];
-        if (!git->stgPush(sha)) {
+        if (!git->stgPush(toTempSha(sha))) {
             statusBar()->showMessage("Failed to push patch " + sha);
             ok = false;
             break;
@@ -1769,7 +1769,7 @@ void MainImpl::ActPop_activated()
     }
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
-    git->stgPop(selectedItems[0]);
+    git->stgPop(toTempSha(selectedItems[0]));
     QApplication::restoreOverrideCursor();
     refreshRepo(false);
 }

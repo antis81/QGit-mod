@@ -122,7 +122,7 @@ void PatchView::button_clicked(int diffType) {
         return;
 
     // check for a ref name or an abbreviated form
-    normalizedSha = (sha.length() != 40 && !sha.isEmpty() ? git->getRefSha(sha) : sha);
+    normalizedSha = (sha.length() != 40 && !sha.isEmpty() ? git->m_references.getRefSha(sha) : sha);
 
     if (normalizedSha != st.diffToSha()) { // avoid looping
         st.setDiffToSha(normalizedSha); // could be empty
