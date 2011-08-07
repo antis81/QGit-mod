@@ -154,7 +154,6 @@ public:
 	bool isNothingToCommit();
 	bool isUnknownFiles() const { return (workingDirInfo.otherFiles.count() > 0); }
 	bool isTextHighlighter() const { return isTextHighlighterFound; }
-	const QString textHighlighterVersion() const { return textHighlighterVersionFound; }
 	bool isMainHistory(const FileHistory* fh) { return (fh == revData); }
 	MyProcess* getDiff(SCRef sha, QObject* receiver, SCRef diffToSha, bool combined);
 	const QString getWorkDirDiff(SCRef fileName = "");
@@ -185,7 +184,6 @@ public:
 	const QStringList getRefName(SCRef sha, RefType type, QString* curBranch = NULL) const;
 	const QStringList getAllRefNames(uint mask, bool onlyLoaded);
 	const QStringList getAllRefSha(uint mask);
-	const QStringList sortShaListByIndex(SCList shaList);
 	void getWorkDirFiles(SList files, SList dirs, RevFile::StatusFlag status);
 	QTextCodec* getTextCodec(bool* isGitArchive);
 	bool formatPatch(SCList shaList, SCRef dirPath, SCRef remoteDir = "");
@@ -330,7 +328,6 @@ private:
 	bool isStGIT;
 	bool isGIT;
 	bool isTextHighlighterFound;
-	QString textHighlighterVersionFound;
 	bool loadingUnAppliedPatches;
 	bool fileCacheAccessed;
 	int patchesStillToFind;

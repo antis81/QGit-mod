@@ -206,14 +206,13 @@ void MainImpl::highlightAbbrevSha(SCRef abbrevSha) {
 
 void MainImpl::lineEditSHA_returnPressed() {
 
-	QString sha = git->getRefSha(lineEditSHA->text());
-	if (!sha.isEmpty()) // good, we can resolve to an unique sha
-	{
-		rv->st.setSha(sha);
-		UPDATE_DOMAIN(rv);
-	} else { // try a multiple match search
+	int len = lineEditSHA->text().length();
+	if (len < 40) {
 		highlightAbbrevSha(lineEditSHA->text());
 		goMatch(0);
+	} else {
+		rv->st.setSha(lineEditSHA->text());
+		UPDATE_DOMAIN(rv);
 	}
 }
 
@@ -1124,22 +1123,10 @@ void MainImpl::doUpdateRecentRepoMenu(SCRef newEntry) {
 	settings.setValue(REC_REP_KEY, newRecents);
 }
 
-static int cntMenuEntries(const QMenu& menu) {
-
-	int cnt = 0;
-	QList<QAction*> al(menu.actions());
-	FOREACH (QList<QAction*>, it, al) {
-		if (!(*it)->isSeparator())
-			cnt++;
-	}
-	return cnt;
-}
-
 void MainImpl::doContexPopup(SCRef sha) {
 
 	QMenu contextMenu(this);
-	QMenu contextBrnMenu("More branches...", this);
-	QMenu contextTagMenu("More tags...", this);
+	QMenu contextSubMenu("More...", this);
 	QMenu contextRmtMenu("Remote branches", this);
 
 	connect(&contextMenu, SIGNAL(triggered(QAction*)), this, SLOT(goRef_triggered(QAction*)));
@@ -1191,51 +1178,33 @@ void MainImpl::doContexPopup(SCRef sha) {
 			act = contextRmtMenu.addAction(*it);
 			act->setData("Ref");
 		}
-		if (!contextRmtMenu.isEmpty())
+		if (contextRmtMenu.actions().count() > 0)
 			contextMenu.addMenu(&contextRmtMenu);
-
-		// halve the possible remaining entries for branches and tags
-		int remainingEntries = (MAX_MENU_ENTRIES - cntMenuEntries(contextMenu));
-		int tagEntries = remainingEntries / 2;
-		int brnEntries = remainingEntries - tagEntries;
-
-		// display more branches, if there are few tags
-		if (tagEntries > tn.count())
-			tagEntries = tn.count();
-
-		// one branch less because of the "More branches..." submenu
-		if ((bn.count() > brnEntries) && tagEntries)
-			tagEntries++;
 
 		if (!bn.empty())
 			contextMenu.addSeparator();
 
 		FOREACH_SL (it, bn) {
-			if (   cntMenuEntries(contextMenu) < MAX_MENU_ENTRIES - tagEntries
-			    || (*it == bn.last() && contextBrnMenu.isEmpty()))
+			if (contextMenu.actions().count() < MAX_MENU_ENTRIES)
 				act = contextMenu.addAction(*it);
 			else
-				act = contextBrnMenu.addAction(*it);
+				act = contextSubMenu.addAction(*it);
 
 			act->setData("Ref");
 		}
-		if (!contextBrnMenu.isEmpty())
-			contextMenu.addMenu(&contextBrnMenu);
-
 		if (!tn.empty())
 			contextMenu.addSeparator();
 
 		FOREACH_SL (it, tn) {
-			if (   cntMenuEntries(contextMenu) < MAX_MENU_ENTRIES
-			    || (*it == tn.last() && contextTagMenu.isEmpty()))
+			if (contextMenu.actions().count() < MAX_MENU_ENTRIES)
 				act = contextMenu.addAction(*it);
 			else
-				act = contextTagMenu.addAction(*it);
+				act = contextSubMenu.addAction(*it);
 
 			act->setData("Ref");
 		}
-		if (!contextTagMenu.isEmpty())
-			contextMenu.addMenu(&contextTagMenu);
+		if (contextSubMenu.actions().count() > 0)
+			contextMenu.addMenu(&contextSubMenu);
 	}
 	contextMenu.exec(QCursor::pos());
 }
@@ -1353,7 +1322,7 @@ void MainImpl::ActSaveFile_activated() {
 
 	QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 	QString fileSha(git->getFileSha(rv->st.fileName(), rv->st.sha()));
-	if (!git->saveFile(fileSha, rv->st.fileName(), fileName))
+	if (!git->saveFile(fileSha, rv->st.sha(), fileName))
 		statusBar()->showMessage("Unable to save " + fileName);
 
 	QApplication::restoreOverrideCursor();

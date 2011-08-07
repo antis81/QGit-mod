@@ -1,6 +1,6 @@
 # Under Windows launch script start_qgit.bat needs the
 # value GIT_EXEC_DIR to be set to the git bin directory
-GIT_EXEC_DIR = "$$(ProgramFiles)\\Git\\bin"
+GIT_EXEC_DIR = "$(ProgramFiles)\\Git\\bin"
 
 # Under Windows uncomment following line to enable console messages
 #CONFIG += ENABLE_CONSOLE_MSG
@@ -14,8 +14,8 @@ CUR_QT = $$[QT_VERSION]
 }
 
 # check for g++ compiler
-contains(QMAKE_CC,.*g\\+\\+.*) {
-        CONFIG += HAVE_GCC
+contains(QMAKE_CC,.*g\+\+.*) {
+	CONFIG += HAVE_GCC
 }
 contains(QMAKE_CC,.*gcc.*) {
 	CONFIG += HAVE_GCC

@@ -177,10 +177,6 @@ void ListView::getSelectedItems(QStringList& selectedItems) {
 	QModelIndexList ml = selectionModel()->selectedRows();
 	FOREACH (QModelIndexList, it, ml)
 		selectedItems.append(sha((*it).row()));
-
-	// selectedRows() returns the items in an unspecified order,
-	// so be sure rows are ordered from newest to oldest.
-	selectedItems = git->sortShaListByIndex(selectedItems);
 }
 
 const QString ListView::shaFromAnnId(uint id) {

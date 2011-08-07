@@ -330,9 +330,7 @@ void Git::checkEnvironment() {
 	isTextHighlighterFound = run("source-highlight -V", &version);
 	errorReportingEnabled = true;
 	if (isTextHighlighterFound)
-		textHighlighterVersionFound = version.section('\n', 0, 0);
-	else
-		textHighlighterVersionFound = "GNU source-highlight not installed";
+		dbp("Found %1", version.section('\n', 0, 0));
 }
 
 void Git::userInfo(SList info) {
@@ -925,17 +923,7 @@ MyProcess* Git::getFile(SCRef fileSha, QObject* receiver, QByteArray* result, SC
 	  change is committed.
 	*/
 	if (fileSha == ZERO_SHA)
-
-#ifdef Q_OS_WIN32
-    {
-		QString winPath = quote(fileName);
-		winPath.replace("/", "\\");
-		runCmd = "type " + winPath;
-    }
-#else
 		runCmd = "cat " + quote(fileName);
-#endif
-
 	else {
 		if (fileSha.isEmpty()) // deleted
 			runCmd = "git diff-tree HEAD HEAD"; // fake an empty file reading
@@ -1309,7 +1297,7 @@ const QString Git::getDesc(SCRef sha, QRegExp& shortLogRE, QRegExp& longLogRE,
 
 		SCRef ref = reSHA.cap(0).mid(2);
 		const Rev* r = (ref.length() == 40 ? revLookup(ref) : revLookup(getRefSha(ref)));
-		if (r && r->sha() != ZERO_SHA_RAW) {
+		if (r) {
 			QString slog(r->shortLog());
 			if (slog.isEmpty()) // very rare but possible
 				slog = r->sha();
@@ -1558,20 +1546,6 @@ bool Git::applyPatchFile(SCRef patchPath, bool fold, bool isDragDrop) {
 	return run(runCmd + quote(patchPath));
 }
 
-const QStringList Git::sortShaListByIndex(SCList shaList) {
-
-	QStringList orderedShaList;
-	FOREACH_SL (it, shaList)
-		appendNamesWithId(orderedShaList, *it, QStringList(*it), true);
-
-	orderedShaList.sort();
-	QStringList::iterator itN(orderedShaList.begin());
-	for ( ; itN != orderedShaList.end(); ++itN) // strip 'idx'
-		(*itN) = (*itN).section(' ', -1, -1);
-
-        return orderedShaList;
-}
-
 bool Git::formatPatch(SCList shaList, SCRef dirPath, SCRef remoteDir) {
 
 	bool remote = !remoteDir.isEmpty();
@@ -1585,7 +1559,7 @@ bool Git::formatPatch(SCList shaList, SCRef dirPath, SCRef remoteDir) {
 	if (remote)
 		runCmd.append(" --keep-subject");
 
-	runCmd.append(" -o " + quote(dirPath));
+	runCmd.append(" -o " + dirPath);
 	if (!FPOpt.isEmpty())
 		runCmd.append(" " + FPOpt.trimmed());
 
@@ -1697,7 +1671,7 @@ bool Git::mkPatchFromWorkDir(SCRef msg, SCRef patchFile, SCList files) {
  		return false;
 
 	QString runOutput;
-	if (!run("git diff --no-ext-diff -C HEAD -- " + quote(files), &runOutput))
+	if (!run("git diff -C HEAD -- " + quote(files), &runOutput))
 		return false;
 
 	const QString patch("Subject: " + msg + "\n---\n" + runOutput);

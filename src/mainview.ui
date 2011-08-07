@@ -64,9 +64,6 @@
    </layout>
   </widget>
   <widget class="QToolBar" name="toolBar">
-   <property name="windowTitle">
-    <string>Toolbar</string>
-   </property>
    <property name="orientation">
     <enum>Qt::Horizontal</enum>
    </property>
@@ -463,7 +460,10 @@
     <string>Filter by tree</string>
    </property>
    <property name="toolTip">
-    <string>Filter by tree selection, multiple selections allowed</string>
+    <string>Filter by tree selection, multple selection allowed</string>
+   </property>
+   <property name="shortcut">
+    <string>F</string>
    </property>
   </action>
   <action name="ActShowTree">
@@ -680,7 +680,7 @@
      <normaloff>:/icons/resources/filter.png</normaloff>:/icons/resources/filter.png</iconset>
    </property>
    <property name="text">
-    <string>Search and filter</string>
+    <string>searchAndFilter</string>
    </property>
    <property name="statusTip">
     <string>Toggle filter</string>
@@ -698,7 +698,7 @@
      <normaloff>:/icons/resources/find.png</normaloff>:/icons/resources/find.png</iconset>
    </property>
    <property name="text">
-    <string>Search and highlight</string>
+    <string>searchAndHighlight</string>
    </property>
    <property name="statusTip">
     <string>Toggle match highlight</string>

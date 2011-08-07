@@ -47,8 +47,6 @@ private:
 	Git* git;
 	QString origMsg;
 	int ofsX, ofsY;
-
-	static QString lastMsgBeforeError;
 };
 
 #endif
