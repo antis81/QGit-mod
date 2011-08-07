@@ -10,15 +10,15 @@ CUR_QT = $$[QT_VERSION]
 
 # WARNING greaterThan is an undocumented function
 !greaterThan(CUR_QT, 4.3) {
-	error("Sorry I need Qt 4.3.0 or later, you seem to have Qt $$CUR_QT instead")
+    error("Sorry I need Qt 4.3.0 or later, you seem to have Qt $$CUR_QT instead")
 }
 
 # check for g++ compiler
 contains(QMAKE_CC,.*g\\+\\+.*) {
-        CONFIG += HAVE_GCC
+    CONFIG += HAVE_GCC
 }
 contains(QMAKE_CC,.*gcc.*) {
-	CONFIG += HAVE_GCC
+    CONFIG += HAVE_GCC
 }
 
 # General stuff
@@ -50,13 +50,13 @@ macx {
 }
 
 HAVE_GCC {
-	QMAKE_CXXFLAGS_RELEASE += -s -O2 -Wno-non-virtual-dtor -Wno-long-long -pedantic -Wconversion
-	QMAKE_CXXFLAGS_DEBUG += -g3 -ggdb -O0 -Wno-non-virtual-dtor -Wno-long-long -pedantic -Wconversion
+    QMAKE_CXXFLAGS_RELEASE += -s -O2 -Wno-non-virtual-dtor -Wno-long-long -pedantic -Wconversion
+    QMAKE_CXXFLAGS_DEBUG += -g3 -ggdb -O0 -Wno-non-virtual-dtor -Wno-long-long -pedantic -Wconversion
 }
 
 ENABLE_CONSOLE_MSG {
-	CONFIG -= windows
-	CONFIG += console
+    CONFIG -= windows
+    CONFIG += console
 }
 
 INSTALLS += target
@@ -71,21 +71,68 @@ OBJECTS_DIR = $$BUILD_DIR
 
 # project files
 FORMS += commit.ui console.ui customaction.ui fileview.ui help.ui \
-         mainview.ui patchview.ui rangeselect.ui revsview.ui settings.ui
+         mainview.ui patchview.ui revsview.ui settings.ui \
+    ui/rangeselect.ui
 
 HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
            customactionimpl.h dataloader.h domain.h exceptionmanager.h \
            filecontent.h filelist.h fileview.h git.h help.h lanes.h \
            listview.h mainimpl.h myprocess.h patchcontent.h patchview.h \
-           rangeselectimpl.h revdesc.h revsview.h settingsimpl.h \
-           smartbrowse.h treeview.h
+            revdesc.h revsview.h settingsimpl.h \
+           treeview.h \
+    branchestree.h \
+    findsupport.h \
+    branchestreeitem.h \
+    externaldiffproc.h \
+    reachinfo.h \
+    rangeinfo.h \
+    updatedomainevent.h \
+    stateinfo.h \
+    fileitem.h \
+    diritem.h \
+    linenumberarea.h \
+    patchcontentfindsupport.h \
+    patchtextblockuserdata.h \
+    filehistory.h \
+    listviewproxy.h \
+    listviewdelegate.h \
+    ui/rangeselectimpl.h \
+    ui/customtabwidget.h \
+    ui/customtab.h \
+    model/shastring.h \
+    model/revision.h \
+    model/shamap.h
+
 
 SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
            customactionimpl.cpp dataloader.cpp domain.cpp exceptionmanager.cpp \
-           filecontent.cpp filelist.cpp fileview.cpp git.cpp git_startup.cpp \
+           filecontent.cpp filelist.cpp fileview.cpp git.cpp \
            lanes.cpp listview.cpp mainimpl.cpp myprocess.cpp namespace_def.cpp \
-           patchcontent.cpp patchview.cpp qgit.cpp rangeselectimpl.cpp \
-           revdesc.cpp revsview.cpp settingsimpl.cpp smartbrowse.cpp treeview.cpp
+           patchcontent.cpp patchview.cpp  \
+           revdesc.cpp revsview.cpp settingsimpl.cpp treeview.cpp \
+    branchestree.cpp \
+    main.cpp \
+    findsupport.cpp \
+    branchestreeitem.cpp \
+    externaldiffproc.cpp \
+    reachinfo.cpp \
+    rangeinfo.cpp \
+    updatedomainevent.cpp \
+    stateinfo.cpp \
+    fileitem.cpp \
+    diritem.cpp \
+    linenumberarea.cpp \
+    patchcontentfindsupport.cpp \
+    patchtextblockuserdata.cpp \
+    filehistory.cpp \
+    listviewproxy.cpp \
+    listviewdelegate.cpp \
+    ui/rangeselectimpl.cpp \
+    ui/customtabwidget.cpp \
+    ui/customtab.cpp \
+    model/shastring.cpp \
+    model/revision.cpp \
+    model/shamap.cpp
 
 DISTFILES += app_icon.rc helpgen.sh resources/* Src.vcproj todo.txt
 DISTFILES += ../COPYING ../exception_manager.txt ../README ../README_WIN.txt

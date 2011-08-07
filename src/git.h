@@ -1,7 +1,7 @@
 /*
-	Author: Marco Costalba (C) 2005-2007
+    Author: Marco Costalba (C) 2005-2007
 
-	Copyright: See COPYING file that comes with this distribution
+    Copyright: See COPYING file that comes with this distribution
 
 */
 #ifndef GIT_H
@@ -10,6 +10,10 @@
 #include <QAbstractItemModel>
 #include "exceptionmanager.h"
 #include "common.h"
+#include "domain.h"
+#include "model/revision.h"
+#include "model/shamap.h"
+//#include "filehistory.h"
 
 template <class, class> struct QPair;
 class QRegExp;
@@ -21,326 +25,261 @@ class Domain;
 class Git;
 class Lanes;
 class MyProcess;
+class FileHistory;
 
-class FileHistory : public QAbstractItemModel {
-Q_OBJECT
+// Need to add in class (conflict in git_startup.cpp)
+
+
+class Git : public QObject
+{
+    Q_OBJECT
 public:
-	FileHistory(QObject* parent, Git* git);
-	~FileHistory();
-	void clear(bool complete = true);
-	const QString sha(int row) const;
-	int row(SCRef sha) const;
-	const QStringList fileNames() const { return fNames; }
-	void resetFileNames(SCRef fn);
-	void setEarlyOutputState(bool b = true) { earlyOutputCnt = (b ? earlyOutputCntBase : -1); }
-	void setAnnIdValid(bool b = true) { annIdValid = b; }
+    ShaMap shaMap;
 
-	virtual QVariant data(const QModelIndex &index, int role) const;
-	virtual Qt::ItemFlags flags(const QModelIndex& index) const;
-	virtual QVariant headerData(int s, Qt::Orientation o, int role = Qt::DisplayRole) const;
-	virtual QModelIndex index(int r, int c, const QModelIndex& par = QModelIndex()) const;
-	virtual QModelIndex parent(const QModelIndex& index) const;
-	virtual int rowCount(const QModelIndex& par = QModelIndex()) const;
-	virtual bool hasChildren(const QModelIndex& par = QModelIndex()) const;
-	virtual int columnCount(const QModelIndex&) const { return 5; }
+    explicit Git(QObject *parent);
 
-public slots:
-	void on_changeFont(const QFont&);
+    // used as self-documenting boolean parameters
+    static const bool optFalse       = false;
+    static const bool optSaveCache   = true;
+    static const bool optGoDown      = true;
+    static const bool optOnlyLoaded  = true;
+    static const bool optDragDrop    = true;
+    static const bool optFold        = true;
+    static const bool optAmend       = true;
+    static const bool optOnlyInIndex = true;
+    static const bool optCreate      = true;
 
-private slots:
-	void on_newRevsAdded(const FileHistory*, const QVector<ShaString>&);
-	void on_loadCompleted(const FileHistory*, const QString&);
+    struct TreeEntry
+    {
+        TreeEntry(SCRef n, SCRef s, SCRef t) : name(n), sha(s), type(t) {}
+        bool operator<(const TreeEntry&) const;
+        QString name;
+        QString sha;
+        QString type;
+    };
 
-private:
-	friend class Annotate;
-	friend class DataLoader;
-	friend class Git;
+    typedef QList<TreeEntry> TreeInfo;
 
-	void flushTail();
-	const QString timeDiff(unsigned long secs) const;
+    void setDefaultModel(FileHistory* fh) { revData = fh; }
+    void checkEnvironment();
+    void userInfo(SList info);
+    const QStringList getGitConfigList(bool global);
+    const QString getBaseDir(bool* c, SCRef wd, bool* ok = NULL, QString* gd = NULL);
+    bool init(SCRef wd, bool range, const QStringList* args, bool overwrite, bool* quit);
+    void stop(bool saveCache);
+    void setThrowOnStop(bool b);
+    bool isThrowOnStopRaised(int excpId, SCRef curContext);
+    void setLane(SCRef sha, FileHistory* fh);
+    Annotate* startAnnotate(FileHistory* fh, QObject* guiObj);
+    const FileAnnotation* lookupAnnotation(Annotate* ann, SCRef sha);
+    void cancelAnnotate(Annotate* ann);
+    bool startFileHistory(SCRef sha, SCRef startingFileName, FileHistory* fh);
+    void cancelDataLoading(const FileHistory* fh);
+    void cancelProcess(MyProcess* p);
+    bool isCommittingMerge() const { return isMergeHead; }
+    bool isStGITStack() const { return isStGIT; }
+    bool isPatchName(SCRef nm);
+    bool isSameFiles(SCRef tree1Sha, SCRef tree2Sha);
+    static bool isImageFile(SCRef file);
+    static bool isBinaryFile(SCRef file);
+    bool isNothingToCommit();
+    bool isUnknownFiles() const { return (workingDirInfo.otherFiles.count() > 0); }
+    bool isTextHighlighter() const { return isTextHighlighterFound; }
+    bool isMainHistory(const FileHistory* fh) { return (fh == revData); }
+    MyProcess* getDiff(SCRef sha, QObject* receiver, SCRef diffToSha, bool combined);
+    const QString getWorkDirDiff(SCRef fileName = "");
+    MyProcess* getFile(SCRef fileSha, QObject* receiver, QByteArray* result, SCRef fileName);
+    MyProcess* getHighlightedFile(SCRef fileSha, QObject* receiver, QString* result, SCRef fileName);
+    const QString getFileSha(SCRef file, SCRef revSha);
+    bool saveFile(SCRef fileSha, SCRef fileName, SCRef path);
+    void getFileFilter(SCRef path, ShaSet& shaSet) const;
+    bool getPatchFilter(SCRef exp, bool isRegExp, ShaSet& shaSet);
+    const RevFile* getFiles(SCRef sha, SCRef sha2 = "", bool all = false, SCRef path = "");
+    bool getTree(SCRef ts, TreeInfo& ti, bool wd, SCRef treePath);
+    static const QString getLocalDate(SCRef gitDate);
+    const QString getDesc(SCRef sha, QRegExp& slogRE, QRegExp& lLogRE, bool showH, FileHistory* fh);
+    const QString getLastCommitMsg();
+    const QString getNewCommitMsg();
+    const QString getLaneParent(SCRef fromSHA, int laneNum);
+    const QStringList getChilds(SCRef parent);
+    const QStringList getNearTags(bool goDown, SCRef sha);
+    const QStringList getDescendantBranches(SCRef sha, bool shaOnly = false);
+    const QString getShortLog(SCRef sha);
+    const QString getTagMsg(SCRef sha);
+    const Revision* revLookup(const ShaString& sha, const FileHistory* fh = NULL) const;
+    const Revision* revLookup(SCRef sha, const FileHistory* fh = NULL) const;
+    const QString getRevInfo(SCRef sha);
+    const QString getRefSha(SCRef refName, Reference::Type type = Reference::ANY_REF, bool askGit = true);
+    const QStringList getAllRefNames(uint mask, bool onlyLoaded);
+    const QStringList sortShaListByIndex(SCList shaList);
+    void getWorkDirFiles(SList files, SList dirs, RevFile::StatusFlag status);
+    QTextCodec* getTextCodec(bool* isGitArchive);
+    bool formatPatch(SCList shaList, SCRef dirPath, SCRef remoteDir = "");
+    bool updateIndex(SCList selFiles);
+    bool commitFiles(SCList files, SCRef msg, bool amend);
+    bool makeBranch(SCRef sha, SCRef branchName);
+    bool makeTag(SCRef sha, SCRef tag, SCRef msg);
+    bool deleteTag(SCRef sha);
+    bool checkout(SCRef sha);
+    bool applyPatchFile(SCRef patchPath, bool fold, bool sign);
+    bool resetCommits(int parentDepth);
+    bool stgCommit(SCList selFiles, SCRef msg, SCRef patchName, bool fold);
+    bool stgPush(SCRef sha);
+    bool stgPop(SCRef sha);
+    void setTextCodec(QTextCodec* tc);
+    void addExtraFileInfo(QString* rowName, SCRef sha, SCRef diffToSha, bool allMergeFiles);
+    void removeExtraFileInfo(QString* rowName);
+    void formatPatchFileHeader(QString* rowName, SCRef sha, SCRef dts, bool cmb, bool all);
+    int findFileIndex(const RevFile& rf, SCRef name);
 
-	Git* git;
-	RevMap revs;
-	ShaVect revOrder;
-	Lanes* lns;
-	uint firstFreeLane;
-	QList<QByteArray*> rowData;
-	QList<QVariant> headerInfo;
-	int rowCnt;
-	bool annIdValid;
-	unsigned long secs;
-	int loadTime;
-	int earlyOutputCnt;
-	int earlyOutputCntBase;
-	QStringList fNames;
-	QStringList curFNames;
-	QStringList renamedRevs;
-	QHash<QString, QString> renamedPatches;
-};
+    const QString filePath(const RevFile& rf, uint i) const
+    {
+        return dirNamesVec[rf.dirAt(i)] + fileNamesVec[rf.nameAt(i)];
+    }
 
-struct Reference { // stores tag information associated to a revision
-	Reference() : type(0) {}
-	uint type;
-	QStringList branches;
-	QStringList remoteBranches;
-	QString     currentBranch;
-	QStringList tags;
-	QStringList refs;
-	QString     tagObj; // TODO support more then one obj
-	QString     tagMsg;
-	QString     stgitPatch;
-};
-typedef QHash<ShaString, Reference> RefMap;
-
-
-class Git : public QObject {
-Q_OBJECT
-public:
-	explicit Git(QObject* parent);
-
-	// used as self-documenting boolean parameters
-	static const bool optFalse       = false;
-	static const bool optSaveCache   = true;
-	static const bool optGoDown      = true;
-	static const bool optOnlyLoaded  = true;
-	static const bool optDragDrop    = true;
-	static const bool optFold        = true;
-	static const bool optAmend       = true;
-	static const bool optOnlyInIndex = true;
-	static const bool optCreate      = true;
-
-	enum RefType {
-		TAG        = 1,
-		BRANCH     = 2,
-		RMT_BRANCH = 4,
-		CUR_BRANCH = 8,
-		REF        = 16,
-		APPLIED    = 32,
-		UN_APPLIED = 64,
-		ANY_REF    = 127
-	};
-
-	struct TreeEntry {
-		TreeEntry(SCRef n, SCRef s, SCRef t) : name(n), sha(s), type(t) {}
-		bool operator<(const TreeEntry&) const;
-		QString name;
-		QString sha;
-		QString type;
-	};
-	typedef QList<TreeEntry> TreeInfo;
-
-	void setDefaultModel(FileHistory* fh) { revData = fh; }
-	void checkEnvironment();
-	void userInfo(SList info);
-	const QStringList getGitConfigList(bool global);
-	const QString getBaseDir(bool* c, SCRef wd, bool* ok = NULL, QString* gd = NULL);
-	bool init(SCRef wd, bool range, const QStringList* args, bool overwrite, bool* quit);
-	void stop(bool saveCache);
-	void setThrowOnStop(bool b);
-	bool isThrowOnStopRaised(int excpId, SCRef curContext);
-	void setLane(SCRef sha, FileHistory* fh);
-	Annotate* startAnnotate(FileHistory* fh, QObject* guiObj);
-	const FileAnnotation* lookupAnnotation(Annotate* ann, SCRef sha);
-	void cancelAnnotate(Annotate* ann);
-	bool startFileHistory(SCRef sha, SCRef startingFileName, FileHistory* fh);
-	void cancelDataLoading(const FileHistory* fh);
-	void cancelProcess(MyProcess* p);
-	bool isCommittingMerge() const { return isMergeHead; }
-	bool isStGITStack() const { return isStGIT; }
-	bool isPatchName(SCRef nm);
-	bool isSameFiles(SCRef tree1Sha, SCRef tree2Sha);
-	static bool isImageFile(SCRef file);
-	static bool isBinaryFile(SCRef file);
-	bool isNothingToCommit();
-	bool isUnknownFiles() const { return (workingDirInfo.otherFiles.count() > 0); }
-	bool isTextHighlighter() const { return isTextHighlighterFound; }
-	bool isMainHistory(const FileHistory* fh) { return (fh == revData); }
-	MyProcess* getDiff(SCRef sha, QObject* receiver, SCRef diffToSha, bool combined);
-	const QString getWorkDirDiff(SCRef fileName = "");
-	MyProcess* getFile(SCRef fileSha, QObject* receiver, QByteArray* result, SCRef fileName);
-	MyProcess* getHighlightedFile(SCRef fileSha, QObject* receiver, QString* result, SCRef fileName);
-	const QString getFileSha(SCRef file, SCRef revSha);
-	bool saveFile(SCRef fileSha, SCRef fileName, SCRef path);
-	void getFileFilter(SCRef path, ShaSet& shaSet) const;
-	bool getPatchFilter(SCRef exp, bool isRegExp, ShaSet& shaSet);
-	const RevFile* getFiles(SCRef sha, SCRef sha2 = "", bool all = false, SCRef path = "");
-	bool getTree(SCRef ts, TreeInfo& ti, bool wd, SCRef treePath);
-	static const QString getLocalDate(SCRef gitDate);
-	const QString getDesc(SCRef sha, QRegExp& slogRE, QRegExp& lLogRE, bool showH, FileHistory* fh);
-	const QString getLastCommitMsg();
-	const QString getNewCommitMsg();
-	const QString getLaneParent(SCRef fromSHA, int laneNum);
-	const QStringList getChilds(SCRef parent);
-	const QStringList getNearTags(bool goDown, SCRef sha);
-	const QStringList getDescendantBranches(SCRef sha, bool shaOnly = false);
-	const QString getShortLog(SCRef sha);
-	const QString getTagMsg(SCRef sha);
-	const Rev* revLookup(const ShaString& sha, const FileHistory* fh = NULL) const;
-	const Rev* revLookup(SCRef sha, const FileHistory* fh = NULL) const;
-	uint checkRef(const ShaString& sha, uint mask = ANY_REF) const;
-	uint checkRef(SCRef sha, uint mask = ANY_REF) const;
-	const QString getRevInfo(SCRef sha);
-	const QString getRefSha(SCRef refName, RefType type = ANY_REF, bool askGit = true);
-	const QStringList getRefName(SCRef sha, RefType type, QString* curBranch = NULL) const;
-	const QStringList getAllRefNames(uint mask, bool onlyLoaded);
-	const QStringList getAllRefSha(uint mask);
-	void getWorkDirFiles(SList files, SList dirs, RevFile::StatusFlag status);
-	QTextCodec* getTextCodec(bool* isGitArchive);
-	bool formatPatch(SCList shaList, SCRef dirPath, SCRef remoteDir = "");
-	bool updateIndex(SCList selFiles);
-	bool commitFiles(SCList files, SCRef msg, bool amend);
-	bool makeBranch(SCRef sha, SCRef branchName);
-	bool makeTag(SCRef sha, SCRef tag, SCRef msg);
-	bool deleteTag(SCRef sha);
-	bool applyPatchFile(SCRef patchPath, bool fold, bool sign);
-	bool resetCommits(int parentDepth);
-	bool stgCommit(SCList selFiles, SCRef msg, SCRef patchName, bool fold);
-	bool stgPush(SCRef sha);
-	bool stgPop(SCRef sha);
-	void setTextCodec(QTextCodec* tc);
-	void addExtraFileInfo(QString* rowName, SCRef sha, SCRef diffToSha, bool allMergeFiles);
-	void removeExtraFileInfo(QString* rowName);
-	void formatPatchFileHeader(QString* rowName, SCRef sha, SCRef dts, bool cmb, bool all);
-	int findFileIndex(const RevFile& rf, SCRef name);
-	const QString filePath(const RevFile& rf, uint i) const {
-
-		return dirNamesVec[rf.dirAt(i)] + fileNamesVec[rf.nameAt(i)];
-	}
-	void setCurContext(Domain* d) { curDomain = d; }
-	Domain* curContext() const { return curDomain; }
-
+    void setCurContext(Domain* d) { curDomain = d; }
+    Domain* curContext() const { return curDomain; }
+    bool updateCurrentBranch();
+    QString& currentBranch();
+    static const QString escape(QString s);
+    static const QString unescape(QString s);
 signals:
-	void newRevsAdded(const FileHistory*, const QVector<ShaString>&);
-	void loadCompleted(const FileHistory*, const QString&);
-	void cancelLoading(const FileHistory*);
-	void cancelAllProcesses();
-	void annotateReady(Annotate*, bool, const QString&);
-	void fileNamesLoad(int, int);
-	void changeFont(const QFont&);
+    void newRevsAdded(const FileHistory*, const QVector<ShaString>&);
+    void loadCompleted(const FileHistory*, const QString&);
+    void cancelLoading(const FileHistory*);
+    void cancelAllProcesses();
+    void annotateReady(Annotate*, bool, const QString&);
+    void fileNamesLoad(int, int);
+    void changeFont(const QFont&);
 
 public slots:
-	void procReadyRead(const QByteArray&);
-	void procFinished();
+    void procReadyRead(const QByteArray&);
+    void procFinished();
 
 private slots:
-	void loadFileCache();
-	void loadFileNames();
-	void on_runAsScript_eof();
-	void on_getHighlightedFile_eof();
-	void on_newDataReady(const FileHistory*);
-	void on_loaded(FileHistory*, ulong,int,bool,const QString&,const QString&);
+    void loadFileCache();
+    void loadFileNames();
+    void on_runAsScript_eof();
+    void on_getHighlightedFile_eof();
+    void on_newDataReady(const FileHistory*);
+    void on_loaded(FileHistory*, ulong,int,bool,const QString&,const QString&);
 
 private:
-	friend class MainImpl;
-	friend class DataLoader;
-	friend class ConsoleImpl;
-	friend class RevsView;
+    friend class MainImpl;
+    friend class DataLoader;
+    friend class ConsoleImpl;
+    friend class RevsView;
 
-	struct WorkingDirInfo {
-		void clear() { diffIndex = diffIndexCached = ""; otherFiles.clear(); }
-		QString diffIndex;
-		QString diffIndexCached;
-		QStringList otherFiles;
-	};
-	WorkingDirInfo workingDirInfo;
+    struct WorkingDirInfo
+    {
+        void clear() { diffIndex = diffIndexCached = ""; otherFiles.clear(); }
+        QString diffIndex;
+        QString diffIndexCached;
+        QStringList otherFiles;
+    };
 
-	struct LoadArguments { // used to pass arguments to init2()
-		QStringList args;
-		bool filteredLoading;
-		QStringList filterList;
-	};
-	LoadArguments loadArguments;
+    WorkingDirInfo workingDirInfo;
 
-	struct FileNamesLoader {
-		FileNamesLoader() : rf(NULL) {}
+    struct LoadArguments
+    { // used to pass arguments to init2()
+        QStringList args;
+        bool filteredLoading;
+        QStringList filterList;
+    };
 
-		RevFile* rf;
-		QVector<int> rfDirs;
-		QVector<int> rfNames;
-	};
-	FileNamesLoader fileLoader;
+    LoadArguments loadArguments;
 
-	void init2();
-	bool run(SCRef cmd, QString* out = NULL, QObject* rcv = NULL, SCRef buf = "");
-	bool run(QByteArray* runOutput, SCRef cmd, QObject* rcv = NULL, SCRef buf = "");
-	MyProcess* runAsync(SCRef cmd, QObject* rcv, SCRef buf = "");
-	MyProcess* runAsScript(SCRef cmd, QObject* rcv = NULL, SCRef buf = "");
-	const QStringList getArgs(bool* quit, bool repoChanged);
-	bool getRefs();
-	void parseStGitPatches(SCList patchNames, SCList patchShas);
-	void clearRevs();
-	void clearFileNames();
-	bool startRevList(SCList args, FileHistory* fh);
-	bool startUnappliedList();
-	bool startParseProc(SCList initCmd, FileHistory* fh, SCRef buf);
-	bool tryFollowRenames(FileHistory* fh);
-	bool populateRenamedPatches(SCRef sha, SCList nn, FileHistory* fh, QStringList* on, bool bt);
-	bool filterEarlyOutputRev(FileHistory* fh, Rev* rev);
-	int addChunk(FileHistory* fh, const QByteArray& ba, int ofs);
-	void parseDiffFormat(RevFile& rf, SCRef buf, FileNamesLoader& fl);
-	void parseDiffFormatLine(RevFile& rf, SCRef line, int parNum, FileNamesLoader& fl);
-	void getDiffIndex();
-	Rev* fakeRevData(SCRef sha, SCList parents, SCRef author, SCRef date, SCRef log,
+    struct FileNamesLoader
+    {
+        FileNamesLoader() : rf(NULL) {}
+
+        RevFile* rf;
+        QVector<int> rfDirs;
+        QVector<int> rfNames;
+    };
+
+    FileNamesLoader fileLoader;
+
+    void init2();
+    bool run(SCRef cmd, QString* out = NULL, QObject* rcv = NULL, SCRef buf = "");
+    bool run(QByteArray* runOutput, SCRef cmd, QObject* rcv = NULL, SCRef buf = "");
+    MyProcess* runAsync(SCRef cmd, QObject* rcv, SCRef buf = "");
+    MyProcess* runAsScript(SCRef cmd, QObject* rcv = NULL, SCRef buf = "");
+    const QStringList getArgs(bool* quit, bool repoChanged);
+    bool getRefs();
+    void parseStGitPatches(SCList patchNames, SCList patchShas);
+    void clearRevs();
+    void clearFileNames();
+    bool startRevList(SCList args, FileHistory* fh);
+    bool startUnappliedList();
+    bool startParseProc(SCList initCmd, FileHistory* fh, SCRef buf);
+    bool tryFollowRenames(FileHistory* fh);
+    bool populateRenamedPatches(SCRef sha, SCList nn, FileHistory* fh, QStringList* on, bool bt);
+    bool filterEarlyOutputRev(FileHistory* fh, Revision* rev);
+    int addChunk(FileHistory* fh, const QByteArray& ba, int ofs);
+    void parseDiffFormat(RevFile& rf, SCRef buf, FileNamesLoader& fl);
+    void parseDiffFormatLine(RevFile& rf, SCRef line, int parNum, FileNamesLoader& fl);
+    void getDiffIndex();
+    Revision* fakeRevData(SCRef sha, SCList parents, SCRef author, SCRef date, SCRef log,
                          SCRef longLog, SCRef patch, int idx, FileHistory* fh);
-	const Rev* fakeWorkDirRev(SCRef parent, SCRef log, SCRef longLog, int idx, FileHistory* fh);
-	const RevFile* fakeWorkDirRevFile(const WorkingDirInfo& wd);
-	bool copyDiffIndex(FileHistory* fh, SCRef parent);
-	const RevFile* insertNewFiles(SCRef sha, SCRef data);
-	const RevFile* getAllMergeFiles(const Rev* r);
-	bool runDiffTreeWithRenameDetection(SCRef runCmd, QString* runOutput);
-	bool isParentOf(SCRef par, SCRef child);
-	bool isTreeModified(SCRef sha);
-	void indexTree();
-	void updateDescMap(const Rev* r, uint i, QHash<QPair<uint, uint>,bool>& dm,
-	                   QHash<uint, QVector<int> >& dv);
-	void mergeNearTags(bool down, Rev* p, const Rev* r, const QHash<QPair<uint, uint>, bool>&dm);
-	void mergeBranches(Rev* p, const Rev* r);
-	void updateLanes(Rev& c, Lanes& lns, SCRef sha);
-	bool mkPatchFromWorkDir(SCRef msg, SCRef patchFile, SCList files);
-	const QStringList getOthersFiles();
-	const QStringList getOtherFiles(SCList selFiles, bool onlyInIndex);
-	const QString getNewestFileName(SCList args, SCRef fileName);
-	static const QString colorMatch(SCRef txt, QRegExp& regExp);
-	void appendFileName(RevFile& rf, SCRef name, FileNamesLoader& fl);
-	void flushFileNames(FileNamesLoader& fl);
-	void populateFileNamesMap();
-	const QString formatList(SCList sl, SCRef name, bool inOneLine = true);
-	static const QString quote(SCRef nm);
-	static const QString quote(SCList sl);
-	static const QStringList noSpaceSepHack(SCRef cmd);
-	void removeDeleted(SCList selFiles);
-	void setStatus(RevFile& rf, SCRef rowSt);
-	void setExtStatus(RevFile& rf, SCRef rowSt, int parNum, FileNamesLoader& fl);
-	void appendNamesWithId(QStringList& names, SCRef sha, SCList data, bool onlyLoaded);
-	Reference* lookupReference(const ShaString& sha, bool create = false);
+    const Revision* fakeWorkDirRev(SCRef parent, SCRef log, SCRef longLog, int idx, FileHistory* fh);
+    const RevFile* fakeWorkDirRevFile(const WorkingDirInfo& wd);
+    bool copyDiffIndex(FileHistory* fh, SCRef parent);
+    const RevFile* insertNewFiles(SCRef sha, SCRef data);
+    const RevFile* getAllMergeFiles(const Revision* r);
+    bool runDiffTreeWithRenameDetection(SCRef runCmd, QString* runOutput);
+    bool isParentOf(SCRef par, SCRef child);
+    bool isTreeModified(SCRef sha);
+    void indexTree();
+    void updateDescMap(const Revision* r, uint i, QHash<QPair<uint, uint>,bool>& dm,
+                       QHash<uint, QVector<int> >& dv);
+    void mergeNearTags(bool down, Revision* p, const Revision* r, const QHash<QPair<uint, uint>, bool>&dm);
+    void mergeBranches(Revision* p, const Revision* r);
+    void updateLanes(Revision& c, Lanes& lns, SCRef sha);
+    bool mkPatchFromWorkDir(SCRef msg, SCRef patchFile, SCList files);
+    const QStringList getOthersFiles();
+    const QStringList getOtherFiles(SCList selFiles, bool onlyInIndex);
+    const QString getNewestFileName(SCList args, SCRef fileName);
+    static const QString colorMatch(SCRef txt, QRegExp& regExp);
+    void appendFileName(RevFile& rf, SCRef name, FileNamesLoader& fl);
+    void flushFileNames(FileNamesLoader& fl);
+    void populateFileNamesMap();
+    const QString formatList(SCList sl, SCRef name, bool inOneLine = true);
+    static const QString quote(SCRef nm);
+    static const QString quote(SCList sl);
+    static const QStringList noSpaceSepHack(SCRef cmd);
+    void removeDeleted(SCList selFiles);
+    void setStatus(RevFile& rf, SCRef rowSt);
+    void setExtStatus(RevFile& rf, SCRef rowSt, int parNum, FileNamesLoader& fl);
+    void appendNamesWithId(QStringList& names, SCRef sha, SCList data, bool onlyLoaded);
+    Reference* lookupReference(const ShaString& sha, bool create = false);
+    EM_DECLARE(exGitStopped);
 
-	EM_DECLARE(exGitStopped);
-
-	Domain* curDomain;
-	QString workDir; // workDir is always without trailing '/'
-	QString gitDir;
-	QString filesLoadingPending;
-	QString filesLoadingCurSha;
-	int filesLoadingStartOfs;
-	bool cacheNeedsUpdate;
-	bool errorReportingEnabled;
-	bool isMergeHead;
-	bool isStGIT;
-	bool isGIT;
-	bool isTextHighlighterFound;
-	bool loadingUnAppliedPatches;
-	bool fileCacheAccessed;
-	int patchesStillToFind;
-	QString firstNonStGitPatch;
-	RevFileMap revsFiles;
-	QVector<QByteArray> revsFilesShaBackupBuf;
-	RefMap refsShaMap;
-	QVector<QByteArray> shaBackupBuf;
-	StrVect fileNamesVec;
-	StrVect dirNamesVec;
-	QHash<QString, int> fileNamesMap; // quick lookup file name
-	QHash<QString, int> dirNamesMap;  // quick lookup directory name
-	FileHistory* revData;
+    Domain* curDomain;
+    QString workDir; // workDir is always without trailing '/'
+    QString gitDir;
+    QString filesLoadingPending;
+    QString filesLoadingCurSha;
+    int filesLoadingStartOfs;
+    bool cacheNeedsUpdate;
+    bool errorReportingEnabled;
+    bool isMergeHead;
+    bool isStGIT;
+    bool isGIT;
+    bool isTextHighlighterFound;
+    bool loadingUnAppliedPatches;
+    bool fileCacheAccessed;
+    int patchesStillToFind;
+    QString firstNonStGitPatch;
+    RevFileMap revsFiles;
+    QVector<QByteArray> revsFilesShaBackupBuf;
+    QVector<QByteArray> shaBackupBuf;
+    StrVect fileNamesVec;
+    StrVect dirNamesVec;
+    QHash<QString, int> fileNamesMap; // quick lookup file name
+    QHash<QString, int> dirNamesMap;  // quick lookup directory name
+    FileHistory* revData;
+    QString m_currentBranch;
 };
 
 #endif
