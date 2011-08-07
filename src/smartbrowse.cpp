@@ -179,8 +179,8 @@ void SmartBrowse::flagChanged(uint flag) {
 		setVisible(curTextEdit()->isEnabled());
 		updatePosition();
 	}
-	if (flag == QGit::LOG_DIFF_TAB_F)
-		rv->setTabLogDiffVisible(QGit::testFlag(QGit::LOG_DIFF_TAB_F));
+//	if (flag == QGit::LOG_DIFF_TAB_F)
+//		rv->setTabLogDiffVisible(QGit::testFlag(QGit::LOG_DIFF_TAB_F));
 }
 
 void SmartBrowse::linkActivated(const QString& text) {
@@ -189,7 +189,7 @@ void SmartBrowse::linkActivated(const QString& text) {
 	switch (key) {
 	case GO_LOG:
 	case GO_DIFF:
-		rv->toggleDiffView();
+//		rv->toggleDiffView();
 		break;
 	case GO_UP:
 		rv->tab()->listViewLog->on_keyUp();

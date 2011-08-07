@@ -1280,14 +1280,14 @@ void MainImpl::ActSplitView_activated() {
 	}
 }
 
-void MainImpl::ActToggleLogsDiff_activated() {
+//void MainImpl::ActToggleLogsDiff_activated() {
 
-	Domain* t;
-	if (currentTabType(&t) == TAB_REV) {
-		RevsView* rv = static_cast<RevsView*>(t);
-		rv->toggleDiffView();
-	}
-}
+//	Domain* t;
+//	if (currentTabType(&t) == TAB_REV) {
+//		RevsView* rv = static_cast<RevsView*>(t);
+//		rv->toggleDiffView();
+//	}
+//}
 
 const QString MainImpl::getRevisionDesc(SCRef sha) {
 
