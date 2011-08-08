@@ -531,7 +531,7 @@ void PatchContent::fitHeightToDocument() {
       this->document()->setTextWidth(this->viewport()->width());
       QSize document_size(this->document()->size().toSize());
 
-      this->fitted_height = (document_size.height() + 2) * fontMetrics().lineSpacing() + document()->documentMargin() * 2;
+      this->fitted_height = qRound( (document_size.height() + 2) * fontMetrics().lineSpacing() + document()->documentMargin() * 2 );
       this->updateGeometry();
 }
 

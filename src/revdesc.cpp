@@ -68,7 +68,7 @@ void RevDesc::fitHeightToDocument() {
       this->document()->setTextWidth(this->viewport()->width());
       QSize document_size(this->document()->size().toSize());
 
-      this->fitted_height = document_size.height() + document()->documentMargin();
+      this->fitted_height = qRound( document_size.height() + document()->documentMargin() );
       this->updateGeometry();
 }
 

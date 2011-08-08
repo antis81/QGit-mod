@@ -12,7 +12,7 @@ public:
     long* rowNumbers;
     int partCount;
 
-    PatchTextBlockUserData() : rowNumbers(NULL), partCount(0), rowType(PatchContent::ROW_OTHER) {}
+    PatchTextBlockUserData() : rowType(PatchContent::ROW_OTHER), rowNumbers(NULL), partCount(0) {}
     ~PatchTextBlockUserData() {
         if (rowNumbers) {
             delete[] rowNumbers;
