@@ -44,7 +44,12 @@ static QColor blend(const QColor& col1, const QColor& col2, int amount = 128) {
 }
 
 void ListViewDelegate::paintGraphLane(QPainter* p, int type, int x1, int x2,
-                                      const QColor& col, const QColor& activeCol, const QBrush& back) const {
+                                      const QColor& col, const QColor& activeCol, const QBrush& back) const
+{
+    #define PADDING  5
+
+    x1 += PADDING;
+    x2 += PADDING;
 
     int h = laneHeight / 2;
     int m = (x1 + x2) / 2;
@@ -223,6 +228,7 @@ void ListViewDelegate::paintGraphLane(QPainter* p, int type, int x1, int x2,
     #undef CENTER_UL
     #undef CENTER_DL
     #undef R_CENTER
+    #undef PADDING
 }
 
 void ListViewDelegate::paintGraph(QPainter* p, const QStyleOptionViewItem& opt,
