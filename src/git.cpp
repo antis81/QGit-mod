@@ -92,9 +92,7 @@ void Git::checkEnvironment()
     isTextHighlighterFound = run("source-highlight -V", &version);
     errorReportingEnabled = true;
     if (isTextHighlighterFound)
-        textHighlighterVersionFound = version.section('\n', 0, 0);
-    else
-        textHighlighterVersionFound = "GNU source-highlight not installed";
+        dbp("Found %1", version.section('\n', 0, 0));
 }
 
 void Git::userInfo(SList info)
@@ -1440,7 +1438,11 @@ bool Git::mkPatchFromWorkDir(SCRef msg, SCRef patchFile, SCList files)
          return false;
 
     QString runOutput;
+//<<<<<<< HEAD
     if (!run("git diff --no-ext-diff -C HEAD -- " + quote(files), &runOutput))
+//=======
+//    if (!run("git diff -C HEAD -- " + quote(files), &runOutput))
+//>>>>>>> antis81/ui_improvements
         return false;
 
     const QString patch("Subject: " + msg + "\n---\n" + runOutput);

@@ -1,0 +1,25 @@
+Description: Use git config instead of git repo-config
+Author: Emil Langrock <emil.langrock@gmx.de>
+Bug-Debian: http://bugs.debian.org/625936
+Last-Update: 2011-06-01
+
+--- a/src/git.cpp
++++ b/src/git.cpp
+@@ -425,7 +425,7 @@
+ 	if (name == "Big5-HKSCS")
+ 		name = "Big5";
+ 
+-	run("git repo-config i18n.commitencoding " + name);
++	run("git config i18n.commitencoding " + name);
+ }
+ 
+ QTextCodec* Git::getTextCodec(bool* isGitArchive) {
+@@ -435,7 +435,7 @@
+ 		return NULL;
+ 
+ 	QString runOutput;
+-	if (!run("git repo-config --get i18n.commitencoding", &runOutput))
++	if (!run("git config --get i18n.commitencoding", &runOutput))
+ 		return NULL;
+ 
+ 	if (runOutput.isEmpty()) // git docs says default is utf-8

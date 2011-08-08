@@ -1,0 +1,3 @@
+debian/qgit.desktop usr/share/applications
+bin/qgit usr/bin
+src/resources/qgit.png usr/share/icons/hicolor/48x48/apps

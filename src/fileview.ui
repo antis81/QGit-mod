@@ -206,7 +206,7 @@
           </size>
          </property>
          <property name="toolTip" >
-          <string>Source highlight (%1)</string>
+          <string>Source highlight</string>
          </property>
          <property name="icon" >
           <iconset resource="icons.qrc" >:/icons/resources/colorize.png</iconset>
@@ -390,6 +390,9 @@
              </property>
              <property name="horizontalScrollMode" >
               <enum>QAbstractItemView::ScrollPerPixel</enum>
+             </property>
+             <property name="uniformItemSizes" >
+              <bool>true</bool>
              </property>
             </widget>
            </item>

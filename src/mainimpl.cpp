@@ -229,14 +229,13 @@ void MainImpl::highlightAbbrevSha(SCRef abbrevSha) {
 
 void MainImpl::lineEditSHA_returnPressed() {
 
-    QString sha = git->getRefSha(lineEditSHA->text());
-    if (!sha.isEmpty()) // good, we can resolve to an unique sha
-    {
-        rv->st.setSha(sha);
-        UPDATE_DOMAIN(rv);
-    } else { // try a multiple match search
+    int len = lineEditSHA->text().length();
+    if (len < 40) {
         highlightAbbrevSha(lineEditSHA->text());
         goMatch(0);
+    } else {
+        rv->st.setSha(lineEditSHA->text());
+        UPDATE_DOMAIN(rv);
     }
 }
 
@@ -1128,17 +1127,6 @@ void MainImpl::doUpdateRecentRepoMenu(SCRef newEntry) {
     settings.setValue(REC_REP_KEY, newRecents);
 }
 
-static int cntMenuEntries(const QMenu& menu) {
-
-    int cnt = 0;
-    QList<QAction*> al(menu.actions());
-    FOREACH (QList<QAction*>, it, al) {
-        if (!(*it)->isSeparator())
-            cnt++;
-    }
-    return cnt;
-}
-
 void MainImpl::doContexPopup(SCRef sha) {
 
     QMenu contextMenu(this);
@@ -1292,7 +1280,7 @@ void MainImpl::ActSaveFile_activated() {
 
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
     QString fileSha(git->getFileSha(rv->st.fileName(), rv->st.sha()));
-    if (!git->saveFile(fileSha, rv->st.fileName(), fileName))
+    if (!git->saveFile(fileSha, rv->st.sha(), fileName))
         statusBar()->showMessage("Unable to save " + fileName);
 
     QApplication::restoreOverrideCursor();

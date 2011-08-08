@@ -71,6 +71,8 @@ void BranchesTree::addNode(ItemType headerType, Reference::Type type)
     case (BranchesTree::HeaderTags):
         node = new BranchesTreeItem(this, QStringList("Tags"), headerType);
         break;
+    default:
+        break;
     }
 
     tempList.sort();
@@ -108,6 +110,8 @@ void BranchesTree::addNode(ItemType headerType, Reference::Type type)
         case (HeaderTags):
             tempItemList = new BranchesTreeItem(node, QStringList(QString(*it)), LeafTag);
             tempItemList->setIcon(0, tagIcon);
+            break;
+        default:
             break;
         }
         tempItemList->setBranch(QString(*it));
@@ -220,6 +224,8 @@ QTreeWidgetItem* BranchesTree::recursiveFindBranch(const QString& branch)
         QTreeWidgetItem* item = recursiveFindBranch(topLevelItem(i), branch);
         if (item) return item;
     }
+
+    return NULL;
 }
 
 QTreeWidgetItem* BranchesTree::recursiveFindBranch(QTreeWidgetItem* parent, const QString& branch)
@@ -247,7 +253,7 @@ void BranchesTree::contextMenu(const QPoint & pos)
     globalPos += QPoint(10, 10);
 
     QMenu branchesTreeContextMenu(tr("Context menu"), this);
-    QTreeWidgetItem *item = selectedItems().first();    
+    QTreeWidgetItem* item = selectedItems().first();
     BranchesTreeItem* branchItem;
 
     switch (item->type()) {

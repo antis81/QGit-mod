@@ -50,7 +50,6 @@ private:
     int ofsX;
     int ofsY;
 
-    static QString lastMsgBeforeError;
 };
 
 #endif
