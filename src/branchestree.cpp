@@ -292,7 +292,7 @@ void BranchesTree::checkout()
 {
     QString branch = (checkoutAction->data()).toString();
     d->m()->checkout(branch);
-    rebuild();
+    //rebuild();
 }
 
 void BranchesTree::removeTag()
