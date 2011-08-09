@@ -45,7 +45,10 @@ void BranchesTree::setup(Domain *domain, Git *git)
     g = git;
 }
 
-void BranchesTree::update()
+/**
+Rebuilds the whole repository tree.
+*/
+void BranchesTree::rebuild()
 {
     clear();
     addNode(BranchesTree::HeaderBranches, Reference::BRANCH);
@@ -289,7 +292,7 @@ void BranchesTree::checkout()
 {
     QString branch = (checkoutAction->data()).toString();
     d->m()->checkout(branch);
-    update();
+    rebuild();
 }
 
 void BranchesTree::removeTag()

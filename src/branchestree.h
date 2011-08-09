@@ -33,7 +33,7 @@ public:
 
     BranchesTree(QWidget *parent = 0);
     void setup(Domain *domain, Git *git); // FIXME: Move to constructor - useless method
-    void update();                        // FIXME: Not update, but updateStatement!
+    void rebuild();                        // FIXME: Not update, but updateStatement!
                                           // THINKME: Why public?
 
 public slots:

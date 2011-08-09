@@ -409,7 +409,7 @@ void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
                         Domain* d;
                         currentTabType(&d);
                         branchesTree->setup(d, git);
-                        branchesTree->update();
+                        branchesTree->rebuild();
         } else
             statusBar()->showMessage("Not a git archive");
 
