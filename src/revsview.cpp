@@ -20,7 +20,6 @@
 #include "revsview.h"
 
 RevsView::RevsView(MainImpl* mi, Git* g, bool isMain) : Domain(mi, g, isMain) {
-
     revTab = new Ui_TabRev();
     revTab->setupUi(container);
 
