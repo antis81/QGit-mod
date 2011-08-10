@@ -43,6 +43,8 @@ public slots:
     void checkout();
     void removeTag();
 
+protected:
+    void keyPressEvent(QKeyEvent *event);
 private:
     // FIXME: Too short names
     Git *g;

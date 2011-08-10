@@ -1,6 +1,7 @@
 #include "branchestree.h"
 #include "mainimpl.h"
 #include <QDebug>
+#include <QKeyEvent>
 
 BranchesTree::BranchesTree(QWidget *parent) : QTreeWidget(parent),
     branchIcon(QString::fromUtf8(":/icons/resources/branch.png")),
@@ -294,6 +295,16 @@ void BranchesTree::checkout()
 
 void BranchesTree::removeTag()
 {
+}
+
+void BranchesTree::keyPressEvent(QKeyEvent *event)
+{
+    if ((event->key() >= Qt::Key_A) && (event->key() <= Qt::Key_Z)) {
+        // FIXME: Bad code
+        d->m()->searchBranchLineEdit->show();
+        d->m()->searchBranchLineEdit->setFocus();
+        d->m()->searchBranchLineEdit->setText(event->text());
+    }
 }
 
 void BranchesTree::showSearchBranchesItems(QString inputText)
