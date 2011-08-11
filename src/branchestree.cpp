@@ -1,6 +1,7 @@
 #include "branchestree.h"
 #include "mainimpl.h"
 #include <QDebug>
+#include <QKeyEvent>
 
 BranchesTree::BranchesTree(QWidget *parent) : QTreeWidget(parent),
     branchIcon(QString::fromUtf8(":/icons/resources/branch.png")),
@@ -299,16 +300,47 @@ void BranchesTree::removeTag()
 {
 }
 
+void BranchesTree::keyPressEvent(QKeyEvent *event)
+{
+    if ((event->key() >= Qt::Key_A) && (event->key() <= Qt::Key_Z)) {
+        // FIXME: Bad code
+        d->m()->searchBranchLineEdit->show();
+        d->m()->searchBranchLineEdit->setFocus();
+        d->m()->searchBranchLineEdit->setText(event->text());
+    }
+}
+
 void BranchesTree::showSearchBranchesItems(QString inputText)
 {
     bool f = false;
     setAllItemsShown();
-    // THINKME: Change to load/save statement of tree
-    if (!(inputText.simplified().isEmpty())) {
+    if (inputText.contains("/")) {
+        QString firstPart = inputText.left(inputText.indexOf("/"));
+        QString lastPart = inputText.mid(inputText.indexOf("/") + 1);
+        // top level item named Remotes for tree is 1 index
+
+        // hide all, exept Remotes
         for (int i = 0; i < topLevelItemCount(); i++) {
-            f = isBranchesTreeItemShown(topLevelItem(i), inputText);
+            if (i != 1)
+                f = isBranchesTreeItemShown(topLevelItem(i), inputText);
         }
-    } // else load condition
+        // hide header in "header/lower"
+        f = isBranchesTreeItemShown(topLevelItem(1), firstPart);
+        // find "lower"
+        for (int i = 0; i < topLevelItem(1)->childCount(); i++) {
+            if (topLevelItem(1)->child(i)->text(0) == firstPart) {
+                f = isBranchesTreeItemShown(topLevelItem(1)->child(i), lastPart);
+            }
+        }
+    } else {
+    // THINKME: Change to load/save statement of tree
+        if (!(inputText.simplified().isEmpty())) {
+            for (int i = 0; i < topLevelItemCount(); i++) {
+                f = isBranchesTreeItemShown(topLevelItem(i), inputText);
+            }
+        } // else load condition
+    }
+
 }
 
 bool BranchesTree::isBranchesTreeItemShown(QTreeWidgetItem *item, QString currentString)
@@ -316,7 +348,6 @@ bool BranchesTree::isBranchesTreeItemShown(QTreeWidgetItem *item, QString curren
     // Use it, if don't remove branchestreeitem class {
     //      BranchesTreeItem* branchItem = static_cast<BranchesTreeItem*>(item);
     // }
-
     if (isRegExpConformed(currentString, item->text(0))) { // FIXME: in class must be reimplement magic number "0"
         item->setHidden(false);
         return true;
@@ -341,7 +372,7 @@ bool BranchesTree::isBranchesTreeItemShown(QTreeWidgetItem *item, QString curren
 
 bool BranchesTree::isRegExpConformed(QString currentString, QString originalString)
 {
-    if (originalString.indexOf(currentString) == 0)
+    if (originalString.indexOf(currentString, 0, Qt::CaseInsensitive) == 0)
         return true;
     else
         return false;

@@ -917,24 +917,24 @@ void MainImpl::tabWdg_currentChanged(int w) {
     }
 }
 
-void MainImpl::setupShortcuts() {
+void MainImpl::setupShortcuts()
+{
+    new QShortcut(Qt::SHIFT | Qt::Key_I,     this, SLOT(shortCutActivated()));
+    new QShortcut(Qt::SHIFT | Qt::Key_K,     this, SLOT(shortCutActivated()));
+    new QShortcut(Qt::SHIFT | Qt::Key_N,     this, SLOT(shortCutActivated()));
+    new QShortcut(Qt::SHIFT | Qt::Key_Left,  this, SLOT(shortCutActivated()));
+    new QShortcut(Qt::SHIFT | Qt::Key_Right, this, SLOT(shortCutActivated()));
 
-    new QShortcut(Qt::Key_I,     this, SLOT(shortCutActivated()));
-    new QShortcut(Qt::Key_K,     this, SLOT(shortCutActivated()));
-    new QShortcut(Qt::Key_N,     this, SLOT(shortCutActivated()));
-    new QShortcut(Qt::Key_Left,  this, SLOT(shortCutActivated()));
-    new QShortcut(Qt::Key_Right, this, SLOT(shortCutActivated()));
+    new QShortcut(Qt::SHIFT | Qt::Key_Delete,    this, SLOT(shortCutActivated()));
+    new QShortcut(Qt::SHIFT | Qt::Key_Backspace, this, SLOT(shortCutActivated()));
+    new QShortcut(Qt::SHIFT | Qt::Key_Space,     this, SLOT(shortCutActivated()));
 
-    new QShortcut(Qt::Key_Delete,    this, SLOT(shortCutActivated()));
-    new QShortcut(Qt::Key_Backspace, this, SLOT(shortCutActivated()));
-    new QShortcut(Qt::Key_Space,     this, SLOT(shortCutActivated()));
-
-    new QShortcut(Qt::Key_B, this, SLOT(shortCutActivated()));
-    new QShortcut(Qt::Key_D, this, SLOT(shortCutActivated()));
-    new QShortcut(Qt::Key_F, this, SLOT(shortCutActivated()));
-    new QShortcut(Qt::Key_P, this, SLOT(shortCutActivated()));
-    new QShortcut(Qt::Key_R, this, SLOT(shortCutActivated()));
-    new QShortcut(Qt::Key_U, this, SLOT(shortCutActivated()));
+    new QShortcut(Qt::SHIFT | Qt::Key_B, this, SLOT(shortCutActivated()));
+    new QShortcut(Qt::SHIFT | Qt::Key_D, this, SLOT(shortCutActivated()));
+    new QShortcut(Qt::SHIFT | Qt::Key_F, this, SLOT(shortCutActivated()));
+    new QShortcut(Qt::SHIFT | Qt::Key_P, this, SLOT(shortCutActivated()));
+    new QShortcut(Qt::SHIFT | Qt::Key_R, this, SLOT(shortCutActivated()));
+    new QShortcut(Qt::SHIFT | Qt::Key_U, this, SLOT(shortCutActivated()));
 
     new QShortcut(Qt::SHIFT | Qt::Key_Up,    this, SLOT(shortCutActivated()));
     new QShortcut(Qt::SHIFT | Qt::Key_Down,  this, SLOT(shortCutActivated()));
@@ -942,8 +942,8 @@ void MainImpl::setupShortcuts() {
     new QShortcut(Qt::CTRL  | Qt::Key_Minus, this, SLOT(shortCutActivated()));
 }
 
-void MainImpl::shortCutActivated() {
-
+void MainImpl::shortCutActivated()
+{
     QShortcut* se = dynamic_cast<QShortcut*>(sender());
     if (!se)
         return;
@@ -952,11 +952,11 @@ void MainImpl::shortCutActivated() {
 
     switch (se->key()) {
 
-    case Qt::Key_I:
+    case Qt::SHIFT | Qt::Key_I:
         rv->tab()->listViewLog->on_keyUp();
         break;
-    case Qt::Key_K:
-    case Qt::Key_N:
+    case Qt::SHIFT | Qt::Key_K:
+    case Qt::SHIFT | Qt::Key_N:
         rv->tab()->listViewLog->on_keyDown();
         break;
     case Qt::SHIFT | Qt::Key_Up:
@@ -965,10 +965,10 @@ void MainImpl::shortCutActivated() {
     case Qt::SHIFT | Qt::Key_Down:
         goMatch(1);
         break;
-    case Qt::Key_Left:
+    case Qt::SHIFT | Qt::Key_Left:
         ActBack_activated();
         break;
-    case Qt::Key_Right:
+    case Qt::SHIFT | Qt::Key_Right:
         ActForward_activated();
         break;
     case Qt::CTRL | Qt::Key_Plus:
@@ -977,26 +977,26 @@ void MainImpl::shortCutActivated() {
     case Qt::CTRL | Qt::Key_Minus:
         adjustFontSize(-1);
         break;
-    case Qt::Key_U:
+    case Qt::SHIFT | Qt::Key_U:
         scrollTextEdit(-18);
         break;
-    case Qt::Key_D:
+    case Qt::SHIFT | Qt::Key_D:
         scrollTextEdit(18);
         break;
-    case Qt::Key_Delete:
-    case Qt::Key_B:
-    case Qt::Key_Backspace:
+    case Qt::SHIFT | Qt::Key_Delete:
+    case Qt::SHIFT | Qt::Key_B:
+    case Qt::SHIFT | Qt::Key_Backspace:
         scrollTextEdit(-1);
         break;
-    case Qt::Key_Space:
+    case Qt::SHIFT | Qt::Key_Space:
         scrollTextEdit(1);
         break;
-    case Qt::Key_R:
+    case Qt::SHIFT | Qt::Key_R:
         tabWdg->setCurrentWidget(rv->tabPage());
         break;
-    case Qt::Key_P:
+    case Qt::SHIFT | Qt::Key_P:
         isKey_P = true;
-    case Qt::Key_F: {
+    case Qt::SHIFT | Qt::Key_F: {
         QWidget* cp = tabWdg->currentWidget();
         Domain* d = isKey_P ? static_cast<Domain*>(firstTab<PatchView>(cp)) :
                               static_cast<Domain*>(firstTab<FileView>(cp));
