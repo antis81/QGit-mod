@@ -78,22 +78,7 @@
             <widget class="QLineEdit" name="searchBranchLineEdit"/>
            </item>
            <item>
-            <widget class="BranchesTree" name="branchesTree">
-             <property name="frameShape">
-              <enum>QFrame::NoFrame</enum>
-             </property>
-             <property name="selectionBehavior">
-              <enum>QAbstractItemView::SelectItems</enum>
-             </property>
-             <attribute name="headerVisible">
-              <bool>false</bool>
-             </attribute>
-             <column>
-              <property name="text">
-               <string notr="true">1</string>
-              </property>
-             </column>
-            </widget>
+            <widget class="QTreeView" name="treeRepo"/>
            </item>
           </layout>
          </item>
@@ -889,11 +874,6 @@
    <class>TreeView</class>
    <extends>QTreeWidget</extends>
    <header>treeview.h</header>
-  </customwidget>
-  <customwidget>
-   <class>BranchesTree</class>
-   <extends>QTreeWidget</extends>
-   <header>branchestree.h</header>
   </customwidget>
   <customwidget>
    <class>CustomTabWidget</class>

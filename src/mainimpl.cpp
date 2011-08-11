@@ -40,10 +40,14 @@
 #include "ui_revsview.h"
 #include "ui_fileview.h"
 #include "ui_patchview.h"
+#include "model/repomodel.h"
 
 using namespace QGit;
 
-MainImpl::MainImpl(SCRef cd, QWidget* p) : QMainWindow(p) {
+MainImpl::MainImpl(SCRef cd, QWidget* p) :
+    QMainWindow(p)
+  , m_repoModel(new RepoModel())
+{
 
     EM_INIT(exExiting, "Exiting");
 
@@ -180,14 +184,14 @@ MainImpl::MainImpl(SCRef cd, QWidget* p) : QMainWindow(p) {
             searchBranchLineEdit, SLOT(setFocus()));
     // }
 
-    connect(hideSearchBranchLineEditAction, SIGNAL(triggered()),
-            branchesTree, SLOT(showSearchBranchesItems()));
+//    connect(hideSearchBranchLineEditAction, SIGNAL(triggered()),
+//            branchesTree, SLOT(showSearchBranchesItems()));
 
     connect(hideSearchBranchLineEditAction, SIGNAL(triggered()),
             searchBranchLineEdit, SLOT(hide()));
 
-    connect(searchBranchLineEdit, SIGNAL(textChanged(QString)),
-            branchesTree, SLOT(showSearchBranchesItems(QString)));
+//    connect(searchBranchLineEdit, SIGNAL(textChanged(QString)),
+//            branchesTree, SLOT(showSearchBranchesItems(QString)));
 
 
     Search->addAction(showSearchBranchLineEditAction);
@@ -406,10 +410,11 @@ void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
             updateGlobalActions(true);
             if (archiveChanged)
                 updateRecentRepoMenu(curDir);
-                        Domain* d;
-                        currentTabType(&d);
-                        branchesTree->setup(d, git);
-                        branchesTree->update();
+            Domain* d;
+            currentTabType(&d);
+            m_repoModel->setup(*git);
+            treeRepo->setModel( m_repoModel );
+
         } else
             statusBar()->showMessage("Not a git archive");
 

@@ -31,6 +31,7 @@ class Git;
 class FileHistory;
 class FileView;
 class RevsView;
+class RepoModel;
 
 class MainImpl : public QMainWindow, public Ui_MainBase
 {
@@ -167,6 +168,8 @@ private:
     void openFileTab(FileView* fv = NULL);
 
     EM_DECLARE(exExiting);
+
+    RepoModel *     m_repoModel; //!< @todo For the beginning, use a single repo. Multiple repos should be supported.
 
     Git* git;
     RevsView* rv;
