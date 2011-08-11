@@ -80,9 +80,7 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
            listview.h mainimpl.h myprocess.h patchcontent.h patchview.h \
             revdesc.h revsview.h settingsimpl.h \
            treeview.h \
-    branchestree.h \
     findsupport.h \
-    branchestreeitem.h \
     externaldiffproc.h \
     reachinfo.h \
     rangeinfo.h \
@@ -106,7 +104,11 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
     model/tagreference.h \
     model/stgitpatchreference.h \
     git/references.h \
-    git/rungit_interface.h
+    git/rungit_interface.h \
+    model/repomodel.h \
+    repotreeitem.h
+    model/repomodel.h \
+    repotreeitem.h
 
 
 SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
@@ -115,10 +117,8 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
            lanes.cpp listview.cpp mainimpl.cpp myprocess.cpp namespace_def.cpp \
            patchcontent.cpp patchview.cpp  \
            revdesc.cpp revsview.cpp settingsimpl.cpp treeview.cpp \
-    branchestree.cpp \
     main.cpp \
     findsupport.cpp \
-    branchestreeitem.cpp \
     externaldiffproc.cpp \
     reachinfo.cpp \
     rangeinfo.cpp \
@@ -141,7 +141,11 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
     model/referencelist.cpp \
     model/tagreference.cpp \
     model/stgitpatchreference.cpp \
-    git/references.cpp
+    git/references.cpp \
+    model/repomodel.cpp \
+    repotreeitem.cpp
+    model/repomodel.cpp \
+    repotreeitem.cpp
 
 DISTFILES += app_icon.rc helpgen.sh resources/* Src.vcproj todo.txt
 DISTFILES += ../COPYING ../exception_manager.txt ../README ../README_WIN.txt
