@@ -8,6 +8,7 @@
 
 RepoTreeItem::RepoTreeItem(RepoTreeItem* parent, RepoTreeItem::ItemType type, const QString& title )
     : m_type(type),
+      m_isHeader(false),
       m_parent(parent)
 {
     setTitle(title);
@@ -59,5 +60,23 @@ RepoTreeItem::ItemType RepoTreeItem::type() const
 QList<RepoTreeItem*>& RepoTreeItem::children()
 {
     return m_children;
+}
+
+/**
+Header items are parent items with a grouping function.
+
+@return Returns true when it is a header item.
+*/
+bool RepoTreeItem::isHeaderItem() const
+{
+    return m_isHeader;
+}
+
+/**
+@see isHeaderItem
+*/
+void RepoTreeItem::setIsHeaderItem(bool yes)
+{
+    m_isHeader = yes;
 }
 

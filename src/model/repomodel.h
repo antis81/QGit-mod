@@ -39,6 +39,7 @@ public:
     void setup(Git* git);
 
 private:
+    Git* m_git;
     RepoTreeItem* m_rootItem;
 
     void addNodes(RepoTreeItem* parent, const QStringList& titles, bool sorted = true);

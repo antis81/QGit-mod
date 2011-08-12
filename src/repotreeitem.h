@@ -31,6 +31,9 @@ public:
 
     explicit RepoTreeItem(RepoTreeItem* parent, RepoTreeItem::ItemType type, const QString& title );
 
+    bool isHeaderItem() const;
+    void setIsHeaderItem(bool yes);
+
     RepoTreeItem::ItemType type() const;
     //void setType(RepoTreeItem::ItemType type);
 
@@ -50,6 +53,7 @@ public:
 
 private:
     RepoTreeItem::ItemType      m_type;
+    bool                        m_isHeader;
     RepoTreeItem*               m_parent;
     QList<RepoTreeItem*>        m_children;
     QMap<QString, QVariant>     m_itemData;
