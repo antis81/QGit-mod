@@ -6,14 +6,16 @@ Copyright: See COPYING file that comes with this distribution
 
 #include "repomodel.h"
 
+#include <QBrush>
+
 #include "repotreeitem.h"
 
 #include "git.h"
-#include "domain.h"
 
 
 RepoModel::RepoModel(QObject *parent) :
     QAbstractItemModel(parent)
+  , m_git(NULL)
   , m_rootItem(NULL)
 {
 }
@@ -27,27 +29,33 @@ QVariant RepoModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    if (role != Qt::DisplayRole)
-        return QVariant();
-
     RepoTreeItem *  item = static_cast<RepoTreeItem *>(index.internalPointer());
 
-    switch (item->type())
+    switch(role)
     {
-    case RepoTreeItem::HeaderBranches:
-    case RepoTreeItem::HeaderRemotes:
-    case RepoTreeItem::HeaderRemote:
-    case RepoTreeItem::HeaderTags:
-//        QFont font = tempItemList->font();
-//        font.setBold(true);
-//        setFont(0, font);
-//        (0, Qt::red);
+    case Qt::DisplayRole:
+        {
+            return item->data("title");
+        }
         break;
-
-    default: break;
+    case Qt::FontRole:
+        if (item->isHeaderItem())
+        {
+            QFont headFont;
+            headFont.setBold(true);
+            return headFont;
+        }
+        break;
+    case Qt::ForegroundRole:
+        if ( (item->type() == RepoTreeItem::LeafBranch) && (item->title() == m_git->currentBranch()) )
+        {
+            QBrush textColor(Qt::red);
+            return textColor;
+        }
+        break;
     }
 
-    return item->data("title");
+    return QVariant();
 }
 
 Qt::ItemFlags RepoModel::flags(const QModelIndex &index) const
@@ -138,18 +146,26 @@ Initializes the repository tree.
 */
 void RepoModel::setup(Git &git)
 {
+    // FIXME: Ugly code. Maybe a singleton would do here.
+    m_git = &git;
+
     // make header and add the top level items
     RepoTreeItem * root = new RepoTreeItem(NULL, RepoTreeItem::HeaderBranches, "Repository");
 
     RepoTreeItem *branchesItem = new RepoTreeItem(root, RepoTreeItem::HeaderBranches, "Branches");
+    branchesItem->setIsHeaderItem(true);
     addNodes( branchesItem, git.getAllRefNames(Reference::BRANCH, !Git::optOnlyLoaded) );
 
     RepoTreeItem *remoteItems = new RepoTreeItem(root, RepoTreeItem::HeaderTags, "Remotes");
+    remoteItems->setIsHeaderItem(true);
     addNodes( remoteItems, git.getAllRefNames(Reference::REMOTE_BRANCH, !Git::optOnlyLoaded) );
 
     RepoTreeItem *tagItems = new RepoTreeItem(root, RepoTreeItem::HeaderTags, "Tags");
+    tagItems->setIsHeaderItem(true);
     addNodes( tagItems, git.getAllRefNames(Reference::TAG, !Git::optOnlyLoaded));
 
+    //! @todo Implement functionality for stashes and submodules
+    RepoTreeItem *stashesItem = new RepoTreeItem(root, RepoTreeItem::HeaderBranches, "Stashes");
     RepoTreeItem *subRepoItem = new RepoTreeItem(root, RepoTreeItem::HeaderTags, "Submodules");
 
     setRootItem(root); // delete previous root and set new one
