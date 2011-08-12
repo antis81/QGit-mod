@@ -20,6 +20,17 @@
    <iconset resource="icons.qrc">
     <normaloff>:/icons/resources/qgit.png</normaloff>:/icons/resources/qgit.png</iconset>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QTabWidget::pane
+{
+	border: none;
+}
+
+QTreeView
+{
+	background-color: #DDE3EB;
+}</string>
+  </property>
   <widget class="QWidget" name="widget">
    <layout class="QHBoxLayout" name="horizontalLayout_2">
     <property name="spacing">
@@ -35,10 +46,7 @@
       </property>
       <widget class="QTabWidget" name="leftWidget">
        <property name="styleSheet">
-        <string notr="true">QTabWidget::pane
-{
-	border-width: 0px
-}</string>
+        <string notr="true"/>
        </property>
        <property name="tabPosition">
         <enum>QTabWidget::West</enum>
@@ -51,9 +59,6 @@
        </property>
        <property name="usesScrollButtons">
         <bool>true</bool>
-       </property>
-       <property name="documentMode">
-        <bool>false</bool>
        </property>
        <property name="movable">
         <bool>true</bool>
@@ -78,7 +83,11 @@
             <widget class="QLineEdit" name="searchBranchLineEdit"/>
            </item>
            <item>
-            <widget class="QTreeView" name="treeRepo"/>
+            <widget class="QTreeView" name="treeRepo">
+             <property name="animated">
+              <bool>true</bool>
+             </property>
+            </widget>
            </item>
           </layout>
          </item>
@@ -143,11 +152,6 @@
          <horstretch>1</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">QTabWidget::pane {
-	border-width: 0px;
-}</string>
        </property>
        <widget class="QWidget" name="TabWdg">
         <attribute name="title">
