@@ -9,7 +9,7 @@ Copyright: See COPYING file that comes with this distribution
 
 #include <QAbstractItemModel>
 
-class RepoTreeItem;
+class ReferenceTreeItem;
 class Domain;
 class Git;
 
@@ -17,14 +17,14 @@ class Git;
 /**
     @brief Provides a tree model managing the main elements of a git repository structure like barnches, tags, submodules etc.
 */
-class RepoModel : public QAbstractItemModel
+class ReferenceTreeModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    explicit RepoModel(QObject* parent = 0);
-    virtual ~RepoModel();
+    explicit ReferenceTreeModel(QObject* parent = 0);
+    virtual ~ReferenceTreeModel();
 
-    void setRootItem(RepoTreeItem* root);
+    void setRootItem(ReferenceTreeItem* root);
 
     QVariant data(const QModelIndex& index, int role) const;
     Qt::ItemFlags flags(const QModelIndex& index) const;
@@ -40,9 +40,9 @@ public:
 
 private:
     Git* m_git;
-    RepoTreeItem* m_rootItem;
+    ReferenceTreeItem* m_rootItem;
 
-    void addNodes(RepoTreeItem* parent, const QStringList& titles, bool sorted = true);
+    void addNodes(ReferenceTreeItem* parent, const QStringList& titles, bool sorted = true);
 };
 
 #endif // REPOMODEL_H

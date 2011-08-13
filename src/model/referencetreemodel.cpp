@@ -4,32 +4,32 @@ Author: Nils Fenner (c) 2011
 Copyright: See COPYING file that comes with this distribution
 */
 
-#include "repomodel.h"
+#include "referencetreemodel.h"
 
 #include <QBrush>
 
-#include "repotreeitem.h"
+#include "referencetreeitem.h"
 
 #include "git.h"
 
 
-RepoModel::RepoModel(QObject* parent)
+ReferenceTreeModel::ReferenceTreeModel(QObject* parent)
     : QAbstractItemModel(parent),
       m_git(NULL),
       m_rootItem(NULL)
 {
 }
 
-RepoModel::~RepoModel()
+ReferenceTreeModel::~ReferenceTreeModel()
 {
 }
 
-QVariant RepoModel::data(const QModelIndex& index, int role) const
+QVariant ReferenceTreeModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return QVariant();
 
-    RepoTreeItem* item = static_cast<RepoTreeItem*>(index.internalPointer());
+    ReferenceTreeItem* item = static_cast<ReferenceTreeItem*>(index.internalPointer());
 
     switch(role)
     {
@@ -47,7 +47,7 @@ QVariant RepoModel::data(const QModelIndex& index, int role) const
         }
         break;
     case Qt::ForegroundRole:
-        if ( (item->type() == RepoTreeItem::LeafBranch) && (item->title() == m_git->currentBranch()) )
+        if ( (item->type() == ReferenceTreeItem::LeafBranch) && (item->title() == m_git->currentBranch()) )
         {
             QBrush textColor(Qt::red);
             return textColor;
@@ -58,7 +58,7 @@ QVariant RepoModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-Qt::ItemFlags RepoModel::flags(const QModelIndex& index) const
+Qt::ItemFlags ReferenceTreeModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
         return 0;
@@ -66,7 +66,7 @@ Qt::ItemFlags RepoModel::flags(const QModelIndex& index) const
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-QVariant RepoModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ReferenceTreeModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
         return m_rootItem->data("title");
@@ -74,32 +74,32 @@ QVariant RepoModel::headerData(int section, Qt::Orientation orientation, int rol
     return QVariant();
 }
 
-QModelIndex RepoModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex ReferenceTreeModel::index(int row, int column, const QModelIndex& parent) const
 {
     if (!hasIndex(row, column, parent))
         return QModelIndex();
 
-    RepoTreeItem* parentItem;
+    ReferenceTreeItem* parentItem;
 
     if (!parent.isValid())
         parentItem = m_rootItem;
     else
-        parentItem = static_cast<RepoTreeItem*>(parent.internalPointer());
+        parentItem = static_cast<ReferenceTreeItem*>(parent.internalPointer());
 
-    RepoTreeItem* childItem = parentItem->children().at(row);
+    ReferenceTreeItem* childItem = parentItem->children().at(row);
     if (childItem)
         return createIndex(row, column, childItem);
     else
         return QModelIndex();
 }
 
-QModelIndex RepoModel::parent(const QModelIndex& index) const
+QModelIndex ReferenceTreeModel::parent(const QModelIndex& index) const
 {
     if (!index.isValid())
         return QModelIndex();
 
-    RepoTreeItem* childItem = static_cast<RepoTreeItem*>(index.internalPointer());
-    RepoTreeItem* parentItem = childItem->parent();
+    ReferenceTreeItem* childItem = static_cast<ReferenceTreeItem*>(index.internalPointer());
+    ReferenceTreeItem* parentItem = childItem->parent();
 
     if (parentItem == m_rootItem)
         return QModelIndex();
@@ -107,24 +107,24 @@ QModelIndex RepoModel::parent(const QModelIndex& index) const
     return createIndex(parentItem->row(), 0, parentItem);
 }
 
-int RepoModel::rowCount(const QModelIndex& parent) const
+int ReferenceTreeModel::rowCount(const QModelIndex& parent) const
 {
-    RepoTreeItem* parentItem;
+    ReferenceTreeItem* parentItem;
     if (parent.column() > 0)
         return 0;
 
     if (!parent.isValid())
         parentItem = m_rootItem;
     else
-        parentItem = static_cast<RepoTreeItem*>(parent.internalPointer());
+        parentItem = static_cast<ReferenceTreeItem*>(parent.internalPointer());
 
     return parentItem->children().count();
 }
 
-int RepoModel::columnCount(const QModelIndex& parent) const
+int ReferenceTreeModel::columnCount(const QModelIndex& parent) const
 {
     if (parent.isValid())
-        return static_cast<RepoTreeItem*>(parent.internalPointer())->data().count();
+        return static_cast<ReferenceTreeItem*>(parent.internalPointer())->data().count();
     else
         return m_rootItem->data().count();
 }
@@ -134,7 +134,7 @@ int RepoModel::columnCount(const QModelIndex& parent) const
 
     @return The previous root item or NULL, if no root item was set before.
 */
-void RepoModel::setRootItem(RepoTreeItem *root)
+void ReferenceTreeModel::setRootItem(ReferenceTreeItem *root)
 {
     delete m_rootItem;
 
@@ -144,28 +144,28 @@ void RepoModel::setRootItem(RepoTreeItem *root)
 /**
     Initializes the repository tree.
 */
-void RepoModel::setup(Git* git)
+void ReferenceTreeModel::setup(Git* git)
 {
     m_git = git;
 
     // make header and add the top level items
-    RepoTreeItem* root = new RepoTreeItem(NULL, RepoTreeItem::HeaderBranches, "Repository");
+    ReferenceTreeItem* root = new ReferenceTreeItem(NULL, ReferenceTreeItem::HeaderBranches, "Repository");
 
-    RepoTreeItem* branchesItem = new RepoTreeItem(root, RepoTreeItem::HeaderBranches, "Branches");
+    ReferenceTreeItem* branchesItem = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderBranches, "Branches");
     branchesItem->setIsHeaderItem(true);
     addNodes( branchesItem, git->getAllRefNames(Reference::BRANCH, !Git::optOnlyLoaded) );
 
-    RepoTreeItem* remoteItems = new RepoTreeItem(root, RepoTreeItem::HeaderTags, "Remotes");
+    ReferenceTreeItem* remoteItems = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderTags, "Remotes");
     remoteItems->setIsHeaderItem(true);
     addNodes( remoteItems, git->getAllRefNames(Reference::REMOTE_BRANCH, !Git::optOnlyLoaded) );
 
-    RepoTreeItem* tagItems = new RepoTreeItem(root, RepoTreeItem::HeaderTags, "Tags");
+    ReferenceTreeItem* tagItems = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderTags, "Tags");
     tagItems->setIsHeaderItem(true);
     addNodes( tagItems, git->getAllRefNames(Reference::TAG, !Git::optOnlyLoaded));
 
     //! @todo Implement functionality for stashes and submodules
-    RepoTreeItem* stashesItem = new RepoTreeItem(root, RepoTreeItem::HeaderBranches, "Stashes");
-    RepoTreeItem* subRepoItem = new RepoTreeItem(root, RepoTreeItem::HeaderTags, "Submodules");
+    ReferenceTreeItem* stashesItem = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderBranches, "Stashes");
+    ReferenceTreeItem* subRepoItem = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderTags, "Submodules");
 
     setRootItem(root); // delete previous root and set new one
 }
@@ -174,7 +174,7 @@ void RepoModel::setup(Git* git)
 /**
     Adds child nodes to the repository tree. The parent node must not be NULL. The root node is the repository node.
 */
-void RepoModel::addNodes(RepoTreeItem* parent, const QStringList& titles, bool sorted)
+void ReferenceTreeModel::addNodes(ReferenceTreeItem* parent, const QStringList& titles, bool sorted)
 {
     if (parent == NULL)
         return;
@@ -184,34 +184,34 @@ void RepoModel::addNodes(RepoTreeItem* parent, const QStringList& titles, bool s
         list.sort();
     }
 
-    RepoTreeItem* tempItemList = NULL;
+    ReferenceTreeItem* tempItemList = NULL;
 
     foreach (const QString& it, list)
     {
-        RepoTreeItem::ItemType type;
+        ReferenceTreeItem::ItemType type;
         switch (parent->type())
         {
-        case RepoTreeItem::HeaderBranches:
-            type = RepoTreeItem::LeafBranch;
+        case ReferenceTreeItem::HeaderBranches:
+            type = ReferenceTreeItem::LeafBranch;
 
             break;
 
-        case RepoTreeItem::HeaderRemotes:
-            type = RepoTreeItem::LeafRemote;
+        case ReferenceTreeItem::HeaderRemotes:
+            type = ReferenceTreeItem::LeafRemote;
 
             break;
 
-        case RepoTreeItem::HeaderTags:
-            type = RepoTreeItem::LeafTag;
+        case ReferenceTreeItem::HeaderTags:
+            type = ReferenceTreeItem::LeafTag;
 
             break;
 
         default:
-            type = RepoTreeItem::LeafBranch;
+            type = ReferenceTreeItem::LeafBranch;
 
             break;
         }
 
-        tempItemList = new RepoTreeItem(parent, type, it);
+        tempItemList = new ReferenceTreeItem(parent, type, it);
     }
 }
