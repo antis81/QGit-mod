@@ -40,13 +40,13 @@
 #include "ui_revsview.h"
 #include "ui_fileview.h"
 #include "ui_patchview.h"
-#include "model/repomodel.h"
+#include "model/referencetreemodel.h"
 
 using namespace QGit;
 
 MainImpl::MainImpl(SCRef cd, QWidget* p) :
     QMainWindow(p)
-  , m_repoModel(new RepoModel())
+  , m_repoModel(new ReferenceTreeModel())
 {
 
     EM_INIT(exExiting, "Exiting");

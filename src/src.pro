@@ -100,8 +100,8 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
     model/shastring.h \
     model/revision.h \
     model/shamap.h \
-    model/repomodel.h \
-    repotreeitem.h
+    referencetreeitem.h \
+    model/referencetreemodel.h
 
 
 SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
@@ -131,8 +131,8 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
     model/shastring.cpp \
     model/revision.cpp \
     model/shamap.cpp \
-    model/repomodel.cpp \
-    repotreeitem.cpp
+    referencetreeitem.cpp \
+    model/referencetreemodel.cpp
 
 DISTFILES += app_icon.rc helpgen.sh resources/* Src.vcproj todo.txt
 DISTFILES += ../COPYING ../exception_manager.txt ../README ../README_WIN.txt
@@ -164,15 +164,3 @@ win32 {
     QMAKE_EXTRA_TARGETS += qgit_launcher
     PRE_TARGETDEPS += qgit_launcher
 }
-
-
-
-
-
-
-
-
-
-
-
-

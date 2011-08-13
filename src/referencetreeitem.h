@@ -1,5 +1,5 @@
 /*
-    Author: Nils Fenner (C) 2005-2011
+    Author: Nils Fenner (C) 2011
 
     Copyright: See COPYING file that comes with this distribution
 */
@@ -12,10 +12,10 @@
 
 
 /**
-@brief Represents a repository tree item.
+@brief Represents a repository reference tree item.
 */
 
-class RepoTreeItem
+class ReferenceTreeItem
 {
 public:
     enum ItemType
@@ -29,22 +29,22 @@ public:
         , HeaderRemote = 263
     };
 
-    explicit RepoTreeItem( RepoTreeItem * parent, RepoTreeItem::ItemType type, const QString & title );
+    explicit ReferenceTreeItem( ReferenceTreeItem * parent, ReferenceTreeItem::ItemType type, const QString & title );
 
     bool isHeaderItem() const;
     void setIsHeaderItem(bool yes);
 
-    RepoTreeItem::ItemType type() const;
+    ReferenceTreeItem::ItemType type() const;
     //void setType(RepoTreeItem::ItemType type);
 
     const QString & title() const;
     void setTitle(const QString & value);
 
-    RepoTreeItem * parent();
-    void setParent(RepoTreeItem * parent);
+    ReferenceTreeItem * parent();
+    void setParent(ReferenceTreeItem * parent);
 
-    const QList<RepoTreeItem *> & children() const;
-    QList<RepoTreeItem *> & children();
+    const QList<ReferenceTreeItem *> & children() const;
+    QList<ReferenceTreeItem *> & children();
 
     const QMap<QString, QVariant> & data() const;
     QVariant data(const QString & id) const;
@@ -52,10 +52,10 @@ public:
     int row() const;
 
 private:
-    RepoTreeItem::ItemType      m_type;
+    ReferenceTreeItem::ItemType      m_type;
     bool                        m_isHeader;
-    RepoTreeItem *              m_parent;
-    QList<RepoTreeItem *>       m_children;
+    ReferenceTreeItem *              m_parent;
+    QList<ReferenceTreeItem *>       m_children;
     QMap<QString, QVariant>     m_itemData;
 };
 
