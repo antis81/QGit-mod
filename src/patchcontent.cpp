@@ -158,7 +158,9 @@ void PatchContent::typeWriterFontChanged() {
     setPlainText(toPlainText());
 }
 
-void PatchContent::processData(const QByteArray& fileChunk, int* prevLineNum) {
+void PatchContent::processData(const QByteArray& fileChunk, int* prevLineNum)
+{
+    Q_UNUSED( prevLineNum );
 
     QString newLines;
     if (!QGit::stripPartialParaghraps(fileChunk, &newLines, &halfLine))
@@ -399,6 +401,7 @@ void PatchContent::formatRow(QTextCursor tc) {
 }
 
 void PatchContent::formatBlock(QTextCursor& cursor, QTextBlock& block, PatchContent::RowType rowType) {
+    Q_UNUSED( block );
     // TODO: make configurable color constants
     // TODO: make colormap { type => color and others font styles}
     QColor lr(255, 220, 220);
@@ -427,7 +430,7 @@ void PatchContent::formatBlock(QTextCursor& cursor, QTextBlock& block, PatchCont
         charFormat.setForeground(Qt::white);
         blockFormat.setBackground(QGit::DARK_ORANGE);
         break;
-    case ROW_OTHER:        
+    case ROW_OTHER:
         break;
     case ROW_CONTEXT:
         charFormat.setForeground(Qt::blue);

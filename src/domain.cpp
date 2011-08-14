@@ -200,7 +200,8 @@ bool Domain::event(QEvent* e)
 {
     bool fromMaster = false;
 
-    switch (e->type()) {
+    switch ( static_cast<int>(e->type() ) )
+    {
     case UPD_DM_MST_EV:
         fromMaster = true;
         // fall through

@@ -30,7 +30,7 @@ QString FindSupport::text()
 bool FindSupport::find(QString text)
 {
     setText(text);
-    find();
+    return find();
 }
 
 

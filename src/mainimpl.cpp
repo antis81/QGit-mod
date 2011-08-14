@@ -846,7 +846,8 @@ bool MainImpl::event(QEvent* e)
     SCRef data = de->myData();
     bool ret = true;
 
-    switch (e->type()) {
+    switch (static_cast<int>(e->type()) )
+    {
     case ERROR_EV: {
         QApplication::setOverrideCursor(QCursor(Qt::ArrowCursor));
         EM_PROCESS_EVENTS;
