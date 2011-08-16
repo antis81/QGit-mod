@@ -52,12 +52,16 @@ MainImpl::MainImpl(SCRef cd, QWidget *parent) : QMainWindow(parent)
 
     // manual setup widgets not buildable with Qt designer
     lineEditSHA = new QLineEdit(NULL);
+    toolBar->addWidget(lineEditSHA);
+
     lineEditFilter = new QLineEdit(NULL);
+
+    QAction* act = toolBar->insertWidget(ActSearchAndFilter, lineEditFilter);
+
     cmbSearch = new QComboBox(NULL);
     QString list("Short log,Log msg,Author,SHA1,File,Patch,Patch (regExp)");
     cmbSearch->addItems(list.split(","));
-    toolBar->addWidget(lineEditSHA);
-    QAction* act = toolBar->insertWidget(ActSearchAndFilter, lineEditFilter);
+
     toolBar->insertWidget(act, cmbSearch);
 
     connect(lineEditSHA, SIGNAL(returnPressed()), this, SLOT(lineEditSHA_returnPressed()));
@@ -170,9 +174,6 @@ MainImpl::MainImpl(SCRef cd, QWidget *parent) : QMainWindow(parent)
         startUpDir = (cd.isEmpty() ? QDir::current().absolutePath() : cd);
     }
 
-    // FIXME: Temporary solution
-    // Don't work shortcut
-    // {
     searchBranchLineEdit->hide();
 
     showSearchBranchLineEditAction = new QAction(tr("Show"), this);
@@ -181,13 +182,11 @@ MainImpl::MainImpl(SCRef cd, QWidget *parent) : QMainWindow(parent)
     hideSearchBranchLineEditAction = new QAction(tr("Hide"), this);
     hideSearchBranchLineEditAction->setShortcut(tr("Esc"));
 
-    // FIXME: Refactor as single slot {
     connect(showSearchBranchLineEditAction, SIGNAL(triggered()),
             searchBranchLineEdit, SLOT(show()));
 
     connect(showSearchBranchLineEditAction, SIGNAL(triggered()),
             searchBranchLineEdit, SLOT(setFocus()));
-    // }
 
     connect(hideSearchBranchLineEditAction, SIGNAL(triggered()),
             branchesTree, SLOT(showSearchBranchesItems()));
@@ -198,10 +197,8 @@ MainImpl::MainImpl(SCRef cd, QWidget *parent) : QMainWindow(parent)
     connect(searchBranchLineEdit, SIGNAL(textChanged(QString)),
             branchesTree, SLOT(showSearchBranchesItems(QString)));
 
-
     Search->addAction(showSearchBranchLineEditAction);
     Search->addAction(hideSearchBranchLineEditAction);
-    // }
 
     // MainImpl c'tor is called before to enter event loop,
     // but some stuff requires event loop to init properly
