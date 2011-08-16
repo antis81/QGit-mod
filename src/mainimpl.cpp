@@ -416,25 +416,23 @@ void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
 
         bool quit;
         bool ok = git->init(curDir, !refresh, passedArgs, overwriteArgs, &quit); // blocking call
-        if (quit)
-            goto exit;
+        if (!quit) {
+            updateCommitMenu(ok && git->isStGITStack());
+            ActCheckWorkDir->setChecked(testFlag(DIFF_INDEX_F)); // could be changed in Git::init()
 
-        updateCommitMenu(ok && git->isStGITStack());
-        ActCheckWorkDir->setChecked(testFlag(DIFF_INDEX_F)); // could be changed in Git::init()
-
-        if (ok) {
-            updateGlobalActions(true);
-            if (archiveChanged)
-                updateRecentRepoMenu(curDir);
-                Domain* d;
-                currentTabType(&d);
-                branchesTree->setup(d, git);
-                branchesTree->update();
-        } else {
-            statusBar()->showMessage("Not a git archive");
+            if (ok) {
+                updateGlobalActions(true);
+                if (archiveChanged)
+                    updateRecentRepoMenu(curDir);
+                    Domain* d;
+                    currentTabType(&d);
+                    branchesTree->setup(d, git);
+                    branchesTree->update();
+            } else {
+                statusBar()->showMessage("Not a git archive");
+            }
         }
 
-exit:
         setRepositoryBusy = false;
         EM_REMOVE(exExiting);
 
