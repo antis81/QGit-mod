@@ -422,12 +422,17 @@ void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
 
             if (ok) {
                 updateGlobalActions(true);
-                if (archiveChanged)
+                if (archiveChanged) {
                     updateRecentRepoMenu(curDir);
+                }
                 Domain* d;
                 currentTabType(&d);
-                m_repoModel->setup(*git);
-                treeRepo->setModel( m_repoModel );
+
+                //! @todo CLEANUP HERE WHEN WORKING STATE REACHED
+                m_repoModel->setup(git);
+                treeRepo->setModel(m_repoModel);
+                treeRepo->setContextMenuPolicy(Qt::CustomContextMenu);
+                connect(treeRepo, SIGNAL(customContextMenuRequested(QPoint)), m_repoModel, SLOT(showContextMenu(QPoint)));
             } else {
                 statusBar()->showMessage("Not a git archive");
             }

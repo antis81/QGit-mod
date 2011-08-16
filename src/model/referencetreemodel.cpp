@@ -7,6 +7,7 @@ Copyright: See COPYING file that comes with this distribution
 #include "referencetreemodel.h"
 
 #include <QBrush>
+#include <QMenu>
 
 #include "referencetreeitem.h"
 
@@ -214,4 +215,25 @@ void ReferenceTreeModel::addNodes(ReferenceTreeItem* parent, const QStringList& 
 
         tempItemList = new ReferenceTreeItem(parent, type, it);
     }
+}
+
+void ReferenceTreeModel::showContextMenu(QPoint pos)
+{
+    QMenu *  m = new QMenu();
+
+    //! @todo Show actions according to selected item type
+    QAction *  a = m->addAction( "Checkout", this, SLOT(actionCheckout()) );
+    //QAction *  a = m->addAction( tr("Delete"), this, SLOT(deleteRepoReference()) );
+
+    m->popup(pos);
+}
+
+void ReferenceTreeModel::checkout() const
+{
+    // TODO!
+}
+
+void ReferenceTreeModel::actionCheckout()
+{
+    m_git->checkout("master");
 }
