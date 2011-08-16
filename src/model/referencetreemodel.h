@@ -8,6 +8,7 @@ Copyright: See COPYING file that comes with this distribution
 #define REPOMODEL_H
 
 #include <QAbstractItemModel>
+#include <QPoint>
 
 class ReferenceTreeItem;
 class Domain;
@@ -38,12 +39,21 @@ public:
 
     void setup(Git &git);
 
-private:
-    Git *               m_git;
+// FIXME: outsource menu and actions to a proxy like thing
+public slots:
+    void showContextMenu(QPoint pos);
 
-    ReferenceTreeItem *      m_rootItem;
+    void actionCheckout();
+
+private:
+    Git *                   m_git;
+
+    ReferenceTreeItem *     m_rootItem;
 
     void addNodes(ReferenceTreeItem * parent, const QStringList &titles, bool sorted=true);
+
+    // FIXME: outsource git functionality to a proxy like thing
+    void checkout() const;
 };
 
 #endif // REPOMODEL_H
