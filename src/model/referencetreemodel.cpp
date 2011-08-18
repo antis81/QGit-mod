@@ -69,6 +69,7 @@ Qt::ItemFlags ReferenceTreeModel::flags(const QModelIndex& index) const
 
 QVariant ReferenceTreeModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
+    Q_UNUSED(section)
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
         return m_rootItem->data("title");
 
@@ -147,26 +148,27 @@ void ReferenceTreeModel::setRootItem(ReferenceTreeItem *root)
 */
 void ReferenceTreeModel::setup(Git* git)
 {
+    // FIXME: Ugly code. Maybe a singleton would do here.
     m_git = git;
 
     // make header and add the top level items
-    ReferenceTreeItem* root = new ReferenceTreeItem(NULL, ReferenceTreeItem::HeaderBranches, "Repository");
+    ReferenceTreeItem* root = new ReferenceTreeItem(NULL, ReferenceTreeItem::HeaderBranches, "Repository", git);
 
-    ReferenceTreeItem* branchesItem = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderBranches, "Branches");
+    ReferenceTreeItem* branchesItem = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderBranches, "Branches", git);
     branchesItem->setIsHeaderItem(true);
-    addNodes( branchesItem, git->getAllRefNames(Reference::BRANCH, !Git::optOnlyLoaded) );
+    addNodes(branchesItem, git->getAllRefNames(Reference::BRANCH, !Git::optOnlyLoaded));
 
-    ReferenceTreeItem* remoteItems = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderTags, "Remotes");
+    ReferenceTreeItem* remoteItems = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderTags, "Remotes", git);
     remoteItems->setIsHeaderItem(true);
-    addNodes( remoteItems, git->getAllRefNames(Reference::REMOTE_BRANCH, !Git::optOnlyLoaded) );
+    addNodes(remoteItems, git->getAllRefNames(Reference::REMOTE_BRANCH, !Git::optOnlyLoaded));
 
-    ReferenceTreeItem* tagItems = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderTags, "Tags");
+    ReferenceTreeItem* tagItems = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderTags, "Tags", git);
     tagItems->setIsHeaderItem(true);
-    addNodes( tagItems, git->getAllRefNames(Reference::TAG, !Git::optOnlyLoaded));
+    addNodes(tagItems, git->getAllRefNames(Reference::TAG, !Git::optOnlyLoaded));
 
     //! @todo Implement functionality for stashes and submodules
-    ReferenceTreeItem* stashesItem = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderBranches, "Stashes");
-    ReferenceTreeItem* subRepoItem = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderTags, "Submodules");
+    ReferenceTreeItem* stashesItem = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderBranches, "Stashes", git);
+    ReferenceTreeItem* subRepoItem = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderTags, "Submodules", git);
 
     setRootItem(root); // delete previous root and set new one
 }
@@ -213,27 +215,6 @@ void ReferenceTreeModel::addNodes(ReferenceTreeItem* parent, const QStringList& 
             break;
         }
 
-        tempItemList = new ReferenceTreeItem(parent, type, it);
+        tempItemList = new ReferenceTreeItem(parent, type, it, m_git);
     }
-}
-
-void ReferenceTreeModel::showContextMenu(QPoint pos)
-{
-    QMenu *  m = new QMenu();
-
-    //! @todo Show actions according to selected item type
-    QAction *  a = m->addAction( "Checkout", this, SLOT(actionCheckout()) );
-    //QAction *  a = m->addAction( tr("Delete"), this, SLOT(deleteRepoReference()) );
-
-    m->popup(pos);
-}
-
-void ReferenceTreeModel::checkout() const
-{
-    // TODO!
-}
-
-void ReferenceTreeModel::actionCheckout()
-{
-    m_git->checkout("master");
 }

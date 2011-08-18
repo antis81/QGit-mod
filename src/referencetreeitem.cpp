@@ -5,16 +5,24 @@
 */
 
 #include "referencetreeitem.h"
+#include "git.h"
 
-ReferenceTreeItem::ReferenceTreeItem(ReferenceTreeItem* parent, ReferenceTreeItem::ItemType type, const QString& title )
-    : m_type(type),
+ReferenceTreeItem::ReferenceTreeItem(ReferenceTreeItem* parent, ReferenceTreeItem::ItemType type, const QString& title, Git* git )
+    : QObject(0),
+      m_type(type),
       m_isHeader(false),
-      m_parent(parent)
+      m_parent(parent),
+      m_git(git)
 {
     setTitle(title);
     if (parent != NULL) {
         parent->children().append(this);
     }
+}
+
+ReferenceTreeItem::~ReferenceTreeItem()
+{
+    qDeleteAll(m_children);
 }
 
 ReferenceTreeItem* ReferenceTreeItem::parent()
@@ -39,10 +47,10 @@ QVariant ReferenceTreeItem::data(const QString& id) const
 
 int ReferenceTreeItem::row() const
 {
-    return m_parent ? m_parent->children().indexOf(this) : 0;
+    return m_parent ? m_parent->children().indexOf(const_cast<ReferenceTreeItem*>(this)) : 0;
 }
 
-const QString ReferenceTreeItem::title() const
+QString ReferenceTreeItem::title() const
 {
     return m_itemData.value("title", QVariant()).toString();
 }
@@ -80,3 +88,32 @@ void ReferenceTreeItem::setIsHeaderItem(bool yes)
     m_isHeader = yes;
 }
 
+/**
+Check out the item.
+*/
+void ReferenceTreeItem::checkout()
+{
+
+    if ((m_type != LeafBranch) && (m_type != LeafTag)) {
+        return;
+    }
+
+    m_git->checkout( title() );
+}
+
+/**
+Remove the item (branch, tag, ...) from the repo.
+*/
+void ReferenceTreeItem::removeReference()
+{
+    //! @todo remove reference from repo
+    //m_git->removeReference( title() );
+}
+
+void ReferenceTreeItem::showRevision()
+{
+    if ((m_type != ReferenceTreeItem::LeafBranch) && (m_type != ReferenceTreeItem::LeafTag))
+            return;
+
+    //! @todo jump to revision in history view
+}

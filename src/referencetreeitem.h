@@ -4,19 +4,22 @@
     Copyright: See COPYING file that comes with this distribution
 */
 
-#ifndef REPOTREEITEM_H
-#define REPOTREEITEM_H
+#ifndef REFERENCETREEITEM_H
+#define REFERENCETREEITEM_H
 
 #include <QList>
 #include <QVariant>
+
+class Git;
 
 
 /**
     @brief Represents a repository reference tree item.
 */
 
-class ReferenceTreeItem
+class ReferenceTreeItem : public QObject
 {
+    Q_OBJECT
 public:
     enum ItemType
     {
@@ -29,7 +32,8 @@ public:
         HeaderRemote = 263
     };
 
-    explicit ReferenceTreeItem(ReferenceTreeItem* parent, ReferenceTreeItem::ItemType type, const QString& title );
+    explicit ReferenceTreeItem(ReferenceTreeItem* parent, ReferenceTreeItem::ItemType type, const QString& title, Git* git);
+    virtual ~ReferenceTreeItem();
 
     bool isHeaderItem() const;
     void setIsHeaderItem(bool yes);
@@ -37,7 +41,7 @@ public:
     ReferenceTreeItem::ItemType type() const;
     //void setType(RepoTreeItem::ItemType type);
 
-    const QString title() const;
+    QString title() const;
     void setTitle(const QString& value);
 
     ReferenceTreeItem* parent();
@@ -51,12 +55,20 @@ public:
 
     int row() const;
 
+public slots:
+    void checkout();
+    void removeReference();
+    void showRevision();
+
 private:
     ReferenceTreeItem::ItemType m_type;
     bool                        m_isHeader;
     ReferenceTreeItem*          m_parent;
     QList<ReferenceTreeItem*>   m_children;
     QMap<QString, QVariant>     m_itemData;
+
+    Git* m_git; //!< @todo Workaround - need a better solution!
+
 };
 
-#endif // REPOTREEITEM_H
+#endif // REFERENCETREEITEM_H

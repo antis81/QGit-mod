@@ -100,16 +100,14 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
     model/shastring.h \
     model/revision.h \
     model/referencetreemodel.h \
-    referencetreeitem.h
     model/reference.h \
     model/referencelist.h \
     model/tagreference.h \
     model/stgitpatchreference.h \
     git/references.h \
     git/rungit_interface.h \
-    model/shamap.h \
     referencetreeitem.h \
-    model/referencetreemodel.h
+    referenceitemdelegate.h
 
 
 SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
@@ -139,14 +137,13 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
     model/shastring.cpp \
     model/revision.cpp \
     model/referencetreemodel.cpp \
-    referencetreeitem.cpp
     model/reference.cpp \
     model/referencelist.cpp \
     model/tagreference.cpp \
     model/stgitpatchreference.cpp \
     git/references.cpp \
     referencetreeitem.cpp \
-    model/referencetreemodel.cpp
+    referenceitemdelegate.cpp
 
 DISTFILES += app_icon.rc helpgen.sh resources/* Src.vcproj todo.txt
 DISTFILES += ../COPYING ../exception_manager.txt ../README ../README_WIN.txt

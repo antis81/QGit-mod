@@ -41,6 +41,7 @@
 #include "ui_fileview.h"
 #include "ui_patchview.h"
 #include "model/referencetreemodel.h"
+#include "referenceitemdelegate.h"
 
 using namespace QGit;
 
@@ -416,6 +417,7 @@ void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
 
         bool quit;
         bool ok = git->init(curDir, !refresh, passedArgs, overwriteArgs, &quit); // blocking call
+
         if (!quit) {
             updateCommitMenu(ok && git->isStGITStack());
             ActCheckWorkDir->setChecked(testFlag(DIFF_INDEX_F)); // could be changed in Git::init()
@@ -431,8 +433,7 @@ void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
                 //! @todo CLEANUP HERE WHEN WORKING STATE REACHED
                 m_repoModel->setup(git);
                 treeRepo->setModel(m_repoModel);
-                treeRepo->setContextMenuPolicy(Qt::CustomContextMenu);
-                connect(treeRepo, SIGNAL(customContextMenuRequested(QPoint)), m_repoModel, SLOT(showContextMenu(QPoint)));
+                treeRepo->setItemDelegate(new ReferenceItemDelegate(git));
             } else {
                 statusBar()->showMessage("Not a git archive");
             }
