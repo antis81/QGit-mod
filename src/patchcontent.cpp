@@ -176,6 +176,9 @@ void PatchContent::processData(const QByteArray& fileChunk, int* prevLineNum) {
         const QString& r = *row;
         RowType rowType = getRowType(r);
 
+        if (rowType == ROW_FILE_HEADER) {
+            partHeaderDetected = false;
+        }
         if (rowType == ROW_PART_HEADER) {
             partHeaderDetected = true;
             partCount = 0;
@@ -278,8 +281,8 @@ void PatchContent::processData(const QByteArray& fileChunk, int* prevLineNum) {
         delete[] lastStartNumbers;
     }
 
-    QScrollBar* vsb = verticalScrollBar();
-    vsb->setValue(vsb->value() + cursorRect().top());
+//    QScrollBar* vsb = verticalScrollBar();
+//    vsb->setValue(vsb->value() + cursorRect().top());
     setUpdatesEnabled(true);
 }
 
