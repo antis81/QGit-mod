@@ -37,13 +37,7 @@ public:
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
 
-    void setup(Git &git);
-
-// FIXME: outsource menu and actions to a proxy like thing
-public slots:
-    void showContextMenu(QPoint pos);
-
-    void actionCheckout();
+    void setup(Git * git);
 
 private:
     Git *                   m_git;
@@ -51,9 +45,6 @@ private:
     ReferenceTreeItem *     m_rootItem;
 
     void addNodes(ReferenceTreeItem * parent, const QStringList &titles, bool sorted=true);
-
-    // FIXME: outsource git functionality to a proxy like thing
-    void checkout() const;
 };
 
 #endif // REPOMODEL_H
