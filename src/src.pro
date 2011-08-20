@@ -107,7 +107,9 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
     git/references.h \
     git/rungit_interface.h \
     referencetreeitem.h \
-    referenceitemdelegate.h
+    referenceitemdelegate.h \
+    branchestreeitem.h \
+    branchestree.h
 
 
 SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
@@ -143,7 +145,9 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
     model/stgitpatchreference.cpp \
     git/references.cpp \
     referencetreeitem.cpp \
-    referenceitemdelegate.cpp
+    referenceitemdelegate.cpp \
+    branchestreeitem.cpp \
+    branchestree.cpp
 
 DISTFILES += app_icon.rc helpgen.sh resources/* Src.vcproj todo.txt
 DISTFILES += ../COPYING ../exception_manager.txt ../README ../README_WIN.txt
