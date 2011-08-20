@@ -109,7 +109,8 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
     referencetreeitem.h \
     referenceitemdelegate.h \
     branchestreeitem.h \
-    branchestree.h
+    branchestree.h \
+    ui/referencetreeview.h
 
 
 SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
@@ -147,7 +148,8 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
     referencetreeitem.cpp \
     referenceitemdelegate.cpp \
     branchestreeitem.cpp \
-    branchestree.cpp
+    branchestree.cpp \
+    ui/referencetreeview.cpp
 
 DISTFILES += app_icon.rc helpgen.sh resources/* Src.vcproj todo.txt
 DISTFILES += ../COPYING ../exception_manager.txt ../README ../README_WIN.txt

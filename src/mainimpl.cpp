@@ -432,8 +432,8 @@ void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
 
                 //! @todo CLEANUP HERE WHEN WORKING STATE REACHED
                 m_repoModel->setup(git);
-                treeRepo->setModel(m_repoModel);
-                treeRepo->setItemDelegate(new ReferenceItemDelegate(git));
+                referenceTreeView->setModel(m_repoModel);
+                referenceTreeView->setItemDelegate(new ReferenceItemDelegate(git));
             } else {
                 statusBar()->showMessage("Not a git archive");
             }
