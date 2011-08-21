@@ -40,8 +40,8 @@
 #include "ui_revsview.h"
 #include "ui_fileview.h"
 #include "ui_patchview.h"
-#include "model/referencetreemodel.h"
-#include "referenceitemdelegate.h"
+#include "ui/referencetreemodel.h"
+#include "ui/referenceitemdelegate.h"
 
 using namespace QGit;
 
