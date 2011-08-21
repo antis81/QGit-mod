@@ -171,7 +171,41 @@ void ReferenceTreeViewModel::setup(Git* git)
     remoteItems = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderTags,
                                             "Remotes");
 //    remoteItems->setIsHeaderItem(true);
-    addNodes(remoteItems, git->getAllRefNames(Reference::REMOTE_BRANCH, !Git::optOnlyLoaded));
+
+//------------- Move to only function ----------------
+    QStringList tempList = git->getAllRefNames(Reference::REMOTE_BRANCH, !Git::optOnlyLoaded);
+    tempList.sort();
+
+    ReferenceTreeViewItem *tempItemList;
+    ReferenceTreeViewItem* headerNode = remoteItems;
+
+    QString lastRemoteName;
+    QString remoteName;
+    ReferenceTreeViewItem* parentNode = headerNode;
+    QString text;
+
+    // заполняем дерево потомками
+    FOREACH_SL (it, tempList) {
+        const QString& branchName = *it;
+        int i = branchName.indexOf("/");
+        if (i > 0) {
+            remoteName = branchName.left(i);
+            text = branchName.mid(i + 1);
+            if (remoteName.compare(lastRemoteName) != 0) {
+                parentNode = new ReferenceTreeViewItem(headerNode, ReferenceTreeViewItem::HeaderRemote, remoteName);
+//                addNodes(headerNode, remoteName);
+                lastRemoteName = remoteName;
+            }
+        } else {
+            parentNode = headerNode;
+            text = branchName;
+            lastRemoteName = "";
+        }
+
+        tempItemList = new ReferenceTreeViewItem(parentNode, ReferenceTreeViewItem::LeafRemote, text);
+    }
+
+//    addNodes(remoteItems, git->getAllRefNames(Reference::REMOTE_BRANCH, !Git::optOnlyLoaded));
 
     ReferenceTreeViewItem* tagItems;
     tagItems = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderTags,
@@ -217,6 +251,9 @@ void ReferenceTreeViewModel::addNodes(ReferenceTreeViewItem* parent, const QStri
             type = ReferenceTreeViewItem::LeafBranch;
             break;
         case ReferenceTreeViewItem::HeaderRemotes:
+            type = ReferenceTreeViewItem::HeaderRemote;
+            break;
+        case ReferenceTreeViewItem::HeaderRemote:
             type = ReferenceTreeViewItem::LeafRemote;
             break;
         case ReferenceTreeViewItem::HeaderTags:
