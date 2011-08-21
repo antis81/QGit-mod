@@ -32,7 +32,7 @@ bool ReferenceTreeViewItemDelegate::editorEvent(QEvent* event, QAbstractItemMode
     switch (event->type()) {
     case QEvent::MouseButtonDblClick:
             // show the branch in the revisions view
-            item->showRevision();
+            //item->showRevision();
             result = true;
         break;
     case QEvent::MouseButtonPress:

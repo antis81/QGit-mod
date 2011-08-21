@@ -34,7 +34,7 @@ QVariant ReferenceTreeViewModel::data(const QModelIndex& index, int role) const
 
     switch(role) {
     case Qt::DisplayRole:
-        return item->data("title");
+        return item->name();// must be text() //->data("title");
         break;
     case Qt::FontRole:
         if (item->isHeaderItem()) {
@@ -46,7 +46,7 @@ QVariant ReferenceTreeViewModel::data(const QModelIndex& index, int role) const
         break;
     case Qt::ForegroundRole:
         if ( (item->type() == ReferenceTreeViewItem::LeafBranch)
-                && (item->title() == m_git->currentBranch()) ) {
+                && (item->name() == m_git->currentBranch()) ) {
             QBrush textColor(Qt::red);
             return textColor;
         }
@@ -70,8 +70,10 @@ QVariant ReferenceTreeViewModel::headerData(int section, Qt::Orientation orienta
 {
     Q_UNUSED(section)
 
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-        return m_rootItem->data("title");
+    if ((orientation == Qt::Horizontal)
+            && (role == Qt::DisplayRole))
+        return m_rootItem->name(); // must be text()
+    // ->data("title");
 
     return QVariant();
 }
@@ -127,10 +129,11 @@ int ReferenceTreeViewModel::rowCount(const QModelIndex& parent) const
 
 int ReferenceTreeViewModel::columnCount(const QModelIndex& parent) const
 {
-    if (parent.isValid())
-        return static_cast<ReferenceTreeViewItem*>(parent.internalPointer())->data().count();
-    else
-        return m_rootItem->data().count();
+    return 1;
+//    if (parent.isValid())
+//        return static_cast<ReferenceTreeViewItem*>(parent.internalPointer())->data().count();
+//    else
+//        return m_rootItem->data().count();
 }
 
 /**
@@ -156,34 +159,34 @@ void ReferenceTreeViewModel::setup(Git* git)
     // make header and add the top level items
     ReferenceTreeViewItem* root;
     root = new ReferenceTreeViewItem(NULL, ReferenceTreeViewItem::HeaderBranches,
-                                     "Repository", git);
+                                     "Repository");
 
     ReferenceTreeViewItem* branchesItem;
     branchesItem = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderBranches,
-                                             "Branches", git);
-    branchesItem->setIsHeaderItem(true);
+                                             "Branches");
+//    branchesItem->setIsHeaderItem(true);
     addNodes(branchesItem, git->getAllRefNames(Reference::BRANCH, !Git::optOnlyLoaded));
 
     ReferenceTreeViewItem* remoteItems;
     remoteItems = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderTags,
-                                            "Remotes", git);
-    remoteItems->setIsHeaderItem(true);
+                                            "Remotes");
+//    remoteItems->setIsHeaderItem(true);
     addNodes(remoteItems, git->getAllRefNames(Reference::REMOTE_BRANCH, !Git::optOnlyLoaded));
 
     ReferenceTreeViewItem* tagItems;
     tagItems = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderTags,
-                                         "Tags", git);
-    tagItems->setIsHeaderItem(true);
+                                         "Tags");
+//    tagItems->setIsHeaderItem(true);
     addNodes(tagItems, git->getAllRefNames(Reference::TAG, !Git::optOnlyLoaded));
 
     //! @todo Implement functionality for stashes and submodules
     ReferenceTreeViewItem* stashesItem;
     stashesItem = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderBranches,
-                                            "Stashes", git);
+                                            "Stashes");
 
     ReferenceTreeViewItem* subRepoItem;
     subRepoItem= new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderTags,
-                                           "Submodules", git);
+                                           "Submodules");
 
     setRootItem(root); // delete previous root and set new one
 }
@@ -224,6 +227,6 @@ void ReferenceTreeViewModel::addNodes(ReferenceTreeViewItem* parent, const QStri
             break;
         }
 
-        tempItemList = new ReferenceTreeViewItem(parent, type, it, m_git);
+        tempItemList = new ReferenceTreeViewItem(parent, type, it);
     }
 }

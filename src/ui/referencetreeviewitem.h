@@ -9,6 +9,7 @@
 
 #include <QList>
 #include <QVariant>
+#include <QString>
 
 class Git;
 
@@ -18,7 +19,7 @@ class Git;
 
 class ReferenceTreeViewItem : public QObject
 {
-    Q_OBJECT
+//    Q_OBJECT
 
 public:
     enum ItemType
@@ -33,43 +34,47 @@ public:
     };
 
     explicit ReferenceTreeViewItem(ReferenceTreeViewItem* parent,
-                                   ReferenceTreeViewItem::ItemType type, const QString& title,
-                                   Git* git);
+                                   ReferenceTreeViewItem::ItemType type, const QString& name);
     virtual ~ReferenceTreeViewItem();
 
     bool isHeaderItem() const;
-    void setIsHeaderItem(bool yes);
+//    void setIsHeaderItem(bool yes);
 
     ReferenceTreeViewItem::ItemType type() const;
-    //void setType(RepoTreeItem::ItemType type);
+//    void setType(RepoTreeItem::ItemType type);
 
-    QString title() const;
-    void setTitle(const QString& value);
+//    QString title() const;
+//    void setTitle(const QString& value);
 
     ReferenceTreeViewItem* parent();
-    void setParent(ReferenceTreeViewItem* parent);
+//    void setParent(ReferenceTreeViewItem* parent);
 
-    const QList<ReferenceTreeViewItem*>& children() const;
+//    const QList<ReferenceTreeViewItem*>& children() const;
     QList<ReferenceTreeViewItem*>& children();
+    QString name();
+    QString text();
 
-    const QMap<QString, QVariant>& data() const;
-    QVariant data(const QString& id) const;
+//    const QMap<QString, QVariant>& data() const;
+//    QVariant data(const QString& id) const;
+
 
     int row() const;
 
-public slots:
-    void checkout();
-    void removeReference();
-    void showRevision();
+//public slots:
+//    void checkout();
+//    void removeReference();
+//    void showRevision();
 
 private:
-    ReferenceTreeViewItem::ItemType m_type;
-    bool                            m_isHeader;
-    ReferenceTreeViewItem*          m_parent;
-    QList<ReferenceTreeViewItem*>   m_children;
-    QMap<QString, QVariant>         m_itemData;
+    ReferenceTreeViewItem*        m_parent;
+    QList<ReferenceTreeViewItem*> m_children;
+    ItemType                      m_type;
+//    bool                          m_isHeader; // m_type give this info
+//    QMap<QString, QVariant>       m_itemData; // QVariant - bad solution. try to avoid it.
+    QString                       m_name;
+    QString                       m_text;
 
-    Git* m_git; //!< @todo Workaround - need a better solution!
+//    Git* m_git; //!< @todo Workaround - need a better solution!
 };
 
 #endif // REFERENCETREEVIEWITEM_H

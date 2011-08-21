@@ -9,14 +9,15 @@
 
 ReferenceTreeViewItem::ReferenceTreeViewItem(ReferenceTreeViewItem* parent,
                                              ReferenceTreeViewItem::ItemType type,
-                                             const QString& title, Git* git )
+                                             const QString& name)//, Git* git )
     : QObject(0),
       m_type(type),
-      m_isHeader(false),
-      m_parent(parent),
-      m_git(git)
+      m_name(name),
+//      m_isHeader(false),
+      m_parent(parent)
+//      m_git(git)
 {
-    setTitle(title);
+//    setTitle(title);
 
     if (parent != NULL) {
         parent->children().append(this);
@@ -33,35 +34,35 @@ ReferenceTreeViewItem* ReferenceTreeViewItem::parent()
     return m_parent;
 }
 
-const QList<ReferenceTreeViewItem*> & ReferenceTreeViewItem::children() const
-{
-    return m_children;
-}
+//const QList<ReferenceTreeViewItem*> & ReferenceTreeViewItem::children() const
+//{
+//    return m_children;
+//}
 
-const QMap<QString, QVariant>& ReferenceTreeViewItem::data() const
-{
-    return m_itemData;
-}
+//const QMap<QString, QVariant>& ReferenceTreeViewItem::data() const
+//{
+//    return m_itemData;
+//}
 
-QVariant ReferenceTreeViewItem::data(const QString& id) const
-{
-    return m_itemData.value(id, QVariant());
-}
+//QVariant ReferenceTreeViewItem::data(const QString& id) const
+//{
+//    return m_itemData.value(id, QVariant());
+//}
 
 int ReferenceTreeViewItem::row() const
 {
     return m_parent ? m_parent->children().indexOf(const_cast<ReferenceTreeViewItem*>(this)) : 0;
 }
 
-QString ReferenceTreeViewItem::title() const
-{
-    return m_itemData.value("title", QVariant()).toString();
-}
+//QString ReferenceTreeViewItem::title() const
+//{
+//    return m_itemData.value("title", QVariant()).toString();
+//}
 
-void ReferenceTreeViewItem::setTitle(const QString& value)
-{
-    m_itemData.insert("title", value);
-}
+//void ReferenceTreeViewItem::setTitle(const QString& value)
+//{
+//    m_itemData.insert("title", value);
+//}
 
 ReferenceTreeViewItem::ItemType ReferenceTreeViewItem::type() const
 {
@@ -73,6 +74,16 @@ QList<ReferenceTreeViewItem*>& ReferenceTreeViewItem::children()
     return m_children;
 }
 
+QString ReferenceTreeViewItem::name()
+{
+    return m_name;
+}
+
+QString ReferenceTreeViewItem::text()
+{
+    return m_text;
+}
+
 /**
 Header items are parent items with a grouping function.
 
@@ -80,42 +91,48 @@ Header items are parent items with a grouping function.
 */
 bool ReferenceTreeViewItem::isHeaderItem() const
 {
-    return m_isHeader;
+    if ((type() == ReferenceTreeViewItem::HeaderBranches)
+            || (type() == ReferenceTreeViewItem::HeaderRemotes)
+            || (type() == ReferenceTreeViewItem::HeaderTags))
+        return true;
+    else
+        return false;
 }
 
 /**
 @see isHeaderItem
 */
-void ReferenceTreeViewItem::setIsHeaderItem(bool yes)
-{
-    m_isHeader = yes;
-}
+//void ReferenceTreeViewItem::setIsHeaderItem(bool yes)
+//{
+//    m_isHeader = yes;
+//}
 
 /**
 Check out the item.
 */
-void ReferenceTreeViewItem::checkout()
-{
-    if ((m_type != LeafBranch) && (m_type != LeafTag)) {
-        return;
-    }
+//void ReferenceTreeViewItem::checkout()
+//{
+//    if ((m_type != LeafBranch) && (m_type != LeafTag)) {
+//        return;
+//    }
 
-    m_git->checkout( title() );
-}
+//    m_git->checkout(title());
+//}
 
-/**
-Remove the item (branch, tag, ...) from the repo.
-*/
-void ReferenceTreeViewItem::removeReference()
-{
-    //! @todo remove reference from repo
-    //m_git->removeReference( title() );
-}
+///**
+//Remove the item (branch, tag, ...) from the repo.
+//*/
+//void ReferenceTreeViewItem::removeReference()
+//{
+//    //! @todo remove reference from repo
+//    //m_git->removeReference( title() );
+//}
 
-void ReferenceTreeViewItem::showRevision()
-{
-    if ((m_type != ReferenceTreeViewItem::LeafBranch) && (m_type != ReferenceTreeViewItem::LeafTag))
-            return;
+//void ReferenceTreeViewItem::showRevision()
+//{
+//    if ((m_type != ReferenceTreeViewItem::LeafBranch)
+//            && (m_type != ReferenceTreeViewItem::LeafTag))
+//        return;
 
-    //! @todo jump to revision in history view
-}
+//    //! @todo jump to revision in history view
+//}
