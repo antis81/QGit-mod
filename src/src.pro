@@ -99,15 +99,15 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
     ui/customtab.h \
     model/shastring.h \
     model/revision.h \
-    ui/referencetreemodel.h \
+    model/referencetreemodel.h \
     model/reference.h \
     model/referencelist.h \
     model/tagreference.h \
     model/stgitpatchreference.h \
     git/references.h \
     git/rungit_interface.h \
-    ui/referencetreeitem.h \
-    ui/referenceitemdelegate.h \
+    referencetreeitem.h \
+    referenceitemdelegate.h \
     branchestreeitem.h \
     branchestree.h \
     ui/referencetreeview.h
@@ -139,14 +139,14 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
     ui/customtab.cpp \
     model/shastring.cpp \
     model/revision.cpp \
-    ui/referencetreemodel.cpp \
+    model/referencetreemodel.cpp \
     model/reference.cpp \
     model/referencelist.cpp \
     model/tagreference.cpp \
     model/stgitpatchreference.cpp \
     git/references.cpp \
-    ui/referencetreeitem.cpp \
-    ui/referenceitemdelegate.cpp \
+    referencetreeitem.cpp \
+    referenceitemdelegate.cpp \
     branchestreeitem.cpp \
     branchestree.cpp \
     ui/referencetreeview.cpp
