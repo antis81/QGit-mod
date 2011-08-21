@@ -11,16 +11,18 @@ Copyright: See COPYING file that comes with this distribution
 
 class ReferenceTreeViewItem;
 
-
 class ReferenceTreeViewItemDelegate : public QItemDelegate
 {
     Q_OBJECT
+
 public:
     explicit ReferenceTreeViewItemDelegate(QObject* parent = 0);
 
-    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
+    void paint(QPainter* painter, const QStyleOptionViewItem& option,
+               const QModelIndex& index) const;
 
-    bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index);
+    bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option,
+                     const QModelIndex& index);
 
 private:
     void menuForReferenceItem(ReferenceTreeViewItem* item, const QPoint& pos);

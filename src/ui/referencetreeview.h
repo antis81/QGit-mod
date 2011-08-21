@@ -6,7 +6,7 @@
 class ReferenceTreeView : public QTreeView
 {
 public:
-    ReferenceTreeView(QWidget *parent);
+    ReferenceTreeView(QWidget* parent);
 };
 
 #endif // REFERENCETREEVIEW_H

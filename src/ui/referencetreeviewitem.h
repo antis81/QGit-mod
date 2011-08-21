@@ -19,19 +19,22 @@ class Git;
 class ReferenceTreeViewItem : public QObject
 {
     Q_OBJECT
+
 public:
     enum ItemType
     {
         HeaderBranches = 257,
-        HeaderRemotes = 258,
-        HeaderTags = 259,
-        LeafBranch = 260,
-        LeafRemote = 261,
-        LeafTag = 262,
-        HeaderRemote = 263
+        HeaderRemotes  = 258,
+        HeaderTags     = 259,
+        LeafBranch     = 260,
+        LeafRemote     = 261,
+        LeafTag        = 262,
+        HeaderRemote   = 263
     };
 
-    explicit ReferenceTreeViewItem(ReferenceTreeViewItem* parent, ReferenceTreeViewItem::ItemType type, const QString& title, Git* git);
+    explicit ReferenceTreeViewItem(ReferenceTreeViewItem* parent,
+                                   ReferenceTreeViewItem::ItemType type, const QString& title,
+                                   Git* git);
     virtual ~ReferenceTreeViewItem();
 
     bool isHeaderItem() const;
@@ -61,13 +64,12 @@ public slots:
 
 private:
     ReferenceTreeViewItem::ItemType m_type;
-    bool                        m_isHeader;
+    bool                            m_isHeader;
     ReferenceTreeViewItem*          m_parent;
     QList<ReferenceTreeViewItem*>   m_children;
-    QMap<QString, QVariant>     m_itemData;
+    QMap<QString, QVariant>         m_itemData;
 
     Git* m_git; //!< @todo Workaround - need a better solution!
-
 };
 
 #endif // REFERENCETREEVIEWITEM_H

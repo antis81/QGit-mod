@@ -7,7 +7,9 @@
 #include "referencetreeviewitem.h"
 #include "git.h"
 
-ReferenceTreeViewItem::ReferenceTreeViewItem(ReferenceTreeViewItem* parent, ReferenceTreeViewItem::ItemType type, const QString& title, Git* git )
+ReferenceTreeViewItem::ReferenceTreeViewItem(ReferenceTreeViewItem* parent,
+                                             ReferenceTreeViewItem::ItemType type,
+                                             const QString& title, Git* git )
     : QObject(0),
       m_type(type),
       m_isHeader(false),
@@ -15,6 +17,7 @@ ReferenceTreeViewItem::ReferenceTreeViewItem(ReferenceTreeViewItem* parent, Refe
       m_git(git)
 {
     setTitle(title);
+
     if (parent != NULL) {
         parent->children().append(this);
     }
@@ -93,7 +96,6 @@ Check out the item.
 */
 void ReferenceTreeViewItem::checkout()
 {
-
     if ((m_type != LeafBranch) && (m_type != LeafTag)) {
         return;
     }

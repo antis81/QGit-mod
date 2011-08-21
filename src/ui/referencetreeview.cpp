@@ -1,5 +1,5 @@
 #include "referencetreeview.h"
 
-ReferenceTreeView::ReferenceTreeView(QWidget *parent) : QTreeView(parent)
+ReferenceTreeView::ReferenceTreeView(QWidget* parent) : QTreeView(parent)
 {
 }

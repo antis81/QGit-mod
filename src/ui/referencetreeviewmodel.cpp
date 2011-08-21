@@ -32,27 +32,25 @@ QVariant ReferenceTreeViewModel::data(const QModelIndex& index, int role) const
 
     ReferenceTreeViewItem* item = static_cast<ReferenceTreeViewItem*>(index.internalPointer());
 
-    switch(role)
-    {
+    switch(role) {
     case Qt::DisplayRole:
-        {
-            return item->data("title");
-        }
+        return item->data("title");
         break;
     case Qt::FontRole:
-        if (item->isHeaderItem())
-        {
+        if (item->isHeaderItem()) {
             QFont headFont;
             headFont.setBold(true);
             return headFont;
         }
+
         break;
     case Qt::ForegroundRole:
-        if ( (item->type() == ReferenceTreeViewItem::LeafBranch) && (item->title() == m_git->currentBranch()) )
-        {
+        if ( (item->type() == ReferenceTreeViewItem::LeafBranch)
+                && (item->title() == m_git->currentBranch()) ) {
             QBrush textColor(Qt::red);
             return textColor;
         }
+
         break;
     }
 
@@ -67,9 +65,11 @@ Qt::ItemFlags ReferenceTreeViewModel::flags(const QModelIndex& index) const
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-QVariant ReferenceTreeViewModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ReferenceTreeViewModel::headerData(int section, Qt::Orientation orientation,
+                                            int role) const
 {
     Q_UNUSED(section)
+
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
         return m_rootItem->data("title");
 
@@ -89,6 +89,7 @@ QModelIndex ReferenceTreeViewModel::index(int row, int column, const QModelIndex
         parentItem = static_cast<ReferenceTreeViewItem*>(parent.internalPointer());
 
     ReferenceTreeViewItem* childItem = parentItem->children().at(row);
+
     if (childItem)
         return createIndex(row, column, childItem);
     else
@@ -100,7 +101,8 @@ QModelIndex ReferenceTreeViewModel::parent(const QModelIndex& index) const
     if (!index.isValid())
         return QModelIndex();
 
-    ReferenceTreeViewItem* childItem = static_cast<ReferenceTreeViewItem*>(index.internalPointer());
+    ReferenceTreeViewItem* childItem;
+    childItem = static_cast<ReferenceTreeViewItem*>(index.internalPointer());
     ReferenceTreeViewItem* parentItem = childItem->parent();
 
     if (parentItem == m_rootItem)
@@ -152,66 +154,73 @@ void ReferenceTreeViewModel::setup(Git* git)
     m_git = git;
 
     // make header and add the top level items
-    ReferenceTreeViewItem* root = new ReferenceTreeViewItem(NULL, ReferenceTreeViewItem::HeaderBranches, "Repository", git);
+    ReferenceTreeViewItem* root;
+    root = new ReferenceTreeViewItem(NULL, ReferenceTreeViewItem::HeaderBranches,
+                                     "Repository", git);
 
-    ReferenceTreeViewItem* branchesItem = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderBranches, "Branches", git);
+    ReferenceTreeViewItem* branchesItem;
+    branchesItem = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderBranches,
+                                             "Branches", git);
     branchesItem->setIsHeaderItem(true);
     addNodes(branchesItem, git->getAllRefNames(Reference::BRANCH, !Git::optOnlyLoaded));
 
-    ReferenceTreeViewItem* remoteItems = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderTags, "Remotes", git);
+    ReferenceTreeViewItem* remoteItems;
+    remoteItems = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderTags,
+                                            "Remotes", git);
     remoteItems->setIsHeaderItem(true);
     addNodes(remoteItems, git->getAllRefNames(Reference::REMOTE_BRANCH, !Git::optOnlyLoaded));
 
-    ReferenceTreeViewItem* tagItems = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderTags, "Tags", git);
+    ReferenceTreeViewItem* tagItems;
+    tagItems = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderTags,
+                                         "Tags", git);
     tagItems->setIsHeaderItem(true);
     addNodes(tagItems, git->getAllRefNames(Reference::TAG, !Git::optOnlyLoaded));
 
     //! @todo Implement functionality for stashes and submodules
-    ReferenceTreeViewItem* stashesItem = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderBranches, "Stashes", git);
-    ReferenceTreeViewItem* subRepoItem = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderTags, "Submodules", git);
+    ReferenceTreeViewItem* stashesItem;
+    stashesItem = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderBranches,
+                                            "Stashes", git);
+
+    ReferenceTreeViewItem* subRepoItem;
+    subRepoItem= new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderTags,
+                                           "Submodules", git);
 
     setRootItem(root); // delete previous root and set new one
 }
 
 
 /**
-    Adds child nodes to the repository tree. The parent node must not be NULL. The root node is the repository node.
+    Adds child nodes to the repository tree. The parent node must not be NULL.
+    The root node is the repository node.
 */
-void ReferenceTreeViewModel::addNodes(ReferenceTreeViewItem* parent, const QStringList& titles, bool sorted)
+void ReferenceTreeViewModel::addNodes(ReferenceTreeViewItem* parent, const QStringList& titles,
+                                      bool sorted)
 {
     if (parent == NULL)
         return;
 
     QStringList list(titles);
+
     if (sorted) {
         list.sort();
     }
 
     ReferenceTreeViewItem* tempItemList = NULL;
 
-    foreach (const QString& it, list)
-    {
+    foreach (const QString& it, list) {
         ReferenceTreeViewItem::ItemType type;
-        switch (parent->type())
-        {
+        switch (parent->type()) {
         case ReferenceTreeViewItem::HeaderBranches:
             type = ReferenceTreeViewItem::LeafBranch;
-
             break;
-
         case ReferenceTreeViewItem::HeaderRemotes:
             type = ReferenceTreeViewItem::LeafRemote;
-
             break;
-
         case ReferenceTreeViewItem::HeaderTags:
             type = ReferenceTreeViewItem::LeafTag;
-
             break;
-
         default:
             type = ReferenceTreeViewItem::LeafBranch;
-
             break;
         }
 
