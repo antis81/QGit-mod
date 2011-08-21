@@ -4,26 +4,26 @@ Author: Nils Fenner (c) 2011
 Copyright: See COPYING file that comes with this distribution
 */
 
-#ifndef REFERENCEITEMDELEGATE_H
-#define REFERENCEITEMDELEGATE_H
+#ifndef REFERENCETREEVIEWITEMDELEGATE_H
+#define REFERENCETREEVIEWITEMDELEGATE_H
 
 #include <QItemDelegate>
 
-class ReferenceTreeItem;
+class ReferenceTreeViewItem;
 
 
-class ReferenceItemDelegate : public QItemDelegate
+class ReferenceTreeViewItemDelegate : public QItemDelegate
 {
     Q_OBJECT
 public:
-    explicit ReferenceItemDelegate(QObject* parent = 0);
+    explicit ReferenceTreeViewItemDelegate(QObject* parent = 0);
 
     void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const;
 
     bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index);
 
 private:
-    void menuForReferenceItem(ReferenceTreeItem* item, const QPoint& pos);
+    void menuForReferenceItem(ReferenceTreeViewItem* item, const QPoint& pos);
 };
 
-#endif // REFERENCEITEMDELEGATE_H
+#endif // REFERENCETREEVIEWITEMDELEGATE_H

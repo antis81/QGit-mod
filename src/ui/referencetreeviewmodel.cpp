@@ -4,33 +4,33 @@ Author: Nils Fenner (c) 2011
 Copyright: See COPYING file that comes with this distribution
 */
 
-#include "referencetreemodel.h"
+#include "referencetreeviewmodel.h"
 
 #include <QBrush>
 #include <QMenu>
 
-#include "referencetreeitem.h"
+#include "referencetreeviewitem.h"
 
 #include "git.h"
 
 
-ReferenceTreeModel::ReferenceTreeModel(QObject* parent)
+ReferenceTreeViewModel::ReferenceTreeViewModel(QObject* parent)
     : QAbstractItemModel(parent),
       m_git(NULL),
       m_rootItem(NULL)
 {
 }
 
-ReferenceTreeModel::~ReferenceTreeModel()
+ReferenceTreeViewModel::~ReferenceTreeViewModel()
 {
 }
 
-QVariant ReferenceTreeModel::data(const QModelIndex& index, int role) const
+QVariant ReferenceTreeViewModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return QVariant();
 
-    ReferenceTreeItem* item = static_cast<ReferenceTreeItem*>(index.internalPointer());
+    ReferenceTreeViewItem* item = static_cast<ReferenceTreeViewItem*>(index.internalPointer());
 
     switch(role)
     {
@@ -48,7 +48,7 @@ QVariant ReferenceTreeModel::data(const QModelIndex& index, int role) const
         }
         break;
     case Qt::ForegroundRole:
-        if ( (item->type() == ReferenceTreeItem::LeafBranch) && (item->title() == m_git->currentBranch()) )
+        if ( (item->type() == ReferenceTreeViewItem::LeafBranch) && (item->title() == m_git->currentBranch()) )
         {
             QBrush textColor(Qt::red);
             return textColor;
@@ -59,7 +59,7 @@ QVariant ReferenceTreeModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-Qt::ItemFlags ReferenceTreeModel::flags(const QModelIndex& index) const
+Qt::ItemFlags ReferenceTreeViewModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
         return 0;
@@ -67,7 +67,7 @@ Qt::ItemFlags ReferenceTreeModel::flags(const QModelIndex& index) const
     return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-QVariant ReferenceTreeModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant ReferenceTreeViewModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     Q_UNUSED(section)
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
@@ -76,32 +76,32 @@ QVariant ReferenceTreeModel::headerData(int section, Qt::Orientation orientation
     return QVariant();
 }
 
-QModelIndex ReferenceTreeModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex ReferenceTreeViewModel::index(int row, int column, const QModelIndex& parent) const
 {
     if (!hasIndex(row, column, parent))
         return QModelIndex();
 
-    ReferenceTreeItem* parentItem;
+    ReferenceTreeViewItem* parentItem;
 
     if (!parent.isValid())
         parentItem = m_rootItem;
     else
-        parentItem = static_cast<ReferenceTreeItem*>(parent.internalPointer());
+        parentItem = static_cast<ReferenceTreeViewItem*>(parent.internalPointer());
 
-    ReferenceTreeItem* childItem = parentItem->children().at(row);
+    ReferenceTreeViewItem* childItem = parentItem->children().at(row);
     if (childItem)
         return createIndex(row, column, childItem);
     else
         return QModelIndex();
 }
 
-QModelIndex ReferenceTreeModel::parent(const QModelIndex& index) const
+QModelIndex ReferenceTreeViewModel::parent(const QModelIndex& index) const
 {
     if (!index.isValid())
         return QModelIndex();
 
-    ReferenceTreeItem* childItem = static_cast<ReferenceTreeItem*>(index.internalPointer());
-    ReferenceTreeItem* parentItem = childItem->parent();
+    ReferenceTreeViewItem* childItem = static_cast<ReferenceTreeViewItem*>(index.internalPointer());
+    ReferenceTreeViewItem* parentItem = childItem->parent();
 
     if (parentItem == m_rootItem)
         return QModelIndex();
@@ -109,24 +109,24 @@ QModelIndex ReferenceTreeModel::parent(const QModelIndex& index) const
     return createIndex(parentItem->row(), 0, parentItem);
 }
 
-int ReferenceTreeModel::rowCount(const QModelIndex& parent) const
+int ReferenceTreeViewModel::rowCount(const QModelIndex& parent) const
 {
-    ReferenceTreeItem* parentItem;
+    ReferenceTreeViewItem* parentItem;
     if (parent.column() > 0)
         return 0;
 
     if (!parent.isValid())
         parentItem = m_rootItem;
     else
-        parentItem = static_cast<ReferenceTreeItem*>(parent.internalPointer());
+        parentItem = static_cast<ReferenceTreeViewItem*>(parent.internalPointer());
 
     return parentItem->children().count();
 }
 
-int ReferenceTreeModel::columnCount(const QModelIndex& parent) const
+int ReferenceTreeViewModel::columnCount(const QModelIndex& parent) const
 {
     if (parent.isValid())
-        return static_cast<ReferenceTreeItem*>(parent.internalPointer())->data().count();
+        return static_cast<ReferenceTreeViewItem*>(parent.internalPointer())->data().count();
     else
         return m_rootItem->data().count();
 }
@@ -136,7 +136,7 @@ int ReferenceTreeModel::columnCount(const QModelIndex& parent) const
 
     @return The previous root item or NULL, if no root item was set before.
 */
-void ReferenceTreeModel::setRootItem(ReferenceTreeItem *root)
+void ReferenceTreeViewModel::setRootItem(ReferenceTreeViewItem *root)
 {
     delete m_rootItem;
 
@@ -146,29 +146,29 @@ void ReferenceTreeModel::setRootItem(ReferenceTreeItem *root)
 /**
     Initializes the repository tree.
 */
-void ReferenceTreeModel::setup(Git* git)
+void ReferenceTreeViewModel::setup(Git* git)
 {
     // FIXME: Ugly code. Maybe a singleton would do here.
     m_git = git;
 
     // make header and add the top level items
-    ReferenceTreeItem* root = new ReferenceTreeItem(NULL, ReferenceTreeItem::HeaderBranches, "Repository", git);
+    ReferenceTreeViewItem* root = new ReferenceTreeViewItem(NULL, ReferenceTreeViewItem::HeaderBranches, "Repository", git);
 
-    ReferenceTreeItem* branchesItem = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderBranches, "Branches", git);
+    ReferenceTreeViewItem* branchesItem = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderBranches, "Branches", git);
     branchesItem->setIsHeaderItem(true);
     addNodes(branchesItem, git->getAllRefNames(Reference::BRANCH, !Git::optOnlyLoaded));
 
-    ReferenceTreeItem* remoteItems = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderTags, "Remotes", git);
+    ReferenceTreeViewItem* remoteItems = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderTags, "Remotes", git);
     remoteItems->setIsHeaderItem(true);
     addNodes(remoteItems, git->getAllRefNames(Reference::REMOTE_BRANCH, !Git::optOnlyLoaded));
 
-    ReferenceTreeItem* tagItems = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderTags, "Tags", git);
+    ReferenceTreeViewItem* tagItems = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderTags, "Tags", git);
     tagItems->setIsHeaderItem(true);
     addNodes(tagItems, git->getAllRefNames(Reference::TAG, !Git::optOnlyLoaded));
 
     //! @todo Implement functionality for stashes and submodules
-    ReferenceTreeItem* stashesItem = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderBranches, "Stashes", git);
-    ReferenceTreeItem* subRepoItem = new ReferenceTreeItem(root, ReferenceTreeItem::HeaderTags, "Submodules", git);
+    ReferenceTreeViewItem* stashesItem = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderBranches, "Stashes", git);
+    ReferenceTreeViewItem* subRepoItem = new ReferenceTreeViewItem(root, ReferenceTreeViewItem::HeaderTags, "Submodules", git);
 
     setRootItem(root); // delete previous root and set new one
 }
@@ -177,7 +177,7 @@ void ReferenceTreeModel::setup(Git* git)
 /**
     Adds child nodes to the repository tree. The parent node must not be NULL. The root node is the repository node.
 */
-void ReferenceTreeModel::addNodes(ReferenceTreeItem* parent, const QStringList& titles, bool sorted)
+void ReferenceTreeViewModel::addNodes(ReferenceTreeViewItem* parent, const QStringList& titles, bool sorted)
 {
     if (parent == NULL)
         return;
@@ -187,34 +187,34 @@ void ReferenceTreeModel::addNodes(ReferenceTreeItem* parent, const QStringList& 
         list.sort();
     }
 
-    ReferenceTreeItem* tempItemList = NULL;
+    ReferenceTreeViewItem* tempItemList = NULL;
 
     foreach (const QString& it, list)
     {
-        ReferenceTreeItem::ItemType type;
+        ReferenceTreeViewItem::ItemType type;
         switch (parent->type())
         {
-        case ReferenceTreeItem::HeaderBranches:
-            type = ReferenceTreeItem::LeafBranch;
+        case ReferenceTreeViewItem::HeaderBranches:
+            type = ReferenceTreeViewItem::LeafBranch;
 
             break;
 
-        case ReferenceTreeItem::HeaderRemotes:
-            type = ReferenceTreeItem::LeafRemote;
+        case ReferenceTreeViewItem::HeaderRemotes:
+            type = ReferenceTreeViewItem::LeafRemote;
 
             break;
 
-        case ReferenceTreeItem::HeaderTags:
-            type = ReferenceTreeItem::LeafTag;
+        case ReferenceTreeViewItem::HeaderTags:
+            type = ReferenceTreeViewItem::LeafTag;
 
             break;
 
         default:
-            type = ReferenceTreeItem::LeafBranch;
+            type = ReferenceTreeViewItem::LeafBranch;
 
             break;
         }
 
-        tempItemList = new ReferenceTreeItem(parent, type, it, m_git);
+        tempItemList = new ReferenceTreeViewItem(parent, type, it, m_git);
     }
 }

@@ -40,14 +40,14 @@
 #include "ui_revsview.h"
 #include "ui_fileview.h"
 #include "ui_patchview.h"
-#include "model/referencetreemodel.h"
-#include "referenceitemdelegate.h"
+#include "ui/referencetreeviewmodel.h"
+#include "ui/referencetreeviewitemdelegate.h"
 
 using namespace QGit;
 
 MainImpl::MainImpl(SCRef cd, QWidget *parent)
     : QMainWindow(parent),
-      m_repoModel(new ReferenceTreeModel())
+      m_repoModel(new ReferenceTreeViewModel())
 {
     EM_INIT(exExiting, "Exiting");
 
@@ -433,7 +433,7 @@ void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
                 //! @todo CLEANUP HERE WHEN WORKING STATE REACHED
                 m_repoModel->setup(git);
                 referenceTreeView->setModel(m_repoModel);
-                referenceTreeView->setItemDelegate(new ReferenceItemDelegate(git));
+                referenceTreeView->setItemDelegate(new ReferenceTreeViewItemDelegate(git));
             } else {
                 statusBar()->showMessage("Not a git archive");
             }

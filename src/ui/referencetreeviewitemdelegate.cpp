@@ -4,7 +4,7 @@ Author: Nils Fenner (c) 2011
 Copyright: See COPYING file that comes with this distribution
 */
 
-#include "referenceitemdelegate.h"
+#include "referencetreeviewitemdelegate.h"
 
 #include <QEvent>
 #include <QMouseEvent>
@@ -12,18 +12,18 @@ Copyright: See COPYING file that comes with this distribution
 #include <QTreeView>
 #include <QPaintEngine>
 
-#include "referencetreeitem.h"
+#include "referencetreeviewitem.h"
 
 
-ReferenceItemDelegate::ReferenceItemDelegate(QObject*parent)
+ReferenceTreeViewItemDelegate::ReferenceTreeViewItemDelegate(QObject*parent)
     : QItemDelegate(parent)
 {
 }
 
-bool ReferenceItemDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index)
+bool ReferenceTreeViewItemDelegate::editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option, const QModelIndex& index)
 {
     bool result = false;
-    ReferenceTreeItem* item = static_cast<ReferenceTreeItem*>(index.internalPointer());
+    ReferenceTreeViewItem* item = static_cast<ReferenceTreeViewItem*>(index.internalPointer());
 
     QMouseEvent* me = static_cast<QMouseEvent*>(event);
 
@@ -51,9 +51,9 @@ bool ReferenceItemDelegate::editorEvent(QEvent* event, QAbstractItemModel* model
 /**
 A reference item has requested a context menu.
 */
-void ReferenceItemDelegate::menuForReferenceItem(ReferenceTreeItem* item, const QPoint& pos)
+void ReferenceTreeViewItemDelegate::menuForReferenceItem(ReferenceTreeViewItem* item, const QPoint& pos)
 {
-    if (item->type() != ReferenceTreeItem::LeafBranch && item->type() != ReferenceTreeItem::LeafTag) {
+    if (item->type() != ReferenceTreeViewItem::LeafBranch && item->type() != ReferenceTreeViewItem::LeafTag) {
         return;
     }
 
@@ -68,7 +68,7 @@ void ReferenceItemDelegate::menuForReferenceItem(ReferenceTreeItem* item, const 
 /**
 Do custom painting here.
 */
-void ReferenceItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+void ReferenceTreeViewItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
     QItemDelegate::paint(painter, option, index);
 }

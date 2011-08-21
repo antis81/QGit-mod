@@ -4,13 +4,13 @@ Author: Nils Fenner (c) 2011
 Copyright: See COPYING file that comes with this distribution
 */
 
-#ifndef REPOMODEL_H
-#define REPOMODEL_H
+#ifndef REFERENCETREEVIEWMODEL_H
+#define REFERENCETREEVIEWMODEL_H
 
 #include <QAbstractItemModel>
 #include <QPoint>
 
-class ReferenceTreeItem;
+class ReferenceTreeViewItem;
 class Domain;
 class Git;
 
@@ -18,14 +18,14 @@ class Git;
 /**
     @brief Provides a tree model managing the main elements of a git repository structure like barnches, tags, submodules etc.
 */
-class ReferenceTreeModel : public QAbstractItemModel
+class ReferenceTreeViewModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    explicit ReferenceTreeModel(QObject* parent = 0);
-    virtual ~ReferenceTreeModel();
+    explicit ReferenceTreeViewModel(QObject* parent = 0);
+    virtual ~ReferenceTreeViewModel();
 
-    void setRootItem(ReferenceTreeItem* root);
+    void setRootItem(ReferenceTreeViewItem* root);
 
     QVariant data(const QModelIndex& index, int role) const;
     Qt::ItemFlags flags(const QModelIndex& index) const;
@@ -42,9 +42,9 @@ public:
 
 private:
     Git* m_git;
-    ReferenceTreeItem* m_rootItem;
+    ReferenceTreeViewItem* m_rootItem;
 
-    void addNodes(ReferenceTreeItem* parent, const QStringList& titles, bool sorted = true);
+    void addNodes(ReferenceTreeViewItem* parent, const QStringList& titles, bool sorted = true);
 };
 
-#endif // REPOMODEL_H
+#endif // REFERENCETREEVIEWMODEL_H

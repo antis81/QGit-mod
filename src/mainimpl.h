@@ -31,7 +31,7 @@ class Git;
 class FileHistory;
 class FileView;
 class RevsView;
-class ReferenceTreeModel;
+class ReferenceTreeViewModel;
 
 class MainImpl : public QMainWindow, public Ui_MainBase
 {
@@ -169,7 +169,7 @@ private:
 
     EM_DECLARE(exExiting);
 
-    ReferenceTreeModel* m_repoModel; //!< @todo For the beginning, use a single repo. Multiple repos should be supported.
+    ReferenceTreeViewModel* m_repoModel; //!< @todo For the beginning, use a single repo. Multiple repos should be supported.
 
     Git* git;
     RevsView* rv;
