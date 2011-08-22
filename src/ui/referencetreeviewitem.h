@@ -68,7 +68,7 @@ public:
 private:
     ReferenceTreeViewItem*        m_parent;
     QList<ReferenceTreeViewItem*> m_children;
-    ItemType                      m_type;
+    ReferenceTreeViewItem::ItemType                      m_type;
 //    bool                          m_isHeader; // m_type give this info
 //    QMap<QString, QVariant>       m_itemData; // QVariant - bad solution. try to avoid it.
     QString                       m_name;

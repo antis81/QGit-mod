@@ -4,13 +4,10 @@ Author: Nils Fenner (c) 2011
 Copyright: See COPYING file that comes with this distribution
 */
 
-#include "referencetreeviewmodel.h"
-
 #include <QBrush>
 #include <QMenu>
-
+#include "referencetreeviewmodel.h"
 #include "referencetreeviewitem.h"
-
 #include "git.h"
 
 
@@ -153,6 +150,21 @@ void ReferenceTreeViewModel::setRootItem(ReferenceTreeViewItem *root)
 */
 void ReferenceTreeViewModel::setup(Git* git)
 {
+    m_git = git;
+
+    ReferenceTreeViewItem* root;
+    root = new ReferenceTreeViewItem(NULL, ReferenceTreeViewItem::HeaderBranches,
+                                     "Repository");
+    m_rootItem = root;
+
+//    addNode(ReferenceTreeViewItem::HeaderBranches);
+
+    addNode(ReferenceTreeViewItem::HeaderBranches, Reference::BRANCH);
+    addNode(ReferenceTreeViewItem::HeaderRemotes, Reference::REMOTE_BRANCH);
+    //addRemotesNodes();
+    addNode(ReferenceTreeViewItem::HeaderTags, Reference::TAG);
+
+    /*
     // FIXME: Ugly code. Maybe a singleton would do here.
     m_git = git;
 
@@ -223,8 +235,105 @@ void ReferenceTreeViewModel::setup(Git* git)
                                            "Submodules");
 
     setRootItem(root); // delete previous root and set new one
+    */
 }
 
+
+void ReferenceTreeViewModel::addNode(ReferenceTreeViewItem::ItemType headerType, Reference::Type type)
+{
+    QStringList tempList = m_git->getAllRefNames(type, !Git::optOnlyLoaded);
+
+    ReferenceTreeViewItem *headerNode;
+
+    switch (headerType) {
+    case (ReferenceTreeViewItem::HeaderBranches):
+        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, tr("Branches"));
+        break;
+    case (ReferenceTreeViewItem::HeaderRemotes):
+        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, "Remotes");
+        break;
+    case (ReferenceTreeViewItem::HeaderTags):
+        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, "Tags");
+        break;
+    default:
+        break;
+    }
+
+    tempList.sort();
+
+//    QFont font = node->font(0);
+//    font.setBold(true);
+//    node->setFont(0, font);
+//    addTopLevelItem(node);
+
+    ReferenceTreeViewItem *tempItemList;
+
+    if (headerType == ReferenceTreeViewItem::HeaderRemotes) {
+ //       QStringList tempList = git->getAllRefNames(Reference::REMOTE_BRANCH, !Git::optOnlyLoaded);
+ //       tempList.sort();
+
+ //       ReferenceTreeViewItem *tempItemList;
+//        ReferenceTreeViewItem* headerNode = headerNode;
+
+        QString lastRemoteName;
+        QString remoteName;
+        ReferenceTreeViewItem* parentNode = headerNode;
+        QString text;
+
+        // заполняем дерево потомками
+        FOREACH_SL (it, tempList) {
+            const QString& branchName = *it;
+            int i = branchName.indexOf("/");
+            if (i > 0) {
+                remoteName = branchName.left(i);
+                text = branchName.mid(i + 1);
+                if (remoteName.compare(lastRemoteName) != 0) {
+                    parentNode = new ReferenceTreeViewItem(headerNode, ReferenceTreeViewItem::HeaderRemote, remoteName);
+    //                addNodes(headerNode, remoteName);
+                    lastRemoteName = remoteName;
+                }
+            } else {
+                parentNode = headerNode;
+                text = branchName;
+                lastRemoteName = "";
+            }
+            tempItemList = new ReferenceTreeViewItem(parentNode, ReferenceTreeViewItem::LeafRemote, text);
+        }
+    }
+
+
+    FOREACH_SL (it, tempList) {
+        //bool isCurrent = (m_git->currentBranch().compare(*it) == 0);
+        switch (headerType) {
+        case (ReferenceTreeViewItem::HeaderBranches):
+            tempItemList = new ReferenceTreeViewItem(headerNode, ReferenceTreeViewItem::LeafBranch, QString(*it));
+//            if (isCurrent) {
+//                QFont font = tempItemList->font(0);
+//                font.setBold(true);
+//                tempItemList->setFont(0, font);
+//                tempItemList->setForeground(0, Qt::red);
+//            }
+//            tempItemList->setIcon(0, branchIcon);
+//            if (*it == "master") {
+//                tempItemList->setIcon(0, masterBranchIcon);
+//            }
+            break;
+        case (ReferenceTreeViewItem::HeaderRemotes):
+//            tempItemList = new ReferenceTreeViewItem(headerNode, ReferenceTreeViewItem::LeafRemote, QString(*it));
+            //tempItemList->setIcon(0, branchIcon);
+            break;
+        case (ReferenceTreeViewItem::HeaderTags):
+            tempItemList = new ReferenceTreeViewItem(headerNode, ReferenceTreeViewItem::LeafTag, QString(*it));
+                    //new BranchesTreeItem(node, QStringList(QString(*it)), LeafTag);
+            //tempItemList->setIcon(0, tagIcon);
+            break;
+        default:
+            break;
+        }
+        //tempItemList->setBranch(QString(*it));
+    }
+/**/
+}
 
 /**
     Adds child nodes to the repository tree. The parent node must not be NULL.

@@ -10,7 +10,10 @@ Copyright: See COPYING file that comes with this distribution
 #include <QAbstractItemModel>
 #include <QPoint>
 
-class ReferenceTreeViewItem;
+#include "referencetreeviewitem.h"
+#include "model/reference.h" //! \todo remove this dependence
+
+//class ReferenceTreeViewItem;
 class Domain;
 class Git;
 
@@ -46,6 +49,7 @@ private:
     ReferenceTreeViewItem* m_rootItem;
 
     void addNodes(ReferenceTreeViewItem* parent, const QStringList& titles, bool sorted = true);
+    void addNode(ReferenceTreeViewItem::ItemType headerType, Reference::Type type);;
 };
 
 #endif // REFERENCETREEVIEWMODEL_H
