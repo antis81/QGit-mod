@@ -17,7 +17,7 @@ class Git;
     @brief Represents a repository reference tree item.
 */
 
-class ReferenceTreeViewItem : public QObject
+class ReferenceTreeViewItem
 {
 public:
     enum ItemType
@@ -53,7 +53,7 @@ public:
 private:
     ReferenceTreeViewItem*        m_parent;
     QList<ReferenceTreeViewItem*> m_children;
-    ReferenceTreeViewItem::ItemType                      m_type;
+    ItemType                      m_type;
     QString                       m_name;
     QString                       m_text;
 };

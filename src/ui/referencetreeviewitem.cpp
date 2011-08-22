@@ -10,8 +10,7 @@
 ReferenceTreeViewItem::ReferenceTreeViewItem(ReferenceTreeViewItem* parent,
                                              ReferenceTreeViewItem::ItemType type,
                                              const QString& name)//, Git* git )
-    : QObject(0),
-      m_type(type),
+    : m_type(type),
       m_name(name),
       m_parent(parent)
 {
