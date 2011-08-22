@@ -30,7 +30,7 @@ public:
     explicit ReferenceTreeViewModel(QObject* parent = 0);
     virtual ~ReferenceTreeViewModel();
 
-    void setRootItem(ReferenceTreeViewItem* root);
+    void setRootItem(ReferenceTreeViewItem* root); // unused
 
     QVariant data(const QModelIndex& index, int role) const;
     Qt::ItemFlags flags(const QModelIndex& index) const;
@@ -48,7 +48,6 @@ private:
     Git* m_git;
     ReferenceTreeViewItem* m_rootItem;
 
-    void addNodes(ReferenceTreeViewItem* parent, const QStringList& titles, bool sorted = true);
     void addNode(ReferenceTreeViewItem::ItemType headerType, Reference::Type type);;
 };
 

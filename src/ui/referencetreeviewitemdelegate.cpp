@@ -32,7 +32,8 @@ bool ReferenceTreeViewItemDelegate::editorEvent(QEvent* event, QAbstractItemMode
     switch (event->type()) {
     case QEvent::MouseButtonDblClick:
             // show the branch in the revisions view
-            //item->showRevision();
+            // item->showRevision();
+        //! \todo off because this slot is disabled
             result = true;
         break;
     case QEvent::MouseButtonPress:

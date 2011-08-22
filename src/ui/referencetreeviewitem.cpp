@@ -13,12 +13,8 @@ ReferenceTreeViewItem::ReferenceTreeViewItem(ReferenceTreeViewItem* parent,
     : QObject(0),
       m_type(type),
       m_name(name),
-//      m_isHeader(false),
       m_parent(parent)
-//      m_git(git)
 {
-//    setTitle(title);
-
     if (parent != NULL) {
         parent->children().append(this);
     }
@@ -34,35 +30,10 @@ ReferenceTreeViewItem* ReferenceTreeViewItem::parent()
     return m_parent;
 }
 
-//const QList<ReferenceTreeViewItem*> & ReferenceTreeViewItem::children() const
-//{
-//    return m_children;
-//}
-
-//const QMap<QString, QVariant>& ReferenceTreeViewItem::data() const
-//{
-//    return m_itemData;
-//}
-
-//QVariant ReferenceTreeViewItem::data(const QString& id) const
-//{
-//    return m_itemData.value(id, QVariant());
-//}
-
 int ReferenceTreeViewItem::row() const
 {
     return m_parent ? m_parent->children().indexOf(const_cast<ReferenceTreeViewItem*>(this)) : 0;
 }
-
-//QString ReferenceTreeViewItem::title() const
-//{
-//    return m_itemData.value("title", QVariant()).toString();
-//}
-
-//void ReferenceTreeViewItem::setTitle(const QString& value)
-//{
-//    m_itemData.insert("title", value);
-//}
 
 ReferenceTreeViewItem::ItemType ReferenceTreeViewItem::type() const
 {
@@ -98,14 +69,6 @@ bool ReferenceTreeViewItem::isHeaderItem() const
     else
         return false;
 }
-
-/**
-@see isHeaderItem
-*/
-//void ReferenceTreeViewItem::setIsHeaderItem(bool yes)
-//{
-//    m_isHeader = yes;
-//}
 
 /**
 Check out the item.
