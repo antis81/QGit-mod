@@ -12,9 +12,7 @@ Copyright: See COPYING file that comes with this distribution
 
 
 ReferenceTreeViewModel::ReferenceTreeViewModel(QObject* parent)
-    : QAbstractItemModel(parent),
-      m_git(NULL),
-      m_rootItem(NULL)
+    : QAbstractItemModel(parent), m_git(NULL), m_rootItem(NULL)
 {
 }
 
@@ -31,7 +29,7 @@ QVariant ReferenceTreeViewModel::data(const QModelIndex& index, int role) const
 
     switch(role) {
     case Qt::DisplayRole:
-        return item->name();// must be text() //->data("title");
+        return item->text();// must be text() //->data("title");
         break;
     case Qt::FontRole:
         if (item->isHeaderItem()) {
@@ -67,7 +65,7 @@ QVariant ReferenceTreeViewModel::headerData(int section, Qt::Orientation orienta
 
     if ((orientation == Qt::Horizontal)
             && (role == Qt::DisplayRole))
-        return m_rootItem->name(); // must be text()
+        return m_rootItem->text();
 
     return QVariant();
 }
@@ -148,7 +146,7 @@ void ReferenceTreeViewModel::setup(Git* git)
 
     ReferenceTreeViewItem* root;
     root = new ReferenceTreeViewItem(NULL, ReferenceTreeViewItem::HeaderBranches,
-                                     "Repository");
+                                     "References", "References");
     m_rootItem = root;
 
     addNode(ReferenceTreeViewItem::HeaderBranches, Reference::BRANCH);
@@ -165,13 +163,13 @@ void ReferenceTreeViewModel::addNode(ReferenceTreeViewItem::ItemType headerType,
 
     switch (headerType) {
     case (ReferenceTreeViewItem::HeaderBranches):
-        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, tr("Branches"));
+        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, "Branches", "Branches");
         break;
     case (ReferenceTreeViewItem::HeaderRemotes):
-        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, "Remotes");
+        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, "Remotes", "Remotes");
         break;
     case (ReferenceTreeViewItem::HeaderTags):
-        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, "Tags");
+        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, "Tags", "Tags");
         break;
     default:
         break;
@@ -206,7 +204,7 @@ void ReferenceTreeViewModel::addNode(ReferenceTreeViewItem::ItemType headerType,
                 remoteName = branchName.left(i);
                 text = branchName.mid(i + 1);
                 if (remoteName.compare(lastRemoteName) != 0) {
-                    parentNode = new ReferenceTreeViewItem(headerNode, ReferenceTreeViewItem::HeaderRemote, remoteName);
+                    parentNode = new ReferenceTreeViewItem(headerNode, ReferenceTreeViewItem::HeaderRemote, remoteName, remoteName);
     //                addNodes(headerNode, remoteName);
                     lastRemoteName = remoteName;
                 }
@@ -215,7 +213,7 @@ void ReferenceTreeViewModel::addNode(ReferenceTreeViewItem::ItemType headerType,
                 text = branchName;
                 lastRemoteName = "";
             }
-            tempItemList = new ReferenceTreeViewItem(parentNode, ReferenceTreeViewItem::LeafRemote, text);
+            tempItemList = new ReferenceTreeViewItem(parentNode, ReferenceTreeViewItem::LeafRemote, text, branchName);
         }
     }
 
@@ -224,7 +222,7 @@ void ReferenceTreeViewModel::addNode(ReferenceTreeViewItem::ItemType headerType,
         //bool isCurrent = (m_git->currentBranch().compare(*it) == 0);
         switch (headerType) {
         case (ReferenceTreeViewItem::HeaderBranches):
-            tempItemList = new ReferenceTreeViewItem(headerNode, ReferenceTreeViewItem::LeafBranch, QString(*it));
+            tempItemList = new ReferenceTreeViewItem(headerNode, ReferenceTreeViewItem::LeafBranch, QString(*it), QString(*it));
 //            if (isCurrent) {
 //                QFont font = tempItemList->font(0);
 //                font.setBold(true);
@@ -241,7 +239,7 @@ void ReferenceTreeViewModel::addNode(ReferenceTreeViewItem::ItemType headerType,
             //tempItemList->setIcon(0, branchIcon);
             break;
         case (ReferenceTreeViewItem::HeaderTags):
-            tempItemList = new ReferenceTreeViewItem(headerNode, ReferenceTreeViewItem::LeafTag, QString(*it));
+            tempItemList = new ReferenceTreeViewItem(headerNode, ReferenceTreeViewItem::LeafTag, QString(*it), QString(*it));
                     //new BranchesTreeItem(node, QStringList(QString(*it)), LeafTag);
             //tempItemList->setIcon(0, tagIcon);
             break;

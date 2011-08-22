@@ -5,14 +5,11 @@
 */
 
 #include "referencetreeviewitem.h"
-#include "git.h"
 
 ReferenceTreeViewItem::ReferenceTreeViewItem(ReferenceTreeViewItem* parent,
                                              ReferenceTreeViewItem::ItemType type,
-                                             const QString& name)//, Git* git )
-    : m_type(type),
-      m_name(name),
-      m_parent(parent)
+                                             const QString& text, const QString& name)
+    : m_type(type), m_text(text), m_name(name), m_parent(parent)
 {
     if (parent != NULL) {
         parent->children().append(this);
@@ -69,9 +66,9 @@ bool ReferenceTreeViewItem::isHeaderItem() const
         return false;
 }
 
-/**
-Check out the item.
-*/
+//*
+//Check out the item.
+
 //void ReferenceTreeViewItem::checkout()
 //{
 //    if ((m_type != LeafBranch) && (m_type != LeafTag)) {

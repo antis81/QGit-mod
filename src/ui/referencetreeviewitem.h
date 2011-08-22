@@ -32,7 +32,8 @@ public:
     };
 
     explicit ReferenceTreeViewItem(ReferenceTreeViewItem* parent,
-                                   ReferenceTreeViewItem::ItemType type, const QString& name);
+                                   ReferenceTreeViewItem::ItemType type, const QString& text,
+                                   const QString& name);
     virtual ~ReferenceTreeViewItem();
 
     bool isHeaderItem() const;

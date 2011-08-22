@@ -63,10 +63,10 @@ void ReferenceTreeViewItemDelegate::menuForReferenceItem(ReferenceTreeViewItem* 
 
     QMenu*  m = new QMenu();
 
-    m->addAction("Checkout", item, SLOT(checkout()));
-    m->addAction(tr("Delete"), item, SLOT(removeReference()));
+//    m->addAction("Checkout", item, SLOT(checkout()));
+//    m->addAction(tr("Delete"), item, SLOT(removeReference()));
 
-    m->popup(QCursor::pos());
+//    m->popup(QCursor::pos());
 }
 
 /**
