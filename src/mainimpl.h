@@ -16,6 +16,8 @@
 
 #include "externaldiffproc.h"
 
+#include "ui/referencetreeviewdelegate.h"
+
 class QAction;
 class QCloseEvent;
 class QComboBox;
@@ -31,7 +33,7 @@ class Git;
 class FileHistory;
 class FileView;
 class RevsView;
-class ReferenceTreeModel;
+class ReferenceTreeViewModel;
 
 class MainImpl : public QMainWindow, public Ui_MainBase
 {
@@ -58,8 +60,13 @@ public:
 
     QComboBox *cmbSearch;
 
-    void changeBranch(QString branchName);
+
+    ReferenceTreeViewDelegate* referenceTreeViewDelegate;
+
     void checkout(const QString& branchName);
+
+public slots:
+    void changeBranch(QString branchName);
 
 signals:
     void highlightPatch(const QString&, bool);
@@ -169,7 +176,7 @@ private:
 
     EM_DECLARE(exExiting);
 
-    ReferenceTreeModel *     m_repoModel; //!< @todo For the beginning, use a single repo. Multiple repos should be supported.
+    ReferenceTreeViewModel* m_repoModel; //!< @todo For the beginning, use a single repo. Multiple repos should be supported.
 
     Git* git;
     RevsView* rv;

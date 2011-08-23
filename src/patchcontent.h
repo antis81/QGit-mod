@@ -42,6 +42,7 @@ public:
         ROW_ADDED,
         ROW_REMOVED,
         ROW_CONTEXT,
+        ROW_DIFF_COMBINED,
         ROW_OTHER
     };
 
@@ -110,6 +111,7 @@ private:
     void updateMatchesHighlight();
 
     QWidget *lineNumberArea;
+    int lineNumberColumnCount;
 
 private slots:
     void onTextChanged();

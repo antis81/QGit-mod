@@ -3,6 +3,7 @@
 
 #include <QLatin1String>
 
+//! SHA of the reference
 class ShaString : public QLatin1String
 {
 public:
@@ -15,6 +16,11 @@ public:
     inline bool operator==(const ShaString& o) const
     {
         return (latin1() == o.latin1()) || !qstrcmp(latin1(), o.latin1());
+    }
+
+    inline bool isNull() const
+    {
+        return *this == ShaString();
     }
 };
 

@@ -158,7 +158,9 @@ void PatchContent::typeWriterFontChanged() {
     setPlainText(toPlainText());
 }
 
-void PatchContent::processData(const QByteArray& fileChunk, int* prevLineNum) {
+void PatchContent::processData(const QByteArray& fileChunk, int* prevLineNum)
+{
+    Q_UNUSED( prevLineNum );
 
     QString newLines;
     if (!QGit::stripPartialParaghraps(fileChunk, &newLines, &halfLine))
@@ -169,10 +171,18 @@ void PatchContent::processData(const QByteArray& fileChunk, int* prevLineNum) {
     setUpdatesEnabled(false);
     long* lastStartNumbers = NULL;
     int partCount = 0;
+    lineNumberColumnCount = 0;
+    bool partHeaderDetected = false;
+
     FOREACH_SL (row, sl) {
         const QString& r = *row;
         RowType rowType = getRowType(r);
+
+        if (rowType == ROW_FILE_HEADER) {
+            partHeaderDetected = false;
+        }
         if (rowType == ROW_PART_HEADER) {
+            partHeaderDetected = true;
             partCount = 0;
             QString header(*row);
 
@@ -187,6 +197,8 @@ void PatchContent::processData(const QByteArray& fileChunk, int* prevLineNum) {
                     delete[] lastStartNumbers;
                 }
                 partCount = parts.length();
+                if (partCount > lineNumberColumnCount) lineNumberColumnCount = partCount;
+
                 lastStartNumbers = new long[partCount];
                 for(int part = 0; part < partCount; part++) {
                     QStringList partData(parts[part].split(','));
@@ -205,27 +217,63 @@ void PatchContent::processData(const QByteArray& fileChunk, int* prevLineNum) {
 
         PatchTextBlockUserData* ud = new PatchTextBlockUserData();
         ud->rowType = rowType;
-        if (lastStartNumbers) {
-            if (rowType == ROW_REMOVED || rowType == ROW_ADDED || rowType == ROW_CONTEXT) {
-                long* rowNumbers = new long[partCount];
-                for(int part = 0; part < partCount; part++) {
+        if (partHeaderDetected && rowType != ROW_PART_HEADER) {
+            QString text(*row);
+            long* rowNumbers = new long[partCount];
+            int* mask = new int[partCount];
+            int maskElement = 0;
+
+            rowType = ROW_CONTEXT;
+            int maskSum = 0;
+            int part;
+            for (part = 0; part < partCount-1 && part < text.length(); part++) {
+                QChar c = text.at(part);
+                if (c == '+') {
+                    maskElement = 1;
+                } else if (c == '-') {
+                    maskElement = -1;
+                } else {
+                    maskElement = 0;
+                }
+                maskSum += maskElement;
+                mask[part] = maskElement;
+            }
+
+            if (maskSum > 0) {
+                for (part = 0; part < partCount-1; part++) {
+                    if (mask[part] == 0) {
+                        rowNumbers[part] = lastStartNumbers[part];
+                        lastStartNumbers[part]++;
+                    } else {
+                        rowNumbers[part] = -1;
+                    }
+                }
+                rowNumbers[part] = lastStartNumbers[part];
+                lastStartNumbers[part]++;
+                rowType = ROW_ADDED;
+            } else if (maskSum < 0) {
+                for (part = 0; part < partCount-1; part++) {
+                    if (mask[part] < 0) {
+                        rowNumbers[part] = lastStartNumbers[part];
+                        lastStartNumbers[part]++;
+                    } else {
+                        rowNumbers[part] = -1;
+                    }
+                }
+                rowNumbers[part] = -1;
+                rowType = ROW_REMOVED;
+            } else {
+                rowType = ROW_CONTEXT;
+                for (part = 0; part < partCount; part++) {
                     rowNumbers[part] = lastStartNumbers[part];
-                }
-                ud->rowNumbers = rowNumbers;
-                ud->partCount = partCount;
-                if (rowType == ROW_REMOVED) {
-                    ud->rowNumbers[1] = -1;
-                }
-                if (rowType == ROW_ADDED) {
-                    ud->rowNumbers[0] = -1;
+                    lastStartNumbers[part]++;
                 }
             }
-            if (rowType == ROW_REMOVED || rowType == ROW_CONTEXT) {
-                lastStartNumbers[0]++;
-            }
-            if (rowType == ROW_ADDED || rowType == ROW_CONTEXT) {
-                lastStartNumbers[1]++;
-            }
+            delete mask;
+
+            ud->rowType = rowType;
+            ud->rowNumbers = rowNumbers;
+            ud->partCount = partCount;
         }
 
         block.setUserData(ud);
@@ -235,8 +283,8 @@ void PatchContent::processData(const QByteArray& fileChunk, int* prevLineNum) {
         delete[] lastStartNumbers;
     }
 
-    QScrollBar* vsb = verticalScrollBar();
-    vsb->setValue(vsb->value() + cursorRect().top());
+//    QScrollBar* vsb = verticalScrollBar();
+//    vsb->setValue(vsb->value() + cursorRect().top());
     setUpdatesEnabled(true);
 }
 
@@ -329,7 +377,7 @@ PatchContent::RowType PatchContent::getRowType(const QString& row) {
             }
 
             if (row.startsWith("diff --combined")) {
-                return ROW_OTHER;
+                return ROW_DIFF_COMBINED;
             }
             break;
         case ' ':
@@ -353,6 +401,7 @@ void PatchContent::formatRow(QTextCursor tc) {
 }
 
 void PatchContent::formatBlock(QTextCursor& cursor, QTextBlock& block, PatchContent::RowType rowType) {
+    Q_UNUSED( block );
     // TODO: make configurable color constants
     // TODO: make colormap { type => color and others font styles}
     QColor lr(255, 220, 220);
@@ -377,10 +426,11 @@ void PatchContent::formatBlock(QTextCursor& cursor, QTextBlock& block, PatchCont
         blockFormat.setBackground(lr);
         break;
     case ROW_FILE_HEADER:
+    case ROW_DIFF_COMBINED:
         charFormat.setForeground(Qt::white);
         blockFormat.setBackground(QGit::DARK_ORANGE);
         break;
-    case ROW_OTHER:        
+    case ROW_OTHER:
         break;
     case ROW_CONTEXT:
         charFormat.setForeground(Qt::blue);
@@ -399,8 +449,8 @@ void PatchContent::formatBlock(QTextCursor& cursor, QTextBlock& block, PatchCont
 int PatchContent::lineNumberAreaWidth()
 {
 
-    int digits = 9;
-    int space = 3 + fontMetrics().width(QLatin1Char('9')) * digits + 3;
+    int digits = 4;
+    int space = 3 + (fontMetrics().width(QLatin1Char('9')) * digits + 3) * lineNumberColumnCount;
 
     return space;
 }
@@ -477,10 +527,13 @@ void PatchContent::lineNumberAreaPaintEvent(QPaintEvent *event)
     int bottom = top + (int) blockBoundingRect(block).height();
     int width = lineNumberArea->width();
 
-    painter.setPen(backColorLight);
-    painter.drawLine(width/2, event->rect().top(), width/2, event->rect().bottom());
-    painter.setPen(backColorDark);
-    painter.drawLine(width/2+1, event->rect().top(), width/2+1, event->rect().bottom());
+    for (int c = 1; c < lineNumberColumnCount; c++) {
+        int x = c * width / lineNumberColumnCount;
+        painter.setPen(backColorLight);
+        painter.drawLine(x, event->rect().top(), x, event->rect().bottom());
+        painter.setPen(backColorDark);
+        painter.drawLine(x + 1, event->rect().top(), x + 1, event->rect().bottom());
+    }
 
 
     while (block.isValid() && top <= event->rect().bottom()) {
@@ -488,20 +541,15 @@ void PatchContent::lineNumberAreaPaintEvent(QPaintEvent *event)
 
             PatchTextBlockUserData* ud = static_cast<PatchTextBlockUserData*>(block.userData());
             if (ud && ud->partCount > 0 && ud->rowNumbers) {
-                QString number;
-                if (ud->rowNumbers[0] >= 0) {
-                    number = QString::number(ud->rowNumbers[0]);
+                for (int c = 0; c < ud->partCount; c++) {
+                    QString number;
+                    if (ud->rowNumbers[c] >= 0) {
+                        number = QString::number(ud->rowNumbers[c]);
 
-                    painter.setPen(QGit::LINE_NUMBERS_FOREGROUND);
-                    painter.drawText(0, top, lineNumberArea->width()/2 - 3, fontMetrics().height(),
-                                    Qt::AlignRight, number);
-                }
-                if (ud->rowNumbers[1] >= 0) {
-                    number = QString::number(ud->rowNumbers[1]);
-
-                    painter.setPen(QGit::LINE_NUMBERS_FOREGROUND);
-                    painter.drawText(0, top, lineNumberArea->width() - 3, fontMetrics().height(),
-                                     Qt::AlignRight, number);
+                        painter.setPen(QGit::LINE_NUMBERS_FOREGROUND);
+                        painter.drawText(0, top, (c + 1) * lineNumberArea->width() / lineNumberColumnCount - 3, fontMetrics().height(),
+                                        Qt::AlignRight, number);
+                    }
                 }
             }
         }

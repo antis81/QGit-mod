@@ -20,7 +20,6 @@
 #include "revsview.h"
 
 RevsView::RevsView(MainImpl* mi, Git* g, bool isMain) : Domain(mi, g, isMain) {
-
     revTab = new Ui_TabRev();
     revTab->setupUi(container);
 
@@ -190,7 +189,7 @@ bool RevsView::doUpdate(bool force) {
 
             updateLineEditSHA();
             on_updateRevDesc();
-            showStatusBarMessage(git->getRevInfo(st.sha()));
+            showStatusBarMessage(git->getRevInfo(QGit::toTempSha(st.sha())));
         }
         const RevFile* files = NULL;
         bool newFiles = false;

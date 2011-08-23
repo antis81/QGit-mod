@@ -347,7 +347,7 @@ bool ListViewDelegate::changedFiles(SCRef sha) const {
 
 QPixmap* ListViewDelegate::getTagMarks(SCRef sha, const QStyleOptionViewItem& opt) const {
 
-    uint rt = git->shaMap.checkRef(sha);
+    uint rt = git->m_references.containsType(toTempSha(sha));
     if (rt == 0)
         return NULL; // common case
 
@@ -370,10 +370,10 @@ QPixmap* ListViewDelegate::getTagMarks(SCRef sha, const QStyleOptionViewItem& op
 
 void ListViewDelegate::addRefPixmap(QPixmap** pp, SCRef sha, int type, QStyleOptionViewItem opt) const {
 
-    SCList refs = git->shaMap.getRefName(sha, (Reference::Type)type);
-    FOREACH_SL (it, refs) {
-
-        bool isCur = git->currentBranch().compare(*it) == 0;
+    ReferenceList refs = git->m_references.filter(toTempSha(sha), type);
+    FOREACH(ReferenceList, it, refs) {
+        const Reference* ref = *it;
+        bool isCur = ref->type() & Reference::CUR_BRANCH;;
         opt.font.setBold(isCur);
 
         QColor clr;
@@ -390,7 +390,7 @@ void ListViewDelegate::addRefPixmap(QPixmap** pp, SCRef sha, int type, QStyleOpt
             clr = PURPLE;
 
         opt.palette.setColor(QPalette::Window, clr);
-        addTextPixmap(pp, *it, opt);
+        addTextPixmap(pp, ref->name(), opt);
     }
 }
 

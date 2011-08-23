@@ -198,7 +198,7 @@ QTreeView
      <x>0</x>
      <y>0</y>
      <width>905</width>
-     <height>22</height>
+     <height>25</height>
     </rect>
    </property>
    <widget class="QMenu" name="Help">
@@ -579,7 +579,7 @@ QTreeView
     <string>Filter by tree selection, multple selection allowed</string>
    </property>
    <property name="shortcut">
-    <string>F</string>
+    <string>Ctrl+F</string>
    </property>
   </action>
   <action name="ActShowTree">
@@ -603,7 +603,7 @@ QTreeView
     <string>Toggle tree view (T)</string>
    </property>
    <property name="shortcut">
-    <string>T</string>
+    <string>Ctrl+T</string>
    </property>
   </action>
   <action name="ActTagDelete">
@@ -680,7 +680,7 @@ QTreeView
     <string>Hide/unhide secondary pane</string>
    </property>
    <property name="shortcut">
-    <string>S</string>
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="ActFind">
@@ -837,7 +837,7 @@ QTreeView
     <string>Show revision description header info</string>
    </property>
    <property name="shortcut">
-    <string>H</string>
+    <string>Ctrl+H</string>
    </property>
   </action>
   <action name="ActRangeDlg">

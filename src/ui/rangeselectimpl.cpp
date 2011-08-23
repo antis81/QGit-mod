@@ -35,8 +35,8 @@ RangeSelectImpl::RangeSelectImpl(QWidget* par, QString* r, bool repoChanged, Git
     // as default select first tag that is not also the current HEAD
     int defIdx = orl.count() - tmp.count();
     if (!tmp.empty()) {
-        SCRef tagSha(git->getRefSha(tmp.first(), Reference::TAG, false));
-        if (!tagSha.isEmpty() && git->shaMap.checkRef(tagSha, Reference::CUR_BRANCH))
+        SCRef tagSha(git->m_references.getRefSha(tmp.first(), Reference::TAG, false));
+        if (!tagSha.isEmpty() && git->m_references.containsType(toTempSha(tagSha), Reference::CUR_BRANCH))
             // in this case set as default tag the next one if any
             defIdx += (tmp.count() > 1 ? 1 : -1);
     }

@@ -224,7 +224,7 @@ bool CommitImpl::checkPatchName(QString& patchName)
         QMessageBox::warning(this, "Create new patch - QGit", "Sorry, control "
                              "characters or spaces\n are not allowed in patch name.");
 
-    else if (git->isPatchName(patchName))
+    else if (git->m_references.isPatchName(patchName))
         QMessageBox::warning(this, "Create new patch - QGit", "Sorry, patch name "
                              "already exists.\nPlease choose a different name.");
     else
