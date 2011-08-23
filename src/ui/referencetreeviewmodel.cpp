@@ -28,7 +28,7 @@ QVariant ReferenceTreeViewModel::data(const QModelIndex& index, int role) const
 
     switch(role) {
     case Qt::DisplayRole:
-        return item->text();// must be text() //->data("title");
+        return item->text();
         break;
     case Qt::FontRole:
         if (item->isHeaderItem()) {
@@ -43,6 +43,9 @@ QVariant ReferenceTreeViewModel::data(const QModelIndex& index, int role) const
             QBrush textColor(Qt::red);
             return textColor;
         }
+        break;
+    case Qt::UserRole:
+        return item->name();
         break;
     }
 
