@@ -11,19 +11,32 @@ ReferenceTreeViewItem::ReferenceTreeViewItem(ReferenceTreeViewItem* parent,
                                              const QString& text, const QString& name)
     : m_type(type), m_text(text), m_name(name), m_parent(parent)
 {
-    if (parent != NULL) {
-        parent->children().append(this);
-    }
+    setParent(parent);
 }
 
 ReferenceTreeViewItem::~ReferenceTreeViewItem()
 {
+    setParent(NULL);
     qDeleteAll(m_children);
 }
 
 ReferenceTreeViewItem* ReferenceTreeViewItem::parent()
 {
     return m_parent;
+}
+
+void ReferenceTreeViewItem::setParent(ReferenceTreeViewItem* parent)
+{
+    if (m_parent) {
+        m_parent->children().removeOne(this);
+        m_parent = NULL;
+    }
+
+    m_parent = parent;
+
+    if (m_parent) {
+        parent->children().append(this);
+    }
 }
 
 int ReferenceTreeViewItem::row() const
@@ -58,40 +71,7 @@ Header items are parent items with a grouping function.
 */
 bool ReferenceTreeViewItem::isHeaderItem() const
 {
-    if ((type() == ReferenceTreeViewItem::HeaderBranches)
+    return ((type() == ReferenceTreeViewItem::HeaderBranches)
             || (type() == ReferenceTreeViewItem::HeaderRemotes)
-            || (type() == ReferenceTreeViewItem::HeaderTags))
-        return true;
-    else
-        return false;
+            || (type() == ReferenceTreeViewItem::HeaderTags));
 }
-
-//*
-//Check out the item.
-
-//void ReferenceTreeViewItem::checkout()
-//{
-//    if ((m_type != LeafBranch) && (m_type != LeafTag)) {
-//        return;
-//    }
-
-//    m_git->checkout(title());
-//}
-
-///**
-//Remove the item (branch, tag, ...) from the repo.
-//*/
-//void ReferenceTreeViewItem::removeReference()
-//{
-//    //! @todo remove reference from repo
-//    //m_git->removeReference( title() );
-//}
-
-//void ReferenceTreeViewItem::showRevision()
-//{
-//    if ((m_type != ReferenceTreeViewItem::LeafBranch)
-//            && (m_type != ReferenceTreeViewItem::LeafTag))
-//        return;
-
-//    //! @todo jump to revision in history view
-//}

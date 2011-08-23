@@ -43,6 +43,7 @@ public:
     QList<ReferenceTreeViewItem*>& children();
     QString name();
     QString text();
+    void setParent(ReferenceTreeViewItem* parent);
 
     int row() const;
 

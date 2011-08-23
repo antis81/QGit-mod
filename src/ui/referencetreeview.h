@@ -11,7 +11,7 @@ public:
     explicit ReferenceTreeView(QWidget* parent = 0);
     void setDelegate(ReferenceTreeViewDelegate* delegate);
 protected:
-    void mouseDoubleClickEvent(QMouseEvent *event);
+    void mouseDoubleClickEvent(QMouseEvent* event);
 private:
     ReferenceTreeViewDelegate* m_delegate;
 };
