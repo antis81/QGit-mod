@@ -207,6 +207,9 @@ MainImpl::MainImpl(SCRef cd, QWidget *parent)
     // MainImpl c'tor is called before to enter event loop,
     // but some stuff requires event loop to init properly
     QTimer::singleShot(10, this, SLOT(initWithEventLoopActive()));
+
+    referenceTreeViewDelegate = new ReferenceTreeViewDelegate();
+    connect(referenceTreeViewDelegate, SIGNAL(setReference(QString)), this, SLOT(changeBranch(QString)));
 }
 
 void MainImpl::initWithEventLoopActive()
@@ -434,6 +437,8 @@ void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
                 m_repoModel->setup(git);
                 referenceTreeView->setModel(m_repoModel);
                 referenceTreeView->setItemDelegate(new ReferenceTreeViewItemDelegate(git));
+                referenceTreeViewDelegate->setup(d);
+                referenceTreeView->setDelegate(referenceTreeViewDelegate);
             } else {
                 statusBar()->showMessage("Not a git archive");
             }

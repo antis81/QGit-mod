@@ -16,6 +16,8 @@
 
 #include "externaldiffproc.h"
 
+#include "ui/referencetreeviewdelegate.h"
+
 class QAction;
 class QCloseEvent;
 class QComboBox;
@@ -58,8 +60,13 @@ public:
 
     QComboBox *cmbSearch;
 
-    void changeBranch(QString branchName);
+
+    ReferenceTreeViewDelegate* referenceTreeViewDelegate;
+
     void checkout(const QString& branchName);
+
+public slots:
+    void changeBranch(QString branchName);
 
 signals:
     void highlightPatch(const QString&, bool);

@@ -110,7 +110,8 @@ HEADERS += annotate.h cache.h commitimpl.h common.h config.h consoleimpl.h \
     ui/referencetreeview.h \
     ui/referencetreeviewitem.h \
     ui/referencetreeviewitemdelegate.h \
-    ui/referencetreeviewmodel.h
+    ui/referencetreeviewmodel.h \
+    ui/referencetreeviewdelegate.h
 
 
 SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
@@ -149,7 +150,8 @@ SOURCES += annotate.cpp cache.cpp commitimpl.cpp consoleimpl.cpp \
     ui/referencetreeview.cpp \
     ui/referencetreeviewitem.cpp \
     ui/referencetreeviewitemdelegate.cpp \
-    ui/referencetreeviewmodel.cpp
+    ui/referencetreeviewmodel.cpp \
+    ui/referencetreeviewdelegate.cpp
 
 DISTFILES += app_icon.rc helpgen.sh resources/* Src.vcproj todo.txt
 DISTFILES += ../COPYING ../exception_manager.txt ../README ../README_WIN.txt

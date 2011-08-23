@@ -3,10 +3,20 @@
 
 #include <QTreeWidget>
 
+#include <qdebug.h>
+
+class ReferenceTreeViewDelegate;
+
 class ReferenceTreeView : public QTreeView
 {
+    Q_OBJECT
 public:
-    ReferenceTreeView(QWidget* parent);
+    explicit ReferenceTreeView(QWidget* parent = 0);
+    void setDelegate(ReferenceTreeViewDelegate* delegate);
+protected:
+    void mouseDoubleClickEvent(QMouseEvent *event);
+private:
+    ReferenceTreeViewDelegate* m_delegate;
 };
 
 #endif // REFERENCETREEVIEW_H
