@@ -10,7 +10,6 @@ Copyright: See COPYING file that comes with this distribution
 #include "referencetreeviewitem.h"
 #include "git.h"
 
-
 ReferenceTreeViewModel::ReferenceTreeViewModel(QObject* parent)
     : QAbstractItemModel(parent), m_git(NULL), m_rootItem(NULL)
 {
@@ -97,26 +96,32 @@ QModelIndex ReferenceTreeViewModel::parent(const QModelIndex& index) const
 
     ReferenceTreeViewItem* childItem;
     childItem = static_cast<ReferenceTreeViewItem*>(index.internalPointer());
-    ReferenceTreeViewItem* parentItem = childItem->parent();
 
-    if (parentItem == m_rootItem)
+    if (!childItem) {
         return QModelIndex();
+    }
+
+    ReferenceTreeViewItem* parentItem = childItem->parent();
+    if (!parentItem || parentItem == m_rootItem) {
+        return QModelIndex();
+    }
 
     return createIndex(parentItem->row(), 0, parentItem);
 }
 
 int ReferenceTreeViewModel::rowCount(const QModelIndex& parent) const
 {
-    ReferenceTreeViewItem* parentItem;
     if (parent.column() > 0)
         return 0;
+
+    ReferenceTreeViewItem* parentItem;
 
     if (!parent.isValid())
         parentItem = m_rootItem;
     else
         parentItem = static_cast<ReferenceTreeViewItem*>(parent.internalPointer());
 
-    return parentItem->children().count();
+    return parentItem ? parentItem->children().count() : 0;
 }
 
 int ReferenceTreeViewModel::columnCount(const QModelIndex& parent) const
@@ -147,6 +152,7 @@ void ReferenceTreeViewModel::setup(Git* git)
     ReferenceTreeViewItem* root;
     root = new ReferenceTreeViewItem(NULL, ReferenceTreeViewItem::HeaderBranches,
                                      "References", "References");
+
     m_rootItem = root;
 
     addNode(ReferenceTreeViewItem::HeaderBranches, Reference::BRANCH);

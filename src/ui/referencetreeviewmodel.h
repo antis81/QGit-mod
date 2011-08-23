@@ -48,7 +48,7 @@ private:
     Git* m_git;
     ReferenceTreeViewItem* m_rootItem;
 
-    void addNode(ReferenceTreeViewItem::ItemType headerType, Reference::Type type);;
+    void addNode(ReferenceTreeViewItem::ItemType headerType, Reference::Type type);
 };
 
 #endif // REFERENCETREEVIEWMODEL_H
