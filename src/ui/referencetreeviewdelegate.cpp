@@ -12,8 +12,5 @@ void ReferenceTreeViewDelegate::setup(Domain *domain)
 
 void ReferenceTreeViewDelegate::changeReference(QString referenceName)
 {
-//    MainImpl* f = new MainImpl("");
-//    f = m_domain->m(); /
-//    m_domain->m()->changeBranch(referenceName);
-    emit setReference(referenceName);
+    m_domain->m()->changeBranch(referenceName);
 }

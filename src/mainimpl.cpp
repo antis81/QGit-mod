@@ -208,6 +208,7 @@ MainImpl::MainImpl(SCRef cd, QWidget *parent)
     // but some stuff requires event loop to init properly
     QTimer::singleShot(10, this, SLOT(initWithEventLoopActive()));
 
+    //! \todo: find best solution
     referenceTreeViewDelegate = new ReferenceTreeViewDelegate();
     connect(referenceTreeViewDelegate, SIGNAL(setReference(QString)), this, SLOT(changeBranch(QString)));
 }
@@ -436,6 +437,7 @@ void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
                 //! @todo CLEANUP HERE WHEN WORKING STATE REACHED
                 m_repoModel->setup(git);
                 referenceTreeView->setModel(m_repoModel);
+                //! \todo: ALERT - memory leaks may be
                 referenceTreeView->setItemDelegate(new ReferenceTreeViewItemDelegate(git));
                 referenceTreeViewDelegate->setup(d);
                 referenceTreeView->setDelegate(referenceTreeViewDelegate);

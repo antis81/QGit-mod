@@ -12,9 +12,8 @@ void ReferenceTreeView::setDelegate(ReferenceTreeViewDelegate* delegate)
     m_delegate = delegate;
 }
 
-void ReferenceTreeView::mouseDoubleClickEvent(QMouseEvent *event)
+void ReferenceTreeView::mouseDoubleClickEvent(QMouseEvent* event)
 {
     QString referenceName = indexAt(event->pos()).data(Qt::UserRole).toString();
-//    qDebug() << referenceName;
     m_delegate->changeReference(referenceName);
 }

@@ -13,7 +13,6 @@ Copyright: See COPYING file that comes with this distribution
 #include "referencetreeviewitem.h"
 #include "model/reference.h" //! \todo remove this dependence
 
-//class ReferenceTreeViewItem;
 class Domain;
 class Git;
 
