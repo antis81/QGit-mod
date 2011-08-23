@@ -1,7 +1,6 @@
 #include "referencetreeview.h"
-#include "referencetreeviewdelegate.h"
 
-#include <QMouseEvent>
+#include "referencetreeviewdelegate.h"
 
 ReferenceTreeView::ReferenceTreeView(QWidget* parent) : QTreeView(parent)
 {
@@ -15,5 +14,5 @@ void ReferenceTreeView::setDelegate(ReferenceTreeViewDelegate* delegate)
 void ReferenceTreeView::mouseDoubleClickEvent(QMouseEvent* event)
 {
     QString referenceName = indexAt(event->pos()).data(Qt::UserRole).toString();
-    m_delegate->changeReference(referenceName);
+    m_delegate->processDblClick(referenceName);
 }

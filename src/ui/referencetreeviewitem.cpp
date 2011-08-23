@@ -5,11 +5,11 @@
 */
 
 #include "referencetreeviewitem.h"
-
+#include <QDebug>
 ReferenceTreeViewItem::ReferenceTreeViewItem(ReferenceTreeViewItem* parent,
                                              ReferenceTreeViewItem::ItemType type,
                                              const QString& text, const QString& name)
-    : m_type(type), m_text(text), m_name(name), m_parent(parent)
+    : m_parent(NULL), m_type(type), m_name(name), m_text(text)
 {
     setParent(parent);
 }
@@ -17,7 +17,7 @@ ReferenceTreeViewItem::ReferenceTreeViewItem(ReferenceTreeViewItem* parent,
 ReferenceTreeViewItem::~ReferenceTreeViewItem()
 {
     setParent(NULL);
-    qDeleteAll(m_children);
+    removeAllChildren();
 }
 
 ReferenceTreeViewItem* ReferenceTreeViewItem::parent()
@@ -35,7 +35,14 @@ void ReferenceTreeViewItem::setParent(ReferenceTreeViewItem* parent)
     m_parent = parent;
 
     if (m_parent) {
-        parent->children().append(this);
+        m_parent->children().append(this);
+    }
+}
+
+void ReferenceTreeViewItem::removeAllChildren()
+{
+    while (m_children.count()) {
+        delete m_children.at(0);
     }
 }
 
@@ -54,12 +61,12 @@ QList<ReferenceTreeViewItem*>& ReferenceTreeViewItem::children()
     return m_children;
 }
 
-QString ReferenceTreeViewItem::name()
+const QString& ReferenceTreeViewItem::name() const
 {
     return m_name;
 }
 
-QString ReferenceTreeViewItem::text()
+const QString& ReferenceTreeViewItem::text() const
 {
     return m_text;
 }

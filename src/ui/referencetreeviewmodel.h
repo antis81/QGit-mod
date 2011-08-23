@@ -29,8 +29,6 @@ public:
     explicit ReferenceTreeViewModel(QObject* parent = 0);
     virtual ~ReferenceTreeViewModel();
 
-    void setRootItem(ReferenceTreeViewItem* root); // unused
-
     QVariant data(const QModelIndex& index, int role) const;
     Qt::ItemFlags flags(const QModelIndex& index) const;
     QVariant headerData(int section, Qt::Orientation orientation,
@@ -42,10 +40,13 @@ public:
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
     void setup(Git* git);
+    void update();
 
 private:
     Git* m_git;
     ReferenceTreeViewItem* m_rootItem;
+
+    void clear();
 
     void addNode(ReferenceTreeViewItem::ItemType headerType, Reference::Type type);
 };

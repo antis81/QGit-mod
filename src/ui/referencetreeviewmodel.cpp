@@ -9,22 +9,131 @@ Copyright: See COPYING file that comes with this distribution
 #include "referencetreeviewmodel.h"
 #include "referencetreeviewitem.h"
 #include "git.h"
+#include <QDebug>
 
 ReferenceTreeViewModel::ReferenceTreeViewModel(QObject* parent)
     : QAbstractItemModel(parent), m_git(NULL), m_rootItem(NULL)
 {
+    m_rootItem = new ReferenceTreeViewItem(NULL, ReferenceTreeViewItem::HeaderBranches,
+                                     "References", "References");
 }
 
 ReferenceTreeViewModel::~ReferenceTreeViewModel()
 {
+    delete m_rootItem;
+    m_rootItem = NULL;
+}
+
+void ReferenceTreeViewModel::clear()
+{
+    beginResetModel();
+    m_rootItem->removeAllChildren();
+    endResetModel();
+}
+
+void ReferenceTreeViewModel::update()
+{
+    clear();
+    beginInsertRows(index(0, 0), 0, 2);
+    addNode(ReferenceTreeViewItem::HeaderBranches, Reference::BRANCH);
+    addNode(ReferenceTreeViewItem::HeaderRemotes, Reference::REMOTE_BRANCH);
+    addNode(ReferenceTreeViewItem::HeaderTags, Reference::TAG);
+    endInsertRows();
+}
+
+void ReferenceTreeViewModel::addNode(ReferenceTreeViewItem::ItemType headerType, Reference::Type type)
+{
+    if (!m_git) {
+        return;
+    }
+
+    QStringList references = m_git->getAllRefNames(type, !Git::optOnlyLoaded);
+
+    ReferenceTreeViewItem* headerNode;
+
+    switch (headerType) {
+    case (ReferenceTreeViewItem::HeaderBranches):
+        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, "Branches", "Branches");
+        break;
+    case (ReferenceTreeViewItem::HeaderRemotes):
+        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, "Remotes", "Remotes");
+        break;
+    case (ReferenceTreeViewItem::HeaderTags):
+        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, "Tags", "Tags");
+        break;
+    default:
+        break;
+    }
+
+    if (!headerNode) {
+        return;
+    }
+
+    references.sort();
+
+    ReferenceTreeViewItem* item;
+
+    if (headerType == ReferenceTreeViewItem::HeaderRemotes) {
+        QString lastRemoteName;
+        QString remoteName;
+        ReferenceTreeViewItem* parentNode = headerNode;
+        QString text;
+
+        // заполняем дерево потомками
+        foreach (const QString& branchName, references) {
+            int i = branchName.indexOf("/");
+            remoteName = (i > 0) ? branchName.left(i) : "";
+            text = branchName.mid(i + 1);
+
+            if (remoteName.compare(lastRemoteName) != 0) {
+                parentNode = new ReferenceTreeViewItem(headerNode,
+                                                       ReferenceTreeViewItem::HeaderRemote,
+                                                       remoteName,
+                                                       remoteName);
+                lastRemoteName = remoteName;
+            } else {
+                parentNode = headerNode;
+            }
+            item = new ReferenceTreeViewItem(parentNode,
+                                             ReferenceTreeViewItem::LeafRemote,
+                                             text,
+                                             branchName);
+        }
+    }
+
+
+    foreach (const QString& reference, references) {
+        //bool isCurrent = (m_git->currentBranch().compare(*it) == 0);
+        switch (headerType) {
+        case (ReferenceTreeViewItem::HeaderBranches):
+            item = new ReferenceTreeViewItem(headerNode,
+                                             ReferenceTreeViewItem::LeafBranch,
+                                             reference,
+                                             reference);
+            break;
+        case (ReferenceTreeViewItem::HeaderTags):
+            item = new ReferenceTreeViewItem(headerNode,
+                                             ReferenceTreeViewItem::LeafTag,
+                                             reference,
+                                             reference);
+            break;
+        default:
+            break;
+        }
+    }
 }
 
 QVariant ReferenceTreeViewModel::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid())
+    if (!index.isValid()) {
         return QVariant();
+    }
 
     ReferenceTreeViewItem* item = static_cast<ReferenceTreeViewItem*>(index.internalPointer());
+
+    if (!item) {
+        return QVariant();
+    }
 
     switch(role) {
     case Qt::DisplayRole:
@@ -84,6 +193,14 @@ QModelIndex ReferenceTreeViewModel::index(int row, int column, const QModelIndex
     else
         parentItem = static_cast<ReferenceTreeViewItem*>(parent.internalPointer());
 
+    if (!parentItem) {
+        return QModelIndex();
+    }
+
+    if (row < 0 || row >= parentItem->children().count()) {
+        return QModelIndex();
+    }
+
     ReferenceTreeViewItem* childItem = parentItem->children().at(row);
 
     if (childItem)
@@ -96,6 +213,7 @@ QModelIndex ReferenceTreeViewModel::parent(const QModelIndex& index) const
 {
     if (!index.isValid())
         return QModelIndex();
+
 
     ReferenceTreeViewItem* childItem;
     childItem = static_cast<ReferenceTreeViewItem*>(index.internalPointer());
@@ -129,19 +247,9 @@ int ReferenceTreeViewModel::rowCount(const QModelIndex& parent) const
 
 int ReferenceTreeViewModel::columnCount(const QModelIndex& parent) const
 {
+    Q_UNUSED(parent);
+
     return 1;
-}
-
-/**
-    Set the root item. The item is not owned by the model.
-
-    @return The previous root item or NULL, if no root item was set before.
-*/
-void ReferenceTreeViewModel::setRootItem(ReferenceTreeViewItem *root)
-{
-    delete m_rootItem;
-
-    m_rootItem = root;
 }
 
 /**
@@ -149,113 +257,8 @@ void ReferenceTreeViewModel::setRootItem(ReferenceTreeViewItem *root)
 */
 void ReferenceTreeViewModel::setup(Git* git)
 {
-    //setRootItem(git);
     m_git = git;
-
-    ReferenceTreeViewItem* root;
-    root = new ReferenceTreeViewItem(NULL, ReferenceTreeViewItem::HeaderBranches,
-                                     "References", "References");
-
-    m_rootItem = root;
-
-    addNode(ReferenceTreeViewItem::HeaderBranches, Reference::BRANCH);
-    addNode(ReferenceTreeViewItem::HeaderRemotes, Reference::REMOTE_BRANCH);
-    addNode(ReferenceTreeViewItem::HeaderTags, Reference::TAG);
 }
 
 
-void ReferenceTreeViewModel::addNode(ReferenceTreeViewItem::ItemType headerType, Reference::Type type)
-{
-    QStringList tempList = m_git->getAllRefNames(type, !Git::optOnlyLoaded);
 
-    ReferenceTreeViewItem *headerNode;
-
-    switch (headerType) {
-    case (ReferenceTreeViewItem::HeaderBranches):
-        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, "Branches", "Branches");
-        break;
-    case (ReferenceTreeViewItem::HeaderRemotes):
-        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, "Remotes", "Remotes");
-        break;
-    case (ReferenceTreeViewItem::HeaderTags):
-        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, "Tags", "Tags");
-        break;
-    default:
-        break;
-    }
-
-    tempList.sort();
-
-//    QFont font = node->font(0);
-//    font.setBold(true);
-//    node->setFont(0, font);
-//    addTopLevelItem(node);
-
-    ReferenceTreeViewItem *tempItemList;
-
-    if (headerType == ReferenceTreeViewItem::HeaderRemotes) {
- //       QStringList tempList = git->getAllRefNames(Reference::REMOTE_BRANCH, !Git::optOnlyLoaded);
- //       tempList.sort();
-
- //       ReferenceTreeViewItem *tempItemList;
-//        ReferenceTreeViewItem* headerNode = headerNode;
-
-        QString lastRemoteName;
-        QString remoteName;
-        ReferenceTreeViewItem* parentNode = headerNode;
-        QString text;
-
-        // заполняем дерево потомками
-        FOREACH_SL (it, tempList) {
-            const QString& branchName = *it;
-            int i = branchName.indexOf("/");
-            if (i > 0) {
-                remoteName = branchName.left(i);
-                text = branchName.mid(i + 1);
-                if (remoteName.compare(lastRemoteName) != 0) {
-                    parentNode = new ReferenceTreeViewItem(headerNode, ReferenceTreeViewItem::HeaderRemote, remoteName, remoteName);
-    //                addNodes(headerNode, remoteName);
-                    lastRemoteName = remoteName;
-                }
-            } else {
-                parentNode = headerNode;
-                text = branchName;
-                lastRemoteName = "";
-            }
-            tempItemList = new ReferenceTreeViewItem(parentNode, ReferenceTreeViewItem::LeafRemote, text, branchName);
-        }
-    }
-
-
-    FOREACH_SL (it, tempList) {
-        //bool isCurrent = (m_git->currentBranch().compare(*it) == 0);
-        switch (headerType) {
-        case (ReferenceTreeViewItem::HeaderBranches):
-            tempItemList = new ReferenceTreeViewItem(headerNode, ReferenceTreeViewItem::LeafBranch, QString(*it), QString(*it));
-//            if (isCurrent) {
-//                QFont font = tempItemList->font(0);
-//                font.setBold(true);
-//                tempItemList->setFont(0, font);
-//                tempItemList->setForeground(0, Qt::red);
-//            }
-//            tempItemList->setIcon(0, branchIcon);
-//            if (*it == "master") {
-//                tempItemList->setIcon(0, masterBranchIcon);
-//            }
-            break;
-        case (ReferenceTreeViewItem::HeaderRemotes):
-//            tempItemList = new ReferenceTreeViewItem(headerNode, ReferenceTreeViewItem::LeafRemote, QString(*it));
-            //tempItemList->setIcon(0, branchIcon);
-            break;
-        case (ReferenceTreeViewItem::HeaderTags):
-            tempItemList = new ReferenceTreeViewItem(headerNode, ReferenceTreeViewItem::LeafTag, QString(*it), QString(*it));
-                    //new BranchesTreeItem(node, QStringList(QString(*it)), LeafTag);
-            //tempItemList->setIcon(0, tagIcon);
-            break;
-        default:
-            break;
-        }
-        //tempItemList->setBranch(QString(*it));
-    }
-/**/
-}

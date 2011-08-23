@@ -24,6 +24,9 @@ bool ReferenceTreeViewItemDelegate::editorEvent(QEvent* event, QAbstractItemMode
                                                 const QStyleOptionViewItem& option,
                                                 const QModelIndex& index)
 {
+    Q_UNUSED(model);
+    Q_UNUSED(option);
+
     bool result = false;
     ReferenceTreeViewItem* item = static_cast<ReferenceTreeViewItem*>(index.internalPointer());
 

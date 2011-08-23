@@ -184,6 +184,8 @@ void BranchesTree::changeBranch(QTreeWidgetItem *item, int column)  // REMEMBER:
                                                                     // of column to avoid magic numbers
                                                                     // see at this class acurately
 {
+    Q_UNUSED(column)
+
     if ((item->type() != LeafBranch)
             && (item->type() != LeafRemote)
             && (item->type() != LeafTag)) {

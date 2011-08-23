@@ -9,8 +9,7 @@ void ReferenceTreeViewDelegate::setup(Domain *domain)
     m_domain = domain;
 }
 
-
-void ReferenceTreeViewDelegate::changeReference(QString referenceName)
+void ReferenceTreeViewDelegate::processDblClick(QString referenceName)
 {
     m_domain->m()->changeBranch(referenceName);
 }

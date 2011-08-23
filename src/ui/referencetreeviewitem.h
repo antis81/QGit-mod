@@ -41,10 +41,10 @@ public:
     ReferenceTreeViewItem::ItemType type() const;
     ReferenceTreeViewItem* parent();
     QList<ReferenceTreeViewItem*>& children();
-    QString name();
-    QString text();
+    const QString& name() const;
+    const QString& text() const;
     void setParent(ReferenceTreeViewItem* parent);
-
+    void removeAllChildren();
     int row() const;
 
 //public slots:
