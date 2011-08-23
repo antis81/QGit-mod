@@ -83,7 +83,7 @@ QTreeView
             <widget class="QLineEdit" name="searchBranchLineEdit"/>
            </item>
            <item>
-            <widget class="QTreeView" name="treeRepo">
+            <widget class="QTreeView" name="referenceTreeView">
              <property name="animated">
               <bool>true</bool>
              </property>
@@ -198,7 +198,7 @@ QTreeView
      <x>0</x>
      <y>0</y>
      <width>905</width>
-     <height>25</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="Help">

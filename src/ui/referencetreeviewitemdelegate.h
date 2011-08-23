@@ -24,6 +24,9 @@ public:
     bool editorEvent(QEvent* event, QAbstractItemModel* model, const QStyleOptionViewItem& option,
                      const QModelIndex& index);
 
+signals:
+    void setReference(QString referenceName);
+
 private:
     void menuForReferenceItem(ReferenceTreeViewItem* item, const QPoint& pos);
 };

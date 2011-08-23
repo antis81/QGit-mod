@@ -4,7 +4,6 @@
 #include <QTreeWidget>
 #include "git.h"
 #include "domain.h"
-#include "branchestreeitem.h"
 
 // Стоит учесть, что уникальное имя в branchesTreeItem не нужно, т.к. поиск мы всё равно производим
 // по видимому имени. Или нужно иметь заранее оговорки, что они могут отличаться только наличием []
