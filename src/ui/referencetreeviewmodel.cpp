@@ -154,6 +154,10 @@ QVariant ReferenceTreeViewModel::data(const QModelIndex& index, int role) const
             return textColor;
         }
         break;
+    case Qt::DecorationRole:
+        if (!item->icon().isNull())
+            return item->icon();
+        break;
     case Qt::UserRole:
         return item->name();
         break;

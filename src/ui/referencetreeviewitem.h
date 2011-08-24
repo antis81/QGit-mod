@@ -9,6 +9,7 @@
 
 #include <QList>
 #include <QString>
+#include <QIcon>
 
 /**
     @brief Represents a repository reference tree item.
@@ -40,6 +41,7 @@ public:
     QList<ReferenceTreeViewItem*>& children();
     const QString& name() const;
     const QString& text() const;
+    const QIcon& icon() const;
     void setParent(ReferenceTreeViewItem* parent);
     void removeAllChildren();
     int row() const;
@@ -57,7 +59,8 @@ private:
     ItemType                      m_type;
     QString                       m_name;
     QString                       m_text;
-    bool m_current;
+    QIcon                         m_icon;
+    bool                          m_current;
 };
 
 #endif // REFERENCETREEVIEWITEM_H

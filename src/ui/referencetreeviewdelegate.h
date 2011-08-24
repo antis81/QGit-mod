@@ -7,6 +7,7 @@
 
 class ReferenceTreeViewDelegate : public QObject
 {
+    Q_OBJECT
 public:
     ReferenceTreeViewDelegate() : QObject(0) {}
     virtual void processDblClick(const QString& referenceName) = 0;

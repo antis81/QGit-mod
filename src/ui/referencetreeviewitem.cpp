@@ -16,6 +16,12 @@ ReferenceTreeViewItem::ReferenceTreeViewItem(ReferenceTreeViewItem* parent,
       m_current(false)
 {
     setParent(parent);
+
+    switch (type) {
+    case (HeaderBranches):
+        m_icon = QIcon(":/icons/resources/branch.png");
+        break;
+    }
 }
 
 ReferenceTreeViewItem::~ReferenceTreeViewItem()
@@ -73,6 +79,11 @@ const QString& ReferenceTreeViewItem::name() const
 const QString& ReferenceTreeViewItem::text() const
 {
     return m_text;
+}
+
+const QIcon& ReferenceTreeViewItem::icon() const
+{
+    return m_icon;
 }
 
 bool ReferenceTreeViewItem::current() const
