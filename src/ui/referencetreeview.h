@@ -20,6 +20,8 @@ protected:
     void mouseDoubleClickEvent(QMouseEvent* event);
 private:
     ReferenceTreeViewDelegate* m_delegate;
+private slots:
+    void contextMenu(const QPoint& pos);
 };
 
 #endif // REFERENCETREEVIEW_H

@@ -47,7 +47,7 @@ public:
     virtual bool isMatch(SCRef);
 
     StateInfo st;
-
+    Git *git;
 signals:
     void updateRequested(StateInfo newSt);
     void cancelDomainProcesses();
@@ -68,7 +68,7 @@ protected:
     void unlinkDomain(Domain *d);
     void setTabCaption(const QString &caption);
 
-    Git *git;
+
     QWidget *container;
     bool busy;
 
