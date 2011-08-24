@@ -27,25 +27,12 @@ ReferenceTreeViewDelegate* ReferenceTreeView::delegate() const
     return m_delegate;
 }
 
-void ReferenceTreeView::showAllItems()
+void ReferenceTreeView::showAllItems(QModelIndex modelIndex)
 {
-    QModelIndex headIndex;
-    QModelIndex subIndex;
-
-    for (int i = 0; i < model()->rowCount(QModelIndex()); i++) {
-        headIndex = model()->index(i, 0, QModelIndex());
-        setRowHidden(i, QModelIndex() , false);
-
-        for (int j = 0; j < model()->rowCount(headIndex); j++) {
-            subIndex = model()->index(i, 0, headIndex);
-            setRowHidden(j, headIndex, false);
-
-            if (headIndex.data().toString() == "Remotes") {
-                for (int k = 0; k < model()->rowCount(subIndex); k++) {
-                    setRowHidden(k, subIndex, false);
-                }
-            }
-        }
+    int currentRowCount = model()->rowCount(modelIndex);
+    for (int i = 0; i < currentRowCount; i++) {
+        setRowHidden(i, modelIndex, false);
+        showAllItems(model()->index(i, 0, modelIndex));
     }
 }
 

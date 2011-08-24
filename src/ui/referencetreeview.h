@@ -16,7 +16,7 @@ public:
     virtual ~ReferenceTreeView();
     void setDelegate(ReferenceTreeViewDelegate* delegate);
     ReferenceTreeViewDelegate* delegate() const;
-    void showAllItems();
+    void showAllItems(QModelIndex modelIndex = QModelIndex());
 public slots:
     void showSearchedItems(QString inputText);
 protected:
