@@ -2867,11 +2867,14 @@ void Git::indexTree() {
 /**
 Stash current working dir changes.
 */
-bool Git::stash(const QString &optionalMsg)
+bool Git::stash(const QString &optionalMsg, bool stashUntracked)
 {
     bool success;
 
-    QString cmd = "git stash save";
+    QString cmd = "git stash save --keep-index";
+    if (stashUntracked)
+        cmd += " --untracked";
+
     if (!optionalMsg.isEmpty())
         cmd += QString(" \"%1\"").arg(optionalMsg);
 

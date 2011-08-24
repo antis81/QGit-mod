@@ -123,7 +123,7 @@ public:
     bool makeTag(SCRef sha, SCRef tag, SCRef msg);
     bool deleteTag(const QString &tagName);
     bool checkout(SCRef sha);
-    bool stash(const QString &optionalMsg);
+    bool stash(const QString &optionalMsg = QString(), bool stashUntracked = false); //!< \todo Use option flags instead of bool
     bool stashApply();
     bool stashDrop();
     bool stashPop();
