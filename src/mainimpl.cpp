@@ -198,8 +198,8 @@ MainImpl::MainImpl(SCRef cd, QWidget *parent)
     connect(hideSearchBranchLineEditAction, SIGNAL(triggered()),
             searchBranchLineEdit, SLOT(hide()));
 
-//    connect(searchBranchLineEdit, SIGNAL(textChanged(QString)),
-//            branchesTree, SLOT(showSearchBranchesItems(QString)));
+    connect(searchBranchLineEdit, SIGNAL(textChanged(QString)),
+            referenceTreeView, SLOT(showSearchedItems(QString)));
 
     Search->addAction(showSearchBranchLineEditAction);
     Search->addAction(hideSearchBranchLineEditAction);

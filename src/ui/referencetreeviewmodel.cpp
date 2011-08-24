@@ -148,7 +148,7 @@ QVariant ReferenceTreeViewModel::data(const QModelIndex& index, int role) const
         }
         break;
     case Qt::ForegroundRole:
-        if ( (item->type() == ReferenceTreeViewItem::LeafBranch)
+        if ((item->type() == ReferenceTreeViewItem::LeafBranch)
                 && item->current() ) {
             QBrush textColor(Qt::red);
             return textColor;

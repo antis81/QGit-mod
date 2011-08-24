@@ -28,13 +28,25 @@ void ReferenceSelectorDelegate::processContextMenu(const QPoint& pos, const QStr
 
     QMenu contextMenu(QObject::tr("Context menu"));
 
+    //! \attention FIXME: MEMORY LEAKS
     QAction* checkoutAction = new QAction(QObject::tr("Checkout"), this);
     QObject::connect(checkoutAction, SIGNAL(triggered()),
                      this, SLOT(checkout()));
 
+    //! \attention FIXME: MEMORY LEAKS
     QAction* removeTagAction = new QAction(QObject::tr("Remove"), this);
     QObject::connect(removeTagAction, SIGNAL(triggered()),
                      this, SLOT(removeTag()));
+
+    //! \attention FIXME: MEMORY LEAKS
+//    QAction* expandNodeAction = new QAction(QObject::tr("Expand"), this);
+//    QObject::connect(expandNodeAction, SIGNAL(triggered()),
+//                     this, SLOT(expandNode()));
+
+    //! \attention FIXME: MEMORY LEAKS
+//    QAction* collapseNodeAction = new QAction(QObject::tr("Collapse"), this);
+//    QObject::connect(expandNodeAction, SIGNAL(triggered()),
+//                     this, SLOT(collapseNode()));
 
     if (reference->type() & Reference::BRANCH) {
         checkoutAction->setData(referenceName);

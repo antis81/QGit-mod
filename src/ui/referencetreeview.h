@@ -16,10 +16,14 @@ public:
     virtual ~ReferenceTreeView();
     void setDelegate(ReferenceTreeViewDelegate* delegate);
     ReferenceTreeViewDelegate* delegate() const;
+    void showAllItems();
+public slots:
+    void showSearchedItems(QString inputText);
 protected:
     void mouseDoubleClickEvent(QMouseEvent* event);
 private:
     ReferenceTreeViewDelegate* m_delegate;
+    bool isRegExpConformed(QString currentString, QString originalString);
 private slots:
     void contextMenu(const QPoint& pos);
 };
