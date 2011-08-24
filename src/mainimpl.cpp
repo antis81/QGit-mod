@@ -41,7 +41,7 @@
 #include "ui_fileview.h"
 #include "ui_patchview.h"
 #include "ui/referencetreeviewmodel.h"
-#include "ui/referencetreeviewitemdelegate.h"
+#include "git/referenceselectordelegate.h"
 
 using namespace QGit;
 
@@ -208,8 +208,8 @@ MainImpl::MainImpl(SCRef cd, QWidget *parent)
     // but some stuff requires event loop to init properly
     QTimer::singleShot(10, this, SLOT(initWithEventLoopActive()));
 
-    //! \todo: find best solution
-    referenceTreeViewDelegate = new ReferenceTreeViewDelegate();
+    referenceTreeView->setModel(m_repoModel);
+    referenceTreeView->setDelegate(new ReferenceSelectorDelegate());
 }
 
 void MainImpl::initWithEventLoopActive()
@@ -435,12 +435,8 @@ void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
 
                 //! @todo CLEANUP HERE WHEN WORKING STATE REACHED
                 m_repoModel->setup(&git->m_references);
-                referenceTreeView->setModel(m_repoModel);
+                static_cast<ReferenceSelectorDelegate*>(referenceTreeView->delegate())->setup(d);
                 m_repoModel->update();
-                //! \todo: ALERT - memory leaks may be
-                referenceTreeView->setItemDelegate(new ReferenceTreeViewItemDelegate(git));
-                referenceTreeViewDelegate->setup(d);
-                referenceTreeView->setDelegate(referenceTreeViewDelegate);
             } else {
                 statusBar()->showMessage("Not a git archive");
             }

@@ -7,11 +7,13 @@ Copyright: See COPYING file that comes with this distribution
 #ifndef REFERENCETREEVIEWMODEL_H
 #define REFERENCETREEVIEWMODEL_H
 
+#include <QObject>
 #include <QAbstractItemModel>
 #include <QPoint>
+#include <QVariant>
+#include <QModelIndex>
 
 #include "referencetreeviewitem.h"
-#include "model/reference.h" //! \todo remove this dependence
 #include "git/references.h"
 
 /**

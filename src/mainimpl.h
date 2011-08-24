@@ -60,9 +60,6 @@ public:
 
     QComboBox *cmbSearch;
 
-
-    ReferenceTreeViewDelegate* referenceTreeViewDelegate; //! \todo: think about best solution
-
     void checkout(const QString& branchName);
     void changeBranch(QString branchName);
 

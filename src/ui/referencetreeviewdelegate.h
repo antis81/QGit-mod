@@ -1,19 +1,12 @@
 #ifndef REFERENCETREEVIEWDELEGATE_H
 #define REFERENCETREEVIEWDELEGATE_H
 
-#include <QObject>
 #include <QString>
-#include "domain.h"
-#include "mainimpl.h"
 
-class ReferenceTreeViewDelegate : public QObject
+class ReferenceTreeViewDelegate
 {
 public:
-    ReferenceTreeViewDelegate(QObject* parent = 0);
-    void setup(Domain* domain);
-    void processDblClick(QString referenceName);
-private:
-    Domain* m_domain;
+    virtual void processDblClick(QString referenceName) = 0;
 };
 
 #endif // REFERENCETREEVIEWDELEGATE_H

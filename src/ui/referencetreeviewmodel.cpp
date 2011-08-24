@@ -8,6 +8,7 @@ Copyright: See COPYING file that comes with this distribution
 #include <QMenu>
 #include "referencetreeviewmodel.h"
 #include "referencetreeviewitem.h"
+#include "model/reference.h"
 
 ReferenceTreeViewModel::ReferenceTreeViewModel(QObject* parent)
     : QAbstractItemModel(parent), m_references(NULL), m_rootItem(NULL)

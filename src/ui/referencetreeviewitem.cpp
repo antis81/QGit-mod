@@ -5,7 +5,7 @@
 */
 
 #include "referencetreeviewitem.h"
-#include <QDebug>
+
 ReferenceTreeViewItem::ReferenceTreeViewItem(ReferenceTreeViewItem* parent,
                                              ReferenceTreeViewItem::ItemType type,
                                              const QString& text, const QString& name)

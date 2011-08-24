@@ -8,10 +8,7 @@
 #define REFERENCETREEVIEWITEM_H
 
 #include <QList>
-#include <QVariant>
 #include <QString>
-
-class Git;
 
 /**
     @brief Represents a repository reference tree item.
