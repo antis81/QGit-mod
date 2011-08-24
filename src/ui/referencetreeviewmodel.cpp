@@ -84,14 +84,14 @@ void ReferenceTreeViewModel::addNode(ReferenceTreeViewItem::ItemType headerType,
             remoteName = (i > 0) ? branchName.left(i) : "";
             text = branchName.mid(i + 1);
 
-            if (remoteName.compare(lastRemoteName) != 0) {
+            if (remoteName.isEmpty()) {
+                parentNode = headerNode;
+            } else if (remoteName.compare(lastRemoteName) != 0) {
                 parentNode = new ReferenceTreeViewItem(headerNode,
                                                        ReferenceTreeViewItem::HeaderRemote,
                                                        remoteName,
                                                        remoteName);
                 lastRemoteName = remoteName;
-            } else {
-                parentNode = headerNode;
             }
             item = new ReferenceTreeViewItem(parentNode,
                                              ReferenceTreeViewItem::LeafRemote,
