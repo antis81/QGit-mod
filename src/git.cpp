@@ -2864,4 +2864,61 @@ void Git::indexTree() {
     }
 }
 
+/**
+Stash current working dir changes.
+*/
+bool Git::stash(const QString &optionalMsg)
+{
+    bool success;
 
+    QString cmd = "git stash";
+    if (!optionalMsg.isEmpty())
+        cmd += QString(" \"%1\"").arg(optionalMsg);
+
+    QString stdOut;
+    success = run(cmd, &stdOut);
+
+    return success;
+}
+
+/**
+Apply stashed changes to the working dir. Stash will not be thrown away (dropped).
+*/
+bool Git::stashApply()
+{
+    bool success;
+
+    QString cmd = "git stash apply";
+    QString stdOut;
+    success = run(cmd, &stdOut);
+
+    return success;
+}
+
+/**
+Throw away stashed changes. They're forever gone if not applied before.
+*/
+bool Git::stashDrop()
+{
+    bool success;
+
+    QString cmd = "git stash drop";
+    QString stdOut;
+    success = run(cmd, &stdOut);
+
+    return success;
+}
+
+/**
+Pop (apply and drop) current stash to the working copy. Stash is not dropped on merge conflicts.
+*/
+bool Git::stashPop()
+{
+    bool success;
+
+    QString cmd = "git stash pop";
+    QString stdOut;
+    success = run(cmd, &stdOut);
+
+    return success;
+}

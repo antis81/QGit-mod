@@ -123,6 +123,10 @@ public:
     bool makeTag(SCRef sha, SCRef tag, SCRef msg);
     bool deleteTag(const QString &tagName);
     bool checkout(SCRef sha);
+    bool stash(const QString &optionalMsg);
+    bool stashApply();
+    bool stashDrop();
+    bool stashPop();
     bool applyPatchFile(SCRef patchPath, bool fold, bool sign);
     bool resetCommits(int parentDepth);
     bool stgCommit(SCList selFiles, SCRef msg, SCRef patchName, bool fold);
