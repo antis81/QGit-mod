@@ -12,9 +12,7 @@ Copyright: See COPYING file that comes with this distribution
 
 #include "referencetreeviewitem.h"
 #include "model/reference.h" //! \todo remove this dependence
-
-class Domain;
-class Git;
+#include "git/references.h"
 
 /**
     @brief Provides a tree model managing the main elements of a git repository structure like
@@ -39,11 +37,11 @@ public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const;
     int columnCount(const QModelIndex& parent = QModelIndex()) const;
 
-    void setup(Git* git);
+    void setup(References* references);
     void update();
 
 private:
-    Git* m_git;
+    References* m_references;
     ReferenceTreeViewItem* m_rootItem;
 
     void clear();

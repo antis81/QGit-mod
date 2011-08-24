@@ -8,11 +8,9 @@ Copyright: See COPYING file that comes with this distribution
 #include <QMenu>
 #include "referencetreeviewmodel.h"
 #include "referencetreeviewitem.h"
-#include "git.h"
-#include <QDebug>
 
 ReferenceTreeViewModel::ReferenceTreeViewModel(QObject* parent)
-    : QAbstractItemModel(parent), m_git(NULL), m_rootItem(NULL)
+    : QAbstractItemModel(parent), m_references(NULL), m_rootItem(NULL)
 {
     m_rootItem = new ReferenceTreeViewItem(NULL, ReferenceTreeViewItem::HeaderBranches,
                                      "References", "References");
@@ -43,11 +41,11 @@ void ReferenceTreeViewModel::update()
 
 void ReferenceTreeViewModel::addNode(ReferenceTreeViewItem::ItemType headerType, Reference::Type type)
 {
-    if (!m_git) {
+    if (!m_references) {
         return;
     }
 
-    QStringList references = m_git->getAllRefNames(type, !Git::optOnlyLoaded);
+    QStringList references = m_references->getNames(type);
 
     ReferenceTreeViewItem* headerNode;
 
@@ -102,14 +100,16 @@ void ReferenceTreeViewModel::addNode(ReferenceTreeViewItem::ItemType headerType,
     }
 
 
+    Reference* ref = NULL;
     foreach (const QString& reference, references) {
-        //bool isCurrent = (m_git->currentBranch().compare(*it) == 0);
         switch (headerType) {
         case (ReferenceTreeViewItem::HeaderBranches):
+            ref = m_references->byName(reference);
             item = new ReferenceTreeViewItem(headerNode,
                                              ReferenceTreeViewItem::LeafBranch,
                                              reference,
                                              reference);
+            item->setCurrent(ref->type() & Reference::CUR_BRANCH);
             break;
         case (ReferenceTreeViewItem::HeaderTags):
             item = new ReferenceTreeViewItem(headerNode,
@@ -148,7 +148,7 @@ QVariant ReferenceTreeViewModel::data(const QModelIndex& index, int role) const
         break;
     case Qt::ForegroundRole:
         if ( (item->type() == ReferenceTreeViewItem::LeafBranch)
-                && (item->name() == m_git->currentBranch()) ) {
+                && item->current() ) {
             QBrush textColor(Qt::red);
             return textColor;
         }
@@ -255,9 +255,9 @@ int ReferenceTreeViewModel::columnCount(const QModelIndex& parent) const
 /**
     Initializes the repository tree.
 */
-void ReferenceTreeViewModel::setup(Git* git)
+void ReferenceTreeViewModel::setup(References* references)
 {
-    m_git = git;
+    m_references = references;
 }
 
 

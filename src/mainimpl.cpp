@@ -434,7 +434,7 @@ void MainImpl::setRepository(SCRef newDir, bool refresh, bool keepSelection,
                 currentTabType(&d);
 
                 //! @todo CLEANUP HERE WHEN WORKING STATE REACHED
-                m_repoModel->setup(git);
+                m_repoModel->setup(&git->m_references);
                 referenceTreeView->setModel(m_repoModel);
                 m_repoModel->update();
                 //! \todo: ALERT - memory leaks may be

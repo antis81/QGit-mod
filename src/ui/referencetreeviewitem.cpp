@@ -9,7 +9,11 @@
 ReferenceTreeViewItem::ReferenceTreeViewItem(ReferenceTreeViewItem* parent,
                                              ReferenceTreeViewItem::ItemType type,
                                              const QString& text, const QString& name)
-    : m_parent(NULL), m_type(type), m_name(name), m_text(text)
+    : m_parent(NULL),
+      m_type(type),
+      m_name(name),
+      m_text(text),
+      m_current(false)
 {
     setParent(parent);
 }
@@ -69,6 +73,16 @@ const QString& ReferenceTreeViewItem::name() const
 const QString& ReferenceTreeViewItem::text() const
 {
     return m_text;
+}
+
+bool ReferenceTreeViewItem::current() const
+{
+    return m_current;
+}
+
+void ReferenceTreeViewItem::setCurrent(bool current)
+{
+    m_current = current;
 }
 
 /**

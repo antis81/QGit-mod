@@ -46,6 +46,8 @@ public:
     void setParent(ReferenceTreeViewItem* parent);
     void removeAllChildren();
     int row() const;
+    bool current() const;
+    void setCurrent(bool current);
 
 //public slots:
 //    void checkout();
@@ -58,6 +60,7 @@ private:
     ItemType                      m_type;
     QString                       m_name;
     QString                       m_text;
+    bool m_current;
 };
 
 #endif // REFERENCETREEVIEWITEM_H
