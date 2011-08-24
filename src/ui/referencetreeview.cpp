@@ -29,23 +29,85 @@ ReferenceTreeViewDelegate* ReferenceTreeView::delegate() const
 
 void ReferenceTreeView::showAllItems()
 {
+    QModelIndex headIndex;
+    QModelIndex subIndex;
+
     for (int i = 0; i < model()->rowCount(QModelIndex()); i++) {
+        headIndex = model()->index(i, 0, QModelIndex());
         setRowHidden(i, QModelIndex() , false);
+
+        for (int j = 0; j < model()->rowCount(headIndex); j++) {
+            subIndex = model()->index(i, 0, headIndex);
+            setRowHidden(j, headIndex, false);
+
+            if (headIndex.data().toString() == "Remotes") {
+                for (int k = 0; k < model()->rowCount(subIndex); k++) {
+                    setRowHidden(k, subIndex, false);
+                }
+            }
+        }
     }
 }
 
 void ReferenceTreeView::showSearchedItems(QString inputText)
 {
-    expandAll();
     showAllItems();
+    expandAll();
+
+    QModelIndex headerIndex;
+    QModelIndex subIndex;
+    QModelIndex remoteLeafIndex;
+
+    bool f = false;
+    bool ff = false;
 
     if (!(inputText.simplified().isEmpty())) {
         for (int i = 0; i < model()->rowCount(QModelIndex()); i++) {
-            if (isRegExpConformed(inputText, model()->index(i, 0, QModelIndex()).data().toString())) {
+            headerIndex = model()->index(i, 0, QModelIndex());
+
+            //[0]
+            if (isRegExpConformed(inputText, headerIndex.data().toString())) {
                 setRowHidden(i, QModelIndex(), false);
             } else {
-                setRowHidden(i, QModelIndex(), true);
-            }
+                f = false;
+                for (int j = 0; j < model()->rowCount(headerIndex); j++) {
+                    subIndex = model()->index(j, 0, headerIndex);
+
+                    if (isRegExpConformed(inputText, subIndex.data().toString())) {
+                        setRowHidden(j, headerIndex, false);
+                        if (!f)
+                            f = true;
+                    } else {
+                        ff = false;
+
+                        if (headerIndex.data().toString() == "Remotes") {
+                            for (int k = 0; k < model()->rowCount(subIndex); k++) {
+                                remoteLeafIndex = model()->index(k, 0, subIndex);
+
+                                if (isRegExpConformed(inputText, remoteLeafIndex.data().toString())) {
+                                    setRowHidden(k, subIndex, false);
+                                    if (!ff) {
+                                        ff = true;
+                                    }
+                                } else {
+                                    setRowHidden(k, subIndex, true);
+                                }
+                            }
+                        }
+
+                        if (ff) {
+                            setRowHidden(j, headerIndex, false);
+                            f = true;
+                        }
+                        else
+                            setRowHidden(j, headerIndex, true);
+                    }
+                }
+                if (f)
+                    setRowHidden(i, QModelIndex(), false);
+                else
+                    setRowHidden(i, QModelIndex(), true);
+            } // [0]
         }
     }
 }
