@@ -38,6 +38,45 @@ void ReferenceTreeView::showAllItems(QModelIndex modelIndex)
 
 void ReferenceTreeView::showSearchedItems(QString inputText)
 {
+    showAllItems();
+    expandAll();
+
+    int rowCount = model()->rowCount(QModelIndex());
+
+    for (int i = 0; i < rowCount; i++) {
+        showNode(QModelIndex(), i, inputText);
+    }
+}
+
+bool ReferenceTreeView::showNode(QModelIndex modelIndex, int iPos, QString inputText)
+{
+    QModelIndex subIndex = model()->index(iPos, 0, modelIndex);
+
+    bool isMustBeShown = false;
+    bool isShownItem = false;
+
+    if (isRegExpConformed(inputText, subIndex.data(Qt::UserRole).toString())) {
+        setRowHidden(iPos, modelIndex, false);
+        return true;
+    } else {
+        for (int i = 0; i < model()->rowCount(subIndex); i++) {
+            isShownItem = showNode(subIndex, i, inputText);
+            if ((!isMustBeShown) && isShownItem)
+                isMustBeShown = true;
+        }
+        if (isMustBeShown) {
+            setRowHidden(iPos, modelIndex, false);
+            return true;
+        } else {
+            setRowHidden(iPos, modelIndex, true);
+            return false;
+        }
+    }
+}
+
+/*
+void ReferenceTreeView::showSearchedItems(QString inputText)
+{
     //! @badcode FIXME: DO RECURSIVE SOLUTION
     showAllItems();
     expandAll();
@@ -147,6 +186,8 @@ void ReferenceTreeView::showSearchedItems(QString inputText)
     }
 }
 
+*/
+
 void ReferenceTreeView::mouseDoubleClickEvent(QMouseEvent* event)
 {
     const QModelIndex& modelIndex = indexAt(event->pos());
@@ -239,8 +280,8 @@ void ReferenceTreeView::contextMenu(const QPoint& pos)
 
 bool ReferenceTreeView::isRegExpConformed(QString currentString, QString originalString)
 {
-    if (originalString.indexOf(currentString, 0, Qt::CaseInsensitive) == 0)
-        return true;
-    else
+    if (originalString.indexOf(currentString, 0, Qt::CaseInsensitive) == -1)
         return false;
+    else
+        return true;
 }

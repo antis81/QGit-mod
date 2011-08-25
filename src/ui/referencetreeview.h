@@ -22,6 +22,7 @@ public slots:
 protected:
     void mouseDoubleClickEvent(QMouseEvent* event);
 private:
+    bool showNode(QModelIndex modelIndex, int iPos, QString inputText);
     ReferenceTreeViewDelegate* m_delegate;
     bool isRegExpConformed(QString currentString, QString originalString);
 private slots:
