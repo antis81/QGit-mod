@@ -9,6 +9,7 @@ Copyright: See COPYING file that comes with this distribution
 #include "referencetreeviewmodel.h"
 #include "referencetreeviewitem.h"
 #include "model/reference.h"
+#include <QDebug>
 
 ReferenceTreeViewModel::ReferenceTreeViewModel(QObject* parent)
     : QAbstractItemModel(parent), m_references(NULL), m_rootItem(NULL)
@@ -30,98 +31,215 @@ void ReferenceTreeViewModel::clear()
     endResetModel();
 }
 
+void ReferenceTreeViewModel::removeChildren(const QModelIndex& parent)
+{
+    beginRemoveRows(parent, 0, rowCount(parent));
+    ReferenceTreeViewItem* item = static_cast<ReferenceTreeViewItem*>(parent.internalPointer());
+    item->removeAllChildren();
+    endRemoveRows();
+}
+
 void ReferenceTreeViewModel::update()
 {
-    clear();
-    beginInsertRows(index(0, 0), 0, 2);
+    if (!m_references) {
+        clear();
+        return;
+    }
+
     addNode(ReferenceTreeViewItem::HeaderBranches, Reference::BRANCH);
     addNode(ReferenceTreeViewItem::HeaderRemotes, Reference::REMOTE_BRANCH);
     addNode(ReferenceTreeViewItem::HeaderTags, Reference::TAG);
-    endInsertRows();
+}
+
+ReferenceTreeViewItem* ReferenceTreeViewModel::createOrGetHeader(ReferenceTreeViewItem::ItemType headerType)
+{
+    QString name;
+
+    switch (headerType) {
+    case ReferenceTreeViewItem::HeaderBranches:
+        name = "Branches";
+        break;
+    case ReferenceTreeViewItem::HeaderRemotes:
+        name = "Remotes";
+        break;
+    case ReferenceTreeViewItem::HeaderTags:
+        name = "Tags";
+        break;
+    default:
+        name = "Unknown";
+    }
+
+    int index = m_rootItem->findChild(name);
+
+    if (index >= 0) return m_rootItem->children().at(index);
+
+    int childrenCount = m_rootItem->children().count();
+    this->beginInsertRows(QModelIndex(), childrenCount, childrenCount + 1);
+
+    ReferenceTreeViewItem* header = new ReferenceTreeViewItem(m_rootItem, headerType, name, name);
+
+    this->endInsertRows();
+
+    return header;
 }
 
 void ReferenceTreeViewModel::addNode(ReferenceTreeViewItem::ItemType headerType, Reference::Type type)
 {
-    if (!m_references) {
-        return;
-    }
+    ReferenceTreeViewItem* headerNode = createOrGetHeader(headerType);
+
+    QModelIndex headerIndex = createIndex(headerNode->row(), 0, headerNode);
 
     QStringList references = m_references->getNames(type);
-
-    ReferenceTreeViewItem* headerNode;
-
-    switch (headerType) {
-    case (ReferenceTreeViewItem::HeaderBranches):
-        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, "Branches", "Branches");
-        break;
-    case (ReferenceTreeViewItem::HeaderRemotes):
-        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, "Remotes", "Remotes");
-        break;
-    case (ReferenceTreeViewItem::HeaderTags):
-        headerNode = new ReferenceTreeViewItem(m_rootItem, headerType, "Tags", "Tags");
-        break;
-    default:
-        break;
-    }
-
-    if (!headerNode) {
-        return;
-    }
-
     references.sort();
 
     ReferenceTreeViewItem* item;
+    QString lastRemoteName;
+    QString remoteName;
+    QString branchName;
+    ReferenceTreeViewItem* parentNode = headerNode;
+    QModelIndex parentIndex = headerIndex;
+    int index;
+    int prevNewIndex = -1;
+    int prevOldIndex = -1;
+    int newIndex = 0;
+    int oldIndex = 0;
+    QString oldName;
 
-    if (headerType == ReferenceTreeViewItem::HeaderRemotes) {
-        QString lastRemoteName;
-        QString remoteName;
-        ReferenceTreeViewItem* parentNode = headerNode;
-        QString text;
 
-        // заполняем дерево потомками
-        foreach (const QString& branchName, references) {
-            int i = branchName.indexOf("/");
-            remoteName = (i > 0) ? branchName.left(i) : "";
-            text = branchName.mid(i + 1);
 
-            if (remoteName.isEmpty()) {
-                parentNode = headerNode;
-            } else if (remoteName.compare(lastRemoteName) != 0) {
-                parentNode = new ReferenceTreeViewItem(headerNode,
-                                                       ReferenceTreeViewItem::HeaderRemote,
-                                                       remoteName,
-                                                       remoteName);
-                lastRemoteName = remoteName;
-            }
-            item = new ReferenceTreeViewItem(parentNode,
-                                             ReferenceTreeViewItem::LeafRemote,
-                                             text,
-                                             branchName);
+    int leftIndex = 0;
+    int rightIndex = 0;
+    ReferenceTreeViewItem* left;
+    ReferenceTreeViewItem* right;
+    QString leftName;
+    QString rightName;
+    int compare;
+
+    while (true) {
+        if (leftIndex < headerNode->children().count()) {
+            left = headerNode->children().at(leftIndex);
+            leftName = left->name();
+        } else {
+            left = NULL;
         }
-    }
+        if (rightIndex < references.count()) {
+            rightName = references.at(rightIndex);
+        } else {
+            rightName = QString();
+        }
 
-
-    Reference* ref = NULL;
-    foreach (const QString& reference, references) {
-        switch (headerType) {
-        case (ReferenceTreeViewItem::HeaderBranches):
-            ref = m_references->byName(reference);
-            item = new ReferenceTreeViewItem(headerNode,
+        if (left != NULL && !rightName.isNull()) {
+            compare = leftName.compare(rightName);
+        } else if (left != NULL && rightName.isNull()) {
+            compare = -1;
+        } else if (left == NULL && !rightName.isNull()) {
+            compare = 1;
+        } else {
+            break;
+        }
+        if (compare == 0) {
+            leftIndex++;
+            rightIndex++;
+        } else if (compare < 0) {
+            beginRemoveRows(headerIndex, leftIndex, leftIndex);
+            delete left;
+            endRemoveRows();
+        } else if (compare > 0) {
+            qDebug()<<"insert" << rightName;
+            beginInsertRows(headerIndex, leftIndex, leftIndex);
+            item = new ReferenceTreeViewItem(NULL,
                                              ReferenceTreeViewItem::LeafBranch,
-                                             reference,
-                                             reference);
-            item->setCurrent(ref->type() & Reference::CUR_BRANCH);
-            break;
-        case (ReferenceTreeViewItem::HeaderTags):
-            item = new ReferenceTreeViewItem(headerNode,
-                                             ReferenceTreeViewItem::LeafTag,
-                                             reference,
-                                             reference);
-            break;
-        default:
-            break;
+                                             rightName,
+                                             rightName);
+            item->setParent(headerNode, leftIndex);
+            endInsertRows();
+            rightIndex++;
+            leftIndex++;
         }
     }
+
+//    Reference* ref = NULL;
+//    foreach (const QString& referenceName, references) {
+//        switch (headerType) {
+//        case ReferenceTreeViewItem::HeaderBranches:
+//            oldName = headerNode->children().at(oldIndex)->name();
+//            if (newName == oldName) {
+//                newIndex++;
+//                oldIndex++;
+//                break;
+//            }
+
+//            while (newName > oldName) {
+//                beginRemoveRows(headerIndex, oldIndex, oldIndex);
+//                oldName = headerNode->children().at(oldIndex)->name();
+//            }
+
+//            while (newName < oldName) {
+//                if (newName <= oldName) break;
+//                beginRemoveRows(headerIndex, );
+//                oldIndex--;
+//            }
+
+//            ref = m_references->byName(referenceName);
+//            beginInsertRows(headerIndex, headerNode->children().count(), headerNode->children().count() + 1);
+//            item = new ReferenceTreeViewItem(parentNode,
+//                                             ReferenceTreeViewItem::LeafBranch,
+//                                             referenceName,
+//                                             referenceName);
+//            item->setCurrent(ref->type() & Reference::CUR_BRANCH);
+//            endInsertRows();
+//            break;
+
+//        case ReferenceTreeViewItem::HeaderTags:
+//            removeChildren(headerIndex);
+
+//            beginInsertRows(headerIndex, headerNode->children().count(), headerNode->children().count() + 1);
+//            item = new ReferenceTreeViewItem(parentNode,
+//                                             ReferenceTreeViewItem::LeafTag,
+//                                             referenceName,
+//                                             referenceName);
+//            endInsertRows();
+//            break;
+
+//        case ReferenceTreeViewItem::HeaderRemotes:
+//            parseRemoteBranchName(referenceName, remoteName, branchName);
+//            if (remoteName.isEmpty()) {
+//                parentNode = headerNode;
+//                parentIndex = headerIndex;
+//            } else if (remoteName.compare(lastRemoteName) != 0) {
+//                index = headerNode->findChild(remoteName);
+//                if (index < 0) {
+//                    beginInsertRows(headerIndex, headerNode->children().count(), headerNode->children().count() + 1);
+//                    parentNode = new ReferenceTreeViewItem(headerNode,
+//                                                           ReferenceTreeViewItem::HeaderRemote,
+//                                                           remoteName,
+//                                                           remoteName);
+//                    endInsertRows();
+//                } else {
+//                    parentNode = headerNode->children().at(index);
+//                }
+//                parentIndex = createIndex(parentNode->row(), 0, parentNode);
+//                lastRemoteName = remoteName;
+
+//                removeChildren(parentIndex);
+//            }
+//            beginInsertRows(parentIndex, parentNode->children().count(), parentNode->children().count() + 1);
+//            item = new ReferenceTreeViewItem(parentNode,
+//                                             ReferenceTreeViewItem::LeafRemote,
+//                                             branchName,
+//                                             referenceName);
+//            endInsertRows();
+//        default:
+//            break;
+//        }
+//    }
+}
+
+void ReferenceTreeViewModel::parseRemoteBranchName(const QString& remoteBranchName, QString& remoteName, QString& branchName)
+{
+    int i = remoteBranchName.indexOf("/");
+    remoteName = (i > 0) ? remoteBranchName.left(i) : "";
+    branchName = remoteBranchName.mid(i + 1);
 }
 
 QVariant ReferenceTreeViewModel::data(const QModelIndex& index, int role) const

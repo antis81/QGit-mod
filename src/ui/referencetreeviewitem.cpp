@@ -37,6 +37,10 @@ ReferenceTreeViewItem* ReferenceTreeViewItem::parent()
 
 void ReferenceTreeViewItem::setParent(ReferenceTreeViewItem* parent)
 {
+    if (m_parent == parent) {
+        return;
+    }
+
     if (m_parent) {
         m_parent->children().removeOne(this);
         m_parent = NULL;
@@ -46,6 +50,24 @@ void ReferenceTreeViewItem::setParent(ReferenceTreeViewItem* parent)
 
     if (m_parent) {
         m_parent->children().append(this);
+    }
+}
+
+void ReferenceTreeViewItem::setParent(ReferenceTreeViewItem* parent, int beforeIndex)
+{
+    if (m_parent == parent) {
+        return;
+    }
+
+    if (m_parent) {
+        m_parent->children().removeOne(this);
+        m_parent = NULL;
+    }
+
+    m_parent = parent;
+
+    if (m_parent) {
+        m_parent->children().insert(beforeIndex, this);
     }
 }
 
@@ -59,6 +81,18 @@ void ReferenceTreeViewItem::removeAllChildren()
 int ReferenceTreeViewItem::row() const
 {
     return m_parent ? m_parent->children().indexOf(const_cast<ReferenceTreeViewItem*>(this)) : 0;
+}
+
+int ReferenceTreeViewItem::findChild(const QString& name)
+{
+    int index = -1;
+    foreach (ReferenceTreeViewItem* item, m_children) {
+        index++;
+        if (item->name() == name) {
+            return index;
+        }
+    }
+    return -1;
 }
 
 ReferenceTreeViewItem::ItemType ReferenceTreeViewItem::type() const

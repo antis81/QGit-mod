@@ -43,10 +43,12 @@ public:
     const QString& text() const;
     const QIcon& icon() const;
     void setParent(ReferenceTreeViewItem* parent);
+    void setParent(ReferenceTreeViewItem* parent, int beforeIndex);
     void removeAllChildren();
     int row() const;
     bool current() const;
     void setCurrent(bool current);
+    int findChild(const QString& name);
 
 //public slots:
 //    void checkout();

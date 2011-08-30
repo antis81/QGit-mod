@@ -49,6 +49,9 @@ private:
     void clear();
 
     void addNode(ReferenceTreeViewItem::ItemType headerType, Reference::Type type);
+    ReferenceTreeViewItem* createOrGetHeader(ReferenceTreeViewItem::ItemType headerType);
+    void parseRemoteBranchName(const QString& remoteBranchName, QString& remoteName, QString& branchName);
+    void removeChildren(const QModelIndex& parent);
 };
 
 #endif // REFERENCETREEVIEWMODEL_H
